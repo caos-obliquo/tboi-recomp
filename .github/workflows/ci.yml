@@ -65,24 +65,56 @@ jobs:
         with:
           ndk-version: r26d
 
-      # The NDK root is derived from the clang that setup-ndk put on PATH,
-      # because none of the ambient runner variables name the NDK it just
-      # installed: ANDROID_NDK_LATEST_HOME resolved to NDK 30 and
-      # ANDROID_NDK_ROOT to NDK 27.3, while r26d (26.1.10909125) was what
-      # setup-ndk actually installed. Deriving from PATH removes the guesswork.
+      # Measured on this runner: ANDROID_NDK_LATEST_HOME resolved to NDK 30,
+      # ANDROID_NDK_ROOT to 27.3, setup-ndk installed r26d (26.1.10909125), and
+      # `command -v clang` returned the host /usr/bin/clang. No single
+      # variable names the NDK we compile with, so we glob for a real driver
+      # and log every candidate to make a future failure diagnosable.
       - name: Resolve NDK root
         run: |
-          clang_bin="$(command -v clang)"
-          echo "clang on PATH: $clang_bin"
-          ndk="${clang_bin%/toolchains/llvm/prebuilt/*}/"
-          if [ ! -d "$ndk" ]; then
-            echo "::error::could not derive an NDK root from $clang_bin" && exit 1
+          wanted="aarch64-linux-android24-clang"
+          want_series="26."
+          best=""
+          fallback=""
+          for root in \
+            "$ANDROID_NDK_HOME" \
+            "$ANDROID_NDK_ROOT" \
+            "$ANDROID_SDK_ROOT"/ndk/* \
+            "$ANDROID_SDK_NDK_ROOT"/ndk/* \
+            /usr/local/lib/android/sdk/ndk/* \
+            "$HOME"/android-sdk/ndk/* \
+            /opt/hostedtoolcache/Android-NDK/* \
+            "$RUNNER_TOOL_CACHE"/Android-NDK/* ; do
+            [ -n "$root" ] || continue
+            [ -d "$root" ] || continue
+            for prebuilt in "$root"/toolchains/llvm/prebuilt/*/bin ; do
+              [ -x "$prebuilt/$wanted" ] || continue
+              case "$root" in
+                *"$want_series"*) [ -n "$best" ] || best="$root" ;;
+                *)               [ -n "$fallback" ] || fallback="$root" ;;
+              esac
+            done
+          done
+
+          found="${best:-$fallback}"
+
+          echo "::group::NDK probe"
+          echo "PATH clang : $(command -v clang || echo none)"
+          for v in ANDROID_NDK_HOME ANDROID_NDK_ROOT ANDROID_SDK_ROOT ANDROID_SDK_NDK_ROOT RUNNER_TOOL_CACHE ; do
+            echo "$v=${!v:-<unset>}"
+          done
+          echo "found NDK : ${found:-<none>}"
+          echo "::endgroup::"
+
+          if [ -z "$found" ]; then
+            echo "::error::no NDK root contained $wanted; see the probe above"
+            exit 1
           fi
-          echo "NDK=$ndk" >> "$GITHUB_OUTPUT"
+          echo "ndk_root=$found" >> "$GITHUB_OUTPUT"
 
       - name: Configure
         env:
-          NDK: ${{ steps.ndk.outputs.ndk }}
+          NDK: ${{ steps.ndk.outputs.ndk_root }}
         run: >-
           cmake -S . -B build-android
           -DCMAKE_BUILD_TYPE=Release
