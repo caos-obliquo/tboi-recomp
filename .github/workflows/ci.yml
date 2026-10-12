@@ -131,12 +131,10 @@ jobs:
       - name: Build
         run: cmake --build build-android -j
 
-      # The real proof, and the only check kept. Inspecting CMakeCache.txt is
-      # fragile: three earlier iterations asserted on cache variables, including
-      # two where the log showed the expected values and the step still failed
-      # because the cache file did not contain them at all. A compiled object's
-      # own ELF header cannot be interpreted or mis-grepped: either the build
-      # targeted ARM64 Android or it did not.
+      # Reads EI_CLASS (offset 4) and e_machine (offset 0x12 LE) as bytes rather
+      # than trusting objdump's format string: on this runner objdump printed
+      # "elf64-little" and "architecture: UNKNOWN!" for a genuinely ARM64
+      # object, because the host binutils has no aarch64 decoder.
       - name: Verify objects are ARM64
         run: |
           obj="$(find build-android -name 'engine.cpp.o' -print -quit)"
@@ -145,8 +143,21 @@ jobs:
             exit 1
           fi
           echo "object: $obj"
-          objdump -f "$obj"
-          objdump -f "$obj" | grep -qF 'elf64-littleaarch64'
+          objdump -f "$obj" || true
+
+          ei_class="$(od -An -tu1 -j4 -N1 "$obj" | tr -d '[:space:]')"
+          e_machine="$(od -An -tx1 -j18 -N2 "$obj" | tr -d '[:space:]')"
+          echo "EI_CLASS=$ei_class (2 = 64-bit)  e_machine=0x$e_machine (b700 = AArch64)"
+
+          if [ "$ei_class" != "2" ]; then
+            echo "::error::not a 64-bit ELF object"
+            exit 1
+          fi
+          if [ "$e_machine" != "b700" ]; then
+            echo "::error::e_machine is 0x$e_machine, expected 0xb700 (EM_AARCH64)"
+            exit 1
+          fi
+          echo "ok  AArch64 object confirmed"
 
   # Warnings are already enabled in the project; this job turns them into a hard
   # failure so a new one cannot land unnoticed. -Werror is deliberately not set
