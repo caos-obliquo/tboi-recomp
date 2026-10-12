@@ -1,0 +1,42 @@
+name: Reverse-engineering finding
+about: A measured observation about the shipped game binary
+title: "finding: "
+labels: finding
+assignees: ''
+
+---
+
+Findings are the currency of this project. The value of a finding is entirely in
+whether the next person can **reproduce it**, so a conclusion without its method
+is not a finding.
+
+## What this is not
+
+This template is **not** for requests to reverse-engineer, and not for sharing
+decompiled code, extracted game data, or Nicalis-owned content. Those cannot be
+accepted here. See [CONTRIBUTING.md](../CONTRIBUTING.md).
+
+## What to include
+
+**Observation** — what you measured, as a fact.
+
+**Method** — how you measured it. Be specific enough to redo.
+
+- Address arithmetic must be written as expressions over the PE section table,
+  never as bare hex or a single hardcoded base. `.rdata` and `.data` share a VA
+  base in `isaac-ng.exe`, which makes a single-base helper silently appear to
+  work for one and fail for the other.
+- Say which tool produced it (`objdump`, `rea`, python) and the exact invocation.
+
+**Negative results are findings too.** "I searched for X and it is not there"
+saves someone a day. Record the search space so they know how far you looked.
+
+**Reproduction script** — attach the script, or describe it precisely enough to
+rewrite. Commit the tool rather than its raw output where that makes sense.
+
+**Confidence** — observed, derived, or inferred.
+
+## Notes
+
+Do not attach the game binary, disassembly dumps, decompiler databases, or any
+extracted game asset to an issue.

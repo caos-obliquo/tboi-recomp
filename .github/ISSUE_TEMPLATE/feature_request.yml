@@ -1,0 +1,35 @@
+name: Feature or gap
+about: Propose work, or claim a task from the roadmap
+title: ''
+labels: ''
+assignees: ''
+
+---
+
+**What you are proposing**
+
+Link any related issues. Refer to existing issues with `#N` so the tracker stays
+connected rather than fragmenting into duplicates.
+
+**Why it matters**
+
+Tie it to a user-visible outcome. If it is unblocking, say what it unblocks.
+
+**Scope**
+
+What is in, and explicitly what is out. Unbounded proposals cannot be reviewed.
+
+**Acceptance criteria**
+
+Concrete, checkable conditions. A good one can be verified by running a command
+or by a test existing in `tests/`.
+
+**Legal boundary**
+
+Confirm this adds no Nicalis-owned content: no game data, no copied code, no
+extracted assets. Implementation must be clean-room. See
+[CONTRIBUTING.md](../CONTRIBUTING.md).
+
+**Prior art**
+
+Related work, existing issues, and what you have already measured.

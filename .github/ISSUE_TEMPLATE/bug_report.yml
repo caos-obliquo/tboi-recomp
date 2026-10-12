@@ -1,0 +1,41 @@
+name: Bug report
+about: Something in the engine or tooling behaves incorrectly
+title: "bug: "
+labels: bug
+assignees: ''
+
+---
+
+**What happened**
+
+A concrete description of the incorrect behaviour.
+
+**What you expected**
+
+**Reproduction**
+
+The smallest command sequence that shows it. If a test fails, the test name and
+the `CHECK` expression are the most precise reproduction you can give.
+
+```sh
+cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake --build build -j"$(nproc)"
+ctest --test-dir build --output-on-failure
+```
+
+**Environment**
+
+- Platform: <!-- e.g. linux x86_64, macOS arm64, Android arm64 -->
+- Compiler and version: <!-- c++ --version -->
+- CMake version: <!-- cmake --version -->
+- Commit: <!-- git rev-parse --short HEAD -->
+
+**Output**
+
+```
+<!-- full output of the failing command, not a paraphrase -->
+```
+
+**Anything else**
+
+Notes, screenshots, or a bisect result.
