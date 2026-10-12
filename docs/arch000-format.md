@@ -37,18 +37,20 @@ Entry 0's offset column is `14` in every archive measured.
 | +0x00 | `hash_lo` | high-entropy; unknown algorithm |
 | +0x04 | `hash_hi` | high-entropy; unknown algorithm |
 | +0x08 | `offset` | monotone ascending, first is 14, all below the index offset |
-| +0x0C | `raw_size` | uncompressed size |
+| +0x0C | `stored_size` | size of the *stored* bytes |
 | +0x10 | `crc` | high-entropy |
 
 The `offset` column is strictly increasing across entries in every archive
 measured, which is what identifies it. The other four columns are not monotone
 and their values are uniformly distributed over 32 bits.
 
-`raw_size` is a *decompressed* size, not a stored size: for `config.a` entry 0 it
-is 25 894 while the occupied span of the payload is 8 806.
+This column is the **stored** size, not the decompressed size. An earlier version
+of this document had it backwards, which produced a convincing but wrong reading
+of the compression ratio. The tell was `graphics.a` entry 0: stored size 12 327
+against a 12 328-byte span, a one-byte gap that is padding, not a ratio of 1.00.
 
-Compressed size is implicit: `offsets[i+1] - offsets[i]`, with the last entry
-ending exactly at the index offset. For `fonts.a` the implied sizes sum to
+Stored size is implicit: `offsets[i+1] - offsets[i]`, less one padding byte, with
+the last entry ending exactly at the index offset. For `fonts.a` the implied sizes sum to
 14 847, which equals `index_offset - 14` exactly.
 
 ## 3. What the offsets imply about ordering
@@ -118,3 +120,13 @@ the file index. That is why a 32-bit name-hash sweep found nothing: the arrays
 are checksums, not hashes. The table is never read at runtime — the master pointer
 array at `.data + 0x2E60` has zero references anywhere in the binary — so the
 loader enumerates `resources/packed/` itself at startup.
+## 8. Provenance and licensing
+
+The codec details in sections 4 and 6 were cross-checked against
+`github.com/diamondo25/tbar-archive-unpacker`, whose own `LICENSE` is MIT
+(Copyright 2014 Erwin Oegema). That project ships a vendored `SharpLZW`
+directory whose files carry the GNU GPL; **none of it was copied into this
+repository.** The container parser, the mode `0x00` obfuscation and the LZW
+decoder here are independent implementations written from the algorithm
+descriptions. That project's format does not document mode `0x02`, which predates
+it.
