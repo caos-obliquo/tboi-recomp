@@ -128,15 +128,26 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-android-arm64.cmake \
             -DANDROID_NDK="$NDK"
 
-      # Proves the compile actually targeted arm64 rather than silently falling
-      # back to the host toolchain, which is the failure this job exists to
-      # catch. CMake resolves the NDK's generic clang driver and passes the
-      # triple as a --target flag, so the triple is not in the cache as a
-      # compiler name.
+      # Asserts on fixed strings rather than a regex: a metacharacter in the cache
+      # format would otherwise turn this check into a silent false negative.
+      # On failure it prints the real cache lines, so the log names the problem
+      # instead of leaving a bare exit 1.
       - name: Verify target triple
         run: |
-          grep -qE '^CMAKE_SYSTEM_NAME:INTERNAL=Android$' build-android/CMakeCache.txt
-          grep -qE '^CMAKE_ANDROID_ARCH_ABI:STRING=arm64-v8a$' build-android/CMakeCache.txt
+          ok=0
+          for expect in CMAKE_SYSTEM_NAME:INTERNAL=Android CMAKE_ANDROID_ARCH_ABI:STRING=arm64-v8a ; do
+            if grep -qF -- "$expect" build-android/CMakeCache.txt ; then
+              echo "ok  $expect"
+            else
+              echo "::error::CMakeCache.txt does not contain $expect"
+              ok=1
+            fi
+          done
+          if [ "$ok" -ne 0 ]; then
+            echo "actual entries:"
+            grep -E '^CMAKE_(SYSTEM_NAME|ANDROID)' build-android/CMakeCache.txt || echo "(none matched)"
+            exit 1
+          fi
 
       - name: Build
         run: cmake --build build-android -j
