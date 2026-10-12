@@ -1,0 +1,3990 @@
+{
+ "classes": [
+  {
+   "methods": [
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Acceleration",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AchievementID",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ActiveItemDesc",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddBlackHearts",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddBombs",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddBurn",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddCharmed",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddCoins",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddCollectibleEffect",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddConfusion",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddCostumeOnPickup",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddEntityFlags",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddFear",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddFreeze",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddHealth",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddHearts",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddKeys",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddMaxHearts",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddMidasFreeze",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddNullEffect",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddPoison",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddShrink",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddSlowing",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddSoulHearts",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddTrinketEffect",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddVelocity",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Anm2Path",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AnnouncerDelay",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AnnouncerVoice",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AnnouncerVoiceSuper",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "BaseDamage",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "BaseScale",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "BatteryCharge",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "BitSet128",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "BloodExplode",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "BombVariant",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "BulletFlags",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "CacheFlags",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "CanShutDoors",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Card",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "CardConfigList",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "CardType",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ChangeFlags",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ChangeTimeout",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ChangeVariant",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ChangeVelocity",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ChargeType",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "CircleAngle",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ClearEffects",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ClearEffectsOnRemove",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ClearEntityFlags",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "CollidesWithGrid",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "CollisionDamage",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Config",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ContinueVelocity",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Cooldown",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Costume",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "CostumeConfigList",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Count",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "CppContainer",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "CraftingQuality",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "CurvingStrength",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "DepthOffset",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "DevilPrice",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "DotProductLimit",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "DropSeed",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "EffectClass",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "EffectList",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "EffectSubClass",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "EntityCollisionClass",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "EntityList",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "EntityRef",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "EntityTear",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "EvadeTarget",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Exists",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "FallingAccelModifier",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "FallingAcceleration",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "FallingSpeed",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "FallingSpeedModifier",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "FindGridPath",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "FireDirectionLimit",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "FrameCount",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Friction",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Get",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetBossID",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetCard",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetCards",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetCollectible",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetCollectibleEffect",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetCollectibleEffectNum",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetCollectibles",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetColor",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetData",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetDropRNG",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetEffectsList",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetEntityFlags",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetEvadeMovementCountdown",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetGridIndex",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetLastChild",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetLastParent",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetNullEffect",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetNullEffectNum",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetNullItem",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetNullItems",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetOverlayAnimation",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetPillEffect",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetPillEffects",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetSeed",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetSprite",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetTrinket",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetTrinketEffect",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetTrinketEffectNum",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetTrinkets",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GfxFileName",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GreedModeAllowed",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GridCollision",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GridCollisionClass",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HasCollectibleEffect",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HasCommonParentWithEntity",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HasDirectPath",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HasEntityFlags",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HasFullHealth",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HasMortalDamage",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HasNullEffect",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HasPathToPos",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HasSkinAlt",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HasTags",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HasTrinketEffect",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HeightModifier",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HitPoints",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HomingFriction",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HomingStrength",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HudAnim",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Index",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "InitCharge",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "InitSeed",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsActiveEnemy",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsAvailable",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsBoss",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsCard",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsCharmed",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsCollectible",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsDead",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsEnemy",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsFlying",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsFrame",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsInvincible",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsNull",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsRune",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsTrinket",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsValidCollectible",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsVisible",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsVulnerableEnemy",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ItemConfig",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ItemConfigList",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Kill",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "KillWithSource",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Mass",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "MaxCharges",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "MaxCooldown",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "MaxHitPoints",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "MimicCharge",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "MoveRandomly",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "MoveRandomlyAxisAligned",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "MoveRandomlyBoss",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "MultiplyFriction",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "OverwriteColor",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Parent",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ParentOffset",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "PartialCharge",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "PassiveCache",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "PathFinder",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "PersistentEffect",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "PickupSubtype",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "PillConfigList",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "PillEffect",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "PlayerTypes",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "PosVel",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "PositionOffset",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "PostRender",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Priority",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ProjectileParams",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Quality",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "QueueItemData",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RNG",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RandomFloat",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RandomInt",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RemoveCollectibleEffect",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RemoveNullEffect",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RemoveStatusEffects",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RemoveTrinketEffect",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RenderShadowLayer",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RenderZOffset",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ResetMovementTarget",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ResetSpriteScale",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Set",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetCanCrushRocks",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetColor",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetDeadEyeIntensity",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetKnockbackMultiplier",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetParentOffset",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetSeed",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetSize",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetSpriteFrame",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetSpriteOverlayFrame",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetWaitFrames",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ShopPrice",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ShouldAddCostumeOnPickup",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SizeMulti",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SkinColor",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SortingLayer",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SpawnGridIndex",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SpawnerEntity",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SpawnerType",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SpawnerVariant",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Special",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SplatColor",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Spread",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SpriteOffset",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SpriteRotation",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SpriteScale",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SubCharge",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SubType",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Tags",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TakeDamage",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TargetPosition",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TearColor",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TearDamage",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TearFlags",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TearHeight",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TearIndex",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TearParams",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TearScale",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TearVariant",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TemporaryEffect",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TemporaryEffects",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TimedRechargeCooldown",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ToBomb",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ToEffect",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ToFamiliar",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ToKnife",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ToLaser",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ToNPC",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ToPickup",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ToPlayer",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ToProjectile",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ToTear",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "UpdateGridIndex",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "VarData",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Variant",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "VectorList",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Velocity",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "VelocityMulti",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "WaitFrames",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "WiggleFrameOffset",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "__band",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "__bnot",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "__bor",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "__bxor",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "__eq",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "__len",
+     "returns": 0
+    }
+   ],
+   "name": "Entity",
+   "parent": ""
+  },
+  {
+   "methods": [
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddBlueFlies",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddBlueSpider",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddCacheFlags",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddCard",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddCollectible",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddCostume",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddEternalHearts",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddGoldenBomb",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddGoldenHearts",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddGoldenKey",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddJarFlies",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddJarHearts",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddNullCostume",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddPill",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddPrettyFly",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "AddTrinket",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "CanPickBlackHearts",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "CanPickGoldenHearts",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "CanTriggerStreakEnd",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ClearCostumes",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ClearTemporaryEffects",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "DischargeActiveItem",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "DonateLuck",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "DropPocketItem",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "DropTrinket",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "EvaluateItems",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "FlushQueueItem",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "FullCharge",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetActiveCharge",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetActiveItem",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetActiveSubCharge",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetBatteryCharge",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetCollectibleCount",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetCollectibleNum",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetJarFlies",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetJarHearts",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetMaxPocketItems",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetMaxTrinkets",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetName",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetPill",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetPocketItem",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HasCollectible",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HasFullHearts",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HasFullHeartsAndSoulHearts",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HasP",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HasTrinket",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsBlackHeart",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsItemQueueEmpty",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "KnockbackMultiplier",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "NeedsCharge",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "PosDisplacement",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "QueueItem",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RemoveBlackHeart",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RemoveBlueFly",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RemoveBlueSpider",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RemoveCollectible",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RemoveCostume",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RemoveGoldenBomb",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RemoveGoldenKey",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RemoveSkinCostume",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RenderBody",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RenderGlow",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RenderHead",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RenderTop",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RespawnFamiliars",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetActiveCharge",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetCard",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetFullHearts",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetPill",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "StickDiff",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "StickTarget",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "StickTimer",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TearsOffset",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ThrowBlueSpider",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TryHoldTrinket",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TryRemoveTrinket",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TryUseKey",
+     "returns": 0
+    }
+   ],
+   "name": "EntityPlayer",
+   "parent": "Entity"
+  },
+  {
+   "methods": [
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "DrawString",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetBaselineHeight",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsFinished",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Play",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetFrame",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetFrame_1",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetMissingCharacter",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetOffset",
+     "returns": 0
+    }
+   ],
+   "name": "Font",
+   "parent": ""
+  },
+  {
+   "methods": [
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Ambush",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Arcade",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Barren",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Boss",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "CardFronts",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "CrumbleNoDebris",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Curse",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "DOWN",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Dice",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Dripping",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Dungeon",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Error",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Exit",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "FallIn",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GhostAppear",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "History",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "JumpOut",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "LeapDown",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "LeapUp",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Library",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Market",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Miniboss",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Null",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SSecret",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Sacrifice",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Secret",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Shockwave1",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Shockwave2",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Shop",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SuperLeapDown",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SuperLeapUp",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Treasure",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "flame",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "intro",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "layerfadespeed",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "layerintro",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "layermode",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "layermul",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "loop",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "mul",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "music",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "pTu",
+     "returns": 0
+    }
+   ],
+   "name": "HUD",
+   "parent": ""
+  },
+  {
+   "methods": [
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "BarOverlay1",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "BarOverlay12",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "BarOverlay2",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "BarOverlay3",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "BarOverlay4",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "BarOverlay5",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "BarOverlay6",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "BarOverlay8",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "BrokenCoinHeart",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "BrokenHeart",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Character",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "CoinEmpty",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Cross",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "CurseHeart",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Date",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Discharge",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "DisplayRank",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "DisplayRankStart",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Dot",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "EmoteMenu",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "EmptyHeart",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Exposure",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Filter",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "FullScreen",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Gamma",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Goal",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GroupScore",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GroupTime",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HUDSmall",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HolyMantle",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HolyMantleBlanket",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HolyMantleHolyCard",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "HolyMantleWoodenCross",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IconAngelRoom",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IconBeggar",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IconBoss",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IconCurseRoom",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IconDevilRoom",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IconLibrary",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IconPlanetarium",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IconSecretRoom",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IconShop",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IconSlot",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IconTreasureRoom",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IconTreasureRoomGreed",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IconUltraSecretRoom",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ItemPoolChests",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "JoinMultiplayer",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "LeftButton",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "LeftTrigger",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Map",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "MenuBack",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "MenuConfirm",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "MenuDown",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "MenuEx",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "MenuLB",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "MenuLT",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "MenuLeft",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "MenuRB",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "MenuRT",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "MenuRight",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "MenuTab",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "MenuUp",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Mute",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Normalize",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Normalized",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "PillCard",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Ref",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Remove",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Restart",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Result",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RightButton",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RightTrigger",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "S16",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "S32",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "S64",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ScoreRank",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ScoresLeft",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ScoresRight",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ShowAnim",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SoloScore",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SoloTime",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TextFriends",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TextGlobal",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TextIn",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TextMine",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TextOut",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TextScore",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TextStay",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TextTime",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TextTop",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TimeRank",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ToggleDescriptions",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "U16",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "U32",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "U64",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "cards",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "collectible",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "collectibles",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "cpath",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "current_stage",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "double",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "float",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "info",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "lobby_banned",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "lobby_challenge",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "lobby_mode",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "lobby_password",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "lobby_seed",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "lobby_tag",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "notcollectible",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "notplayer",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "nottrinket",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "pills",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "tag",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "text",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "trinkets",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "wasd8456",
+     "returns": 0
+    }
+   ],
+   "name": "Input",
+   "parent": ""
+  },
+  {
+   "methods": [
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Alpha",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Bossrush",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Center",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Child",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Clear",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ColorMul",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Completion",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Controller",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "CurrentDir",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Curses",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "DeathTeleport",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Description",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "DoubleTrouble",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "DoubleTroubleCoop",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "KeyConfigs",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Keyboard",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Menu",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Minibosses",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Music",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "None",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Offset",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Options",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Planetarium",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Popups",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Scene",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SceneCoop",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SecretExit",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Size",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Stages",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Swap",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Switched",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Tab",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TeleEntrance",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "TeleExit",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Type",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "USecret",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Unknown",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Windows",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "arcade",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "backdrop",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "barren",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "blackmarket",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "blue",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "bossgfxroot",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "bossrush",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "bossspot",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "chunks",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "curses",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "default",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "dice",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "difficulty",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "door",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "exists",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "flags",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "generated",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "greedexit",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "greedroot",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "height",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "isaacs",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "itemdungeon",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "miniboss",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "minibosses",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "numWaves",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "playerspot",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "rooms",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "sacrifice",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "secretexit",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "shape",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "spawnsPerWave",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "stages",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "stb",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "supersecret",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "teleporter",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "teleporterexit",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ultrasecret",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "width",
+     "returns": 0
+    }
+   ],
+   "name": "Isaac",
+   "parent": ""
+  },
+  {
+   "methods": [
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "EnableAutoWrap",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "EnableTruncation",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetCharacterWidth",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetLineHeight",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetLineHeightModifier",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetMaxCharacters",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetMissingCharacterOverride",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetStringWidth",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Green",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsAutoWrapEnabled",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsLoaded",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsTruncationEnabled",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Load",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetLineHeightModifier",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetMissingCharacterOverride",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Unload",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "__tostring",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "__unm",
+     "returns": 0
+    }
+   ],
+   "name": "KColor",
+   "parent": ""
+  },
+  {
+   "methods": [
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "FlipX",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "FlipY",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetAnimation",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetDefaultAnimation",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetDefaultAnimationName",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetFilename",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetFrame",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetLayerCount",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetOverlayFrame",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetTexel",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsEventTriggered",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsFriendly",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsOverlayFinished",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsOverlayPlaying",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "IsPlaying",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "LoadGraphics",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "PlayRandom",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "PlaybackSpeed",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Reload",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Render",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "RenderLayer",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "ReplaceSpritesheet",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Scale",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetAnimation",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetColorize",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetLastFrame",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetLayerFrame",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetOverlayAnimation",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetOverlayFrame",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetOverlayRenderPriority",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetTint",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Update",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "WasEventTriggered",
+     "returns": 0
+    }
+   ],
+   "name": "Sprite",
+   "parent": ""
+  },
+  {
+   "methods": [
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Clamp",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Clamped",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Distance",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "DistanceSquared",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "EntityPtr",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "FontRenderSettings",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "FromAngle",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetAlignment",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "GetAngleDegrees",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Length",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "LengthSquared",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Lerp",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Resize",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Resized",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "Rotated",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetAlignment",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetMaxCharacters",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "SetReference",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "__add",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "__div",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "__mul",
+     "returns": 0
+    },
+    {
+     "argc": 0,
+     "documented": false,
+     "name": "__sub",
+     "returns": 0
+    }
+   ],
+   "name": "Vector",
+   "parent": ""
+  }
+ ],
+ "count": 655,
+ "source": "isaac-ng.exe binding tables (0x76xxxx region)"
+}
