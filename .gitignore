@@ -15,3 +15,9 @@ compile_commands.json
 # Python bytecode from tools/
 __pycache__/
 *.pyc
+
+# scratch output from the release-notes CI job, run locally
+body.md
+bump.log
+new_version
+release_body.md
