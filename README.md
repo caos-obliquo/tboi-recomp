@@ -12,6 +12,26 @@ aims to be compatible with.
 > Nothing here plays the game.** The table below is the honest picture. See
 > [Progress](#progress) before you get excited.
 
+## Why it exists
+
+I cannot play this game anymore. Launching it on my laptop sends the temperature
+straight to 100 degrees before the menu finishes loading, and that is not a
+driver I can fix, update, or tune. The game I have played for the better part of
+two decades is the game I am locked out of.
+
+Mobile is the obvious answer, and it should have been an easy one. Isaac's
+original build is a 32-bit Windows executable bound to DirectX 9 and Win32
+audio — it cannot run on a phone, and it never will. Everything that *can* be
+rebuilt is the part that is genuinely portable: reading the data, hosting the
+Lua VM, and implementing the native functions the game already calls into from
+Lua.
+
+Edmund has always been forward about where his games go and who they reach.
+Fitting that is the point of this.
+
+If this works, the game comes back to people the hardware already left behind.
+That is worth the months.
+
 ## Legal boundary
 
 This repository contains **no code, data, sprites, audio, video, or text** from

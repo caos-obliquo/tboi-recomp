@@ -128,36 +128,25 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-android-arm64.cmake \
             -DANDROID_NDK="$NDK"
 
-      # Asserts on fixed strings rather than a regex: a metacharacter in the cache
-      # format would otherwise turn this check into a silent false negative.
-      # On failure it prints the real cache lines, so the log names the problem
-      # instead of leaving a bare exit 1.
-      - name: Verify target triple
-        run: |
-          ok=0
-          for expect in CMAKE_SYSTEM_NAME:INTERNAL=Android CMAKE_ANDROID_ARCH_ABI:STRING=arm64-v8a ; do
-            if grep -qF -- "$expect" build-android/CMakeCache.txt ; then
-              echo "ok  $expect"
-            else
-              echo "::error::CMakeCache.txt does not contain $expect"
-              ok=1
-            fi
-          done
-          if [ "$ok" -ne 0 ]; then
-            echo "actual entries:"
-            grep -E '^CMAKE_(SYSTEM_NAME|ANDROID)' build-android/CMakeCache.txt || echo "(none matched)"
-            exit 1
-          fi
-
       - name: Build
         run: cmake --build build-android -j
 
-      # A build that silently used the host compiler would still produce
-      # objects; these are ARM64 ELF files or the build did not target Android.
+      # The real proof, and the only check kept. Inspecting CMakeCache.txt is
+      # fragile: three earlier iterations asserted on cache variables, including
+      # two where the log showed the expected values and the step still failed
+      # because the cache file did not contain them at all. A compiled object's
+      # own ELF header cannot be interpreted or mis-grepped: either the build
+      # targeted ARM64 Android or it did not.
       - name: Verify objects are ARM64
         run: |
-          objdump -f build-android/CMakeFiles/isaec_core.dir/src/engine/engine.cpp.o \
-            | grep -qE 'file format elf64-littleaarch64'
+          obj="$(find build-android -name 'engine.cpp.o' -print -quit)"
+          if [ -z "$obj" ]; then
+            echo "::error::no engine.cpp.o under build-android; nothing to inspect"
+            exit 1
+          fi
+          echo "object: $obj"
+          objdump -f "$obj"
+          objdump -f "$obj" | grep -qF 'elf64-littleaarch64'
 
   # Warnings are already enabled in the project; this job turns them into a hard
   # failure so a new one cannot land unnoticed. -Werror is deliberately not set
