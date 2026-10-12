@@ -64,12 +64,23 @@ jobs:
         with:
           ndk-version: r26d
 
+      # Referenced as a shell variable, not through the ${{ env }} context. The
+      # step above exports ANDROID_NDK_LATEST_HOME into the environment, and a
+      # shell expansion picks that up at run time. The ${{ env }} form is
+      # evaluated earlier and arrived empty, which made the toolchain file
+      # abort with "ANDROID_NDK is not set".
       - name: Configure
         run: >-
           cmake -S . -B build-android
           -DCMAKE_BUILD_TYPE=Release
           -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-android-arm64.cmake
-          -DANDROID_NDK=${{ env.ANDROID_NDK_LATEST_HOME }}
+          -DANDROID_NDK="$ANDROID_NDK_LATEST_HOME"
+
+      # Proves the compile actually targeted arm64 rather than silently falling
+      # back to the host toolchain, which is the failure this job exists to
+      # catch.
+      - name: Verify target triple
+        run: grep -qE 'aarch64' build-android/CMakeCache.txt
 
       - name: Build
         run: cmake --build build-android -j
