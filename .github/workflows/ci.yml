@@ -229,8 +229,13 @@ jobs:
             echo "::error::extractor must fail when the game binary is absent"
             exit 1
           fi
-  # A version with no CHANGELOG section would publish a bare commit list as
-  # its release notes, so the mismatch is caught here rather than at release.
+  # Self-test of the release plumbing, not a gate on the current version.
+  #
+  # A version with no CHANGELOG section is a legitimate state on main: the
+  # Release workflow bumps the patch after publishing, so between a release and
+  # the next section being written, main is always one version ahead of the
+  # changelog. Gating every commit on that would break main after every release.
+  # The strict check belongs where a release is cut, and release.yml runs it.
   release-notes:
     name: release-notes-are-writable
     runs-on: ubuntu-latest
@@ -239,16 +244,33 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Version and changelog agree
-        run: python3 tools/release.py check
-
-      - name: Release notes render
+      - name: Detector accepts a documented version
         run: |
           set -euo pipefail
-          version="$(python3 tools/release.py version)"
-          python3 tools/release.py body "$version" > body.md
+          documented="$(python3 tools/release.py documented)"
+          python3 tools/release.py check --expect "$documented"
+
+      - name: Detector rejects an undocumented version
+        run: |
+          set -euo pipefail
+          if python3 tools/release.py check --expect "99.99.99" 2>/dev/null; then
+            echo "::error::check passed for a version that has no CHANGELOG section"
+            exit 1
+          fi
+          echo "ok  rejects a missing section, as intended"
+
+      - name: Body renders for a documented version
+        run: |
+          set -euo pipefail
+          documented="$(python3 tools/release.py documented)"
+          python3 tools/release.py body "$documented" > body.md
           test -s body.md
           grep -q "Full Changelog" body.md
+          grep -qE '^### (Added|Changed|Fixed|Removed)' body.md
+          if grep -qE '^\[[^]]+\]:' body.md; then
+            echo "::error::release body leaked the changelog link-reference footer"
+            exit 1
+          fi
 
       - name: Round-trips a version bump
         run: |
@@ -257,5 +279,7 @@ jobs:
           python3 tools/release.py bump patch >/dev/null
           after="$(python3 tools/release.py version)"
           git checkout -- CMakeLists.txt
-          echo "bumped ${before} -> ${after}, restored to $(python3 tools/release.py version)"
+          restored="$(python3 tools/release.py version)"
+          echo "bumped ${before} -> ${after}, restored to ${restored}"
           test "$before" != "$after"
+          test "$before" = "$restored"

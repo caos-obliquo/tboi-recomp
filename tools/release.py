@@ -9,6 +9,7 @@ drift.
     release.py version            print the current version
     release.py body <version>     render the GitHub release body for it
     release.py check              exit nonzero if CHANGELOG has no section for it
+    release.py documented         print the newest version that has a section
     release.py bump patch         bump and rewrite CMakeLists.txt in place
 
 `body` prefers the curated CHANGELOG section, because that is where the Why and
@@ -78,6 +79,23 @@ def section_for(version: str) -> tuple[str, str] | None:
         return header.group("date"), strip_link_refs(body)
 
     return None
+
+
+def latest_documented() -> str | None:
+    """The newest version that has a dated CHANGELOG section.
+
+    This is not the same as the declared version. The Release workflow bumps
+    the patch after publishing, so main normally sits one version ahead of the
+    changelog until the next section is written.
+    """
+    if not CHANGELOG.exists():
+        return None
+    found = [
+        match.group("tag").lstrip("v")
+        for match in HEADER.finditer(CHANGELOG.read_text(encoding="utf-8"))
+        if match.group("date") and re.fullmatch(r"v?[\d.]+", match.group("tag"))
+    ]
+    return found[0] if found else None
 
 
 def strip_link_refs(body: str) -> str:
@@ -175,9 +193,15 @@ def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("version")
+    sub.add_parser("documented")
     body = sub.add_parser("body")
     body.add_argument("version")
-    sub.add_parser("check")
+    check = sub.add_parser("check")
+    check.add_argument(
+        "--expect",
+        metavar="X.Y.Z",
+        help="check this version instead of the one declared in CMakeLists.txt",
+    )
     bump = sub.add_parser("bump")
     bump.add_argument("part", choices=["major", "minor", "patch"])
 
@@ -189,15 +213,28 @@ def main(argv: list[str]) -> int:
     if args.command == "body":
         print(render_body(args.version), end="")
         return 0
+    if args.command == "documented":
+        latest = latest_documented()
+        if latest is None:
+            print(f"::error::{CHANGELOG.name} has no dated version section", file=sys.stderr)
+            return 1
+        print(latest)
+        return 0
     if args.command == "bump":
         return cmd_bump(args.part)
     if args.command == "check":
-        version = read_version()
-        if section_for(version) is None:
+        version = args.expect or read_version()
+        if args.expect is None and section_for(version) is None:
             print(
                 f"::error::CMakeLists.txt is at {version} but {CHANGELOG.name} has no "
                 f"`## [v{version}]` section, so the release notes would fall back to a "
                 "bare commit list",
+                file=sys.stderr,
+            )
+            return 1
+        if section_for(version) is None:
+            print(
+                f"::error::{CHANGELOG.name} has no `## [v{version}]` section",
                 file=sys.stderr,
             )
             return 1

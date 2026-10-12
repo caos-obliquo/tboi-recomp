@@ -1,0 +1,83 @@
+## v0.1.0
+
+Released 2026-10-12.
+
+### Changes
+
+First tagged release. A scaffold, not a playable game: the binding surface is
+recovered and registered, and nothing renders yet. See the "Where this actually
+stands" section of the README for what exists and what does not.
+
+### Added
+
+- Class registry implementing Isaac's recovered metatable model — `__class`,
+  `__parent`, `__index`, `__propget`, `__propset`, `__newindex`, `__const`,
+  `__metatable`, `__type` — with single-parent inheritance and read-only
+  property mirroring
+- 655 native method names recovered from the shipped binary's binding tables and
+  registered through a declarative `ApiSpec` -> `Binding` codegen path, covering
+  `Entity` 261, `Input` 118, `Isaac` 76, `EntityPlayer` 77, `HUD` 42, `Sprite`
+  33, `Vector` 22, `KColor` 18, `Font` 8
+- `tools/gen-api-spec.py` regenerates both the JSON spec and a compiled C++ header
+  from committed recovered data, so a malformed method name fails at compile
+  time rather than at load time
+- `tools/extract-binding-tables.py`, which re-derives the binding surface from a
+  copy of the game the user already owns, so the recovery is reproducible rather
+  than a claim
+- Engine core: `mount` / `start` / `tick` / `stop`, a frame clock, and a pure
+  virtual `Renderer` interface with a headless `NullRenderer`
+- CI: a 9-job pipeline covering gcc, clang, AppleClang, `-Werror`, ASan + UBSan,
+  an arm64 Android NDK cross-compile, generated-spec freshness, and an extractor
+  self-check
+- Governance: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, three issue templates, a
+  PR template with a clean-room attestation, and `dependabot` for Actions
+
+### Changed
+
+- Lua pinned to **5.3** and vendored, rather than discovered.
+  Isaac's interpreter is Lua 5.3; 5.4, 5.5, and LuaJIT are all wrong.
+  `find_package(Lua 5.3)` had no upper bound and silently accepted the host's
+  5.5, so it is now an existence check on the vendored tree.
+- The spec generator reads its recovered data from inside the repository.
+  It previously read `/tmp/opencode/`, which meant a fresh checkout could not
+  regenerate the spec and CI would have failed on its first run.
+
+### Fixed
+
+- **`lineage()` reported a cycle as one class too many.**
+  Why: the walk pushed each class before testing whether it had already been
+  seen, so an `EntityPlayer` <-> `Entity` cycle produced `[A, B, A]`.
+  Effect: it now stops on revisit. The hop bound that papered over the problem
+  was removed, because a repeat check over a finite class set already
+  terminates.
+- **A duplicate constructor registration was silently accepted.**
+  Why: `register_constructor` wrote to Lua and returned `true` unconditionally,
+  with no registry-side tracking, so a spec listing the same constructor twice
+  would quietly replace the Lua global instead of reporting the mistake.
+  Effect: `ClassEntry` tracks its constructor and a second registration is
+  rejected, matching `register_class`.
+- **The headless binary read the wrong command-line argument.**
+  Why: `next_arg` incremented the cursor before reading, so
+  `isaec_headless <install> 120` looked for a data source under `120`.
+  Effect: frames are read from the argument the user actually passed.
+- **The Android CI job was validating itself against the host toolchain.**
+  Why: five separate attempts each asserted something the host could satisfy —
+  an env var the previous step had not exported, a step id that silently
+  shadowed the NDK installer's own, `CMakeCache.txt` keys that are not written
+  there, and finally `objdump -f`'s format string, which reads `architecture:
+  UNKNOWN!` because host binutils has no aarch64 decoder.
+  Effect: the job now locates an NDK by probing for a real
+  `aarch64-linux-android24-clang`, refuses to configure if it finds none, and
+  confirms success by reading `e_machine` out of the compiled object's ELF
+  header. Nothing about that check can be satisfied by a host build.
+
+### Removed
+
+- The GNU `ar` archive reader.
+  Why: Isaac's `.a` files begin `ARCH000\0` or `ARCH000\x01`, not `!<arch>\n`,
+  and carry no plaintext filenames. The reader was written before the real data
+  was inspected and modelled a format this game has never used.
+  Effect: `DataSource` supports directories only. The container format is
+  tracked as issues #1 and #2 with the disassembly already done.
+
+**Full Changelog**: https://github.com/caos-obliquo/tboi-recomp/releases/tag/v0.1.0
