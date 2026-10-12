@@ -36,6 +36,9 @@ U32 = 0xFFFFFFFF
 # are LZW. Both were confirmed by decoding, not inferred.
 MODE_ASSETS = 0x00
 MODE_LZW = 0x01
+# 0x02 exists and covers every DLC and localisation archive, which is most
+# of the installed bytes. Its codec is unknown; read_archive still parses those
+# archives, but decode_entry refuses them rather than guessing.
 
 # Obfuscation seed for the asset bank. Verified: every entry decoded with this
 # constant yields a valid PNG, OGG, BMF or WAV.
@@ -175,7 +178,12 @@ def decode_entry(blob: bytes, mode: int, entry: tuple[int, int, int, int, int]) 
     _, special_hash, offset, size, _ = entry
     if mode == MODE_LZW:
         return decode_lzw(blob, offset, size)
-    return decode_assets(blob, offset, size, special_hash)
+    if mode == MODE_ASSETS:
+        return decode_assets(blob, offset, size, special_hash)
+    raise Malformed(
+        f"archive mode 0x{mode:02x} is not implemented; decoding it as mode "
+        f"{MODE_ASSETS} would return garbage rather than fail"
+    )
 
 
 def classify(data: bytes) -> str:
