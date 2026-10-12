@@ -73,7 +73,7 @@ jobs:
         run: python3 tools/release.py body "${CURRENT}" > release_body.md
 
       - name: Create GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ steps.version.outputs.current }}
           name: v${{ steps.version.outputs.current }}
