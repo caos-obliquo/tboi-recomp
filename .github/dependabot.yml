@@ -1,0 +1,18 @@
+# Dependabot version updates.
+#
+# The layout is deliberately a single `updates:` key. A second one silently
+# replaces the first instead of adding to it, so the two `cargo` entries in
+# some of our other repos have never been read. One key, one list.
+#
+# See https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # CMake, ninja, and the NDK are pinned by version in-tree, so a bump is a
+  # deliberate change rather than something to merge unreviewed.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - dependencies

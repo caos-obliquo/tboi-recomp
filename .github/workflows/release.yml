@@ -1,0 +1,104 @@
+name: Release
+
+# Triggered by the tag itself. An earlier version of this file fired on pushes to
+# main and then checked whether HEAD was tagged, which cannot work: pushing a tag
+# is not a push to main, so the workflow would never see it. Tag-triggered is
+# both simpler and the only correct ordering.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to (re)publish, e.g. v0.1.0
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Create release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve version from the tag
+        id: version
+        env:
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+          tag="${TAG#refs/tags/}"
+          tag="${tag#v}"
+          if ! printf '%s' "$tag" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::${tag} is not a vX.Y.Z tag"
+            exit 1
+          fi
+          # A tag that disagrees with CMakeLists.txt means the version was bumped
+          # without a matching CHANGELOG section, or was never committed.
+          declared="$(python3 tools/release.py version)"
+          if [ "$declared" != "$tag" ]; then
+            echo "::error::tag v${tag} but CMakeLists.txt declares ${declared}. Commit the version bump before tagging."
+            exit 1
+          fi
+          echo "current=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Release notes must be written
+        run: python3 tools/release.py check
+
+      - name: Build and package
+        env:
+          CURRENT: ${{ steps.version.outputs.current }}
+        run: |
+          set -euo pipefail
+          cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release -DISAEC_BUILD_TESTS=OFF
+          cmake --build build-release -j"$(nproc)"
+          stage="tboi-recomp-v${CURRENT}"
+          mkdir -p "${stage}"
+          install -Dm755 build-release/isaec_headless "${stage}/isaec_headless"
+          install -Dm644 README.md CHANGELOG.md LICENSE "${stage}/"
+          tar -czf "${stage}.tar.gz" "${stage}"
+
+      - name: Render release body
+        env:
+          CURRENT: ${{ steps.version.outputs.current }}
+        run: python3 tools/release.py body "${CURRENT}" > release_body.md
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.current }}
+          name: v${{ steps.version.outputs.current }}
+          files: tboi-recomp-v${{ steps.version.outputs.current }}.tar.gz
+          body_path: release_body.md
+
+      - name: Bump patch version
+        id: bump
+        run: |
+          set -euo pipefail
+          python3 tools/release.py bump patch | tee bump.log
+          # Read the value back rather than scraping the log: the script's own
+          # wording is not a machine interface, and a reworded message must not
+          # silently change which version gets committed.
+          python3 tools/release.py version > new_version
+          echo "next=$(cat new_version)" >> "$GITHUB_OUTPUT"
+
+      - name: Commit version bump
+        env:
+          NEXT: ${{ steps.bump.outputs.next }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add CMakeLists.txt
+          git commit -m "chore: bump version to ${NEXT} [skip ci]"
+          git pull --rebase origin main
+          git push origin HEAD:main

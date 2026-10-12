@@ -70,3 +70,48 @@ expression identify the bug more precisely than any description you can write.
 
 By contributing you agree that your work is licensed under the MIT licence in
 [LICENSE](LICENSE).
+## Releases
+
+The version lives in one place: the `project(... VERSION x.y.z ...)` line of
+`CMakeLists.txt`. `tools/release.py` is the only thing that reads or writes it,
+so there is no second copy to drift.
+
+```sh
+python3 tools/release.py version        # print it
+python3 tools/release.py body 0.2.0     # render release notes for a version
+python3 tools/release.py check          # CI gate: does the CHANGELOG cover it
+python3 tools/release.py bump patch     # bump and rewrite CMakeLists.txt
+```
+
+To cut a release:
+
+1. Add a `## [vX.Y.Z] - YYYY-MM-DD` section to `CHANGELOG.md`, with `### Added`,
+   `### Changed`, `### Fixed`, `### Removed` as they apply. Write it for someone
+   reading it in six months, not for yourself reading it today.
+2. Set `VERSION x.y.z` in `CMakeLists.txt`.
+3. Commit, push, then `git tag vX.Y.Z && git push origin vX.Y.Z`.
+
+The Release workflow notices a tag on `main`, builds a linux-x86_64 tarball,
+publishes it, and then bumps the patch version itself with a `[skip ci]`
+commit — so the next release only needs a tag.
+
+**A fix entry carries its cause.** `- Something was broken` is not a changelog
+line. Use the `Why:` / `Effect:` form:
+
+```markdown
+- **Playback stopped when a track could not be downloaded.**
+  Why: the skip-on-failure path looked for the next track in the queue, but the
+  queue had already been replaced by the album split that caused the failure.
+  Effect: the next track is resolved from the failed download itself.
+```
+
+`tools/release.py check` fails the build if the version in `CMakeLists.txt` has
+no CHANGELOG section, so a release can never publish a bare commit list in place
+of an explanation someone wrote.
+
+## Commit messages
+
+Conventional Commits, one line, imperative: `feat(renderer):`, `fix(ci):`,
+`docs(tools):`, `chore:`. Scope is optional but prefer one when the change is
+confined to a directory. Anything containing `[skip ci]` will not start a
+release.
