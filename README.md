@@ -1,44 +1,59 @@
-# isaac-engine
+# tboi-recomp
 
-A clean-room, OS-agnostic engine for *The Binding of Isaac*. Written from the
-public interface, not from Nicalis's code.
+A clean-room reimplementation of *The Binding of Isaac: Repentance*, built to run
+on arm64 Android and Linux x86_64 from one source tree.
 
-**Status: scaffold.** Nothing here plays the game yet. See *Where this actually
-stands* before you get excited.
+**This is an independent project. It is not affiliated with, endorsed by, or
+connected to Nicalis or Edmund McMillen.** "The Binding of Isaac" is a trademark
+of its respective owners and is used here only to identify the game this project
+aims to be compatible with.
 
-## Why this exists
+> **Status: early scaffold. 0 of 655 native function bodies are implemented.
+> Nothing here plays the game.** The table below is the honest picture. See
+> [Progress](#progress) before you get excited.
 
-Isaac ships as a 32-bit Windows PE linked against DirectX 9 and Win32 audio. It
-cannot run on Android, and it will never run there. What *can* be rebuilt is the
-part of the game that is genuinely portable: a data reader, a Lua VM, and the
-native functions the shipped Lua calls into.
+## Legal boundary
 
-That last part is the whole game. The binary registers 655 native methods across
-9 classes (`Entity` 261, `Input` 118, `Isaac` 76, `HUD` 42, `Sprite` 33,
-`Vector` 22, `KColor` 18, `Font` 8, `EntityPlayer` 77). They were recovered by
-reading the shipped binary's binding tables. Implementing those 655 functions is
-roughly 90% of the work; rendering and input are solved problems.
+This repository contains **no code, data, sprites, audio, video, or text** from
+Nicalis or Edmund McMillen. Not in the source, not in the tests, not in a
+fixture, not "just temporarily".
 
-## Design
+What it does contain is *interface facts*: method names, counts, and structural
+observations, recovered by reading a binary the maintainer already owns. Method
+names are facts about an interface. Every implementation in this repository is
+written from scratch here.
 
-One source tree, two targets:
+The engine ships **no game data**. It is pointed at a copy you already own, the
+way OpenMW points at Morrowind and OpenTTD points at Transport Tycoon. If you
+do not own *The Binding of Isaac*, this project has nothing to show you.
 
-| Target | Toolchain file |
-|---|---|
-| linux-x86_64 | host default |
-| arm64-android | `cmake/toolchain-android-arm64.cmake` |
+MIT licensed. See [`LICENSE`](LICENSE).
 
-Data is **never** shipped. The engine is pointed at a copy the user already owns,
-the way OpenMW points at Morrowind and OpenTTD points at Transport Tycoon. No
-Nicalis Lua source, sprites, audio, video, or bytecode is in this repository.
+## What is being rebuilt, and from what
 
-Namespace is `isaec`, not `isaac` — deliberately, so nothing here reads as an
-official Nicalis artifact.
+This is the distinction that matters most and that is most often gotten wrong:
 
-### The binding model
+| | What it is | Detail |
+|---|---|---|
+| **Reference binary** | The thing being read | The **Windows PC / Steam build** — `isaac-ng.exe`, a **32-bit x86 PE**. *Not* an iOS or Android build. |
+| **Output target** | What this engine produces | **arm64-android** first, then **linux-x86_64**. |
 
-Isaac does not use `lua_register`. It uses a custom metatable model, and the
-recovered keys are the reason this engine's binding core looks the way it does:
+The reference is a 32-bit Windows PE linked against DirectX 9 and Win32 audio.
+It cannot run on Android and never will. So it is not being ported, recompiled,
+or re-linked. What is being reimplemented is the portable half of the game: a
+data reader, a Lua VM, and the native functions the shipped Lua calls into.
+
+Why the PC build and not iOS? The iOS build is ARM64 Mach-O and would have been
+*easier* to analyse. It was rejected: the only iOS copy available was a pirated
+repack with an injected cheat framework, and a clean-room project cannot be
+built on a tampered artifact. The legally-owned Steam install is both the
+correct and the ethical reference.
+
+## The binding surface
+
+Isaac's gameplay is Lua. That Lua calls into 655 native methods across at least
+9 classes, registered through a custom metatable model — **not** `lua_register`,
+which appears zero times in the binary. The recovered metatable keys are:
 
 ```
 __class __parent __index __propget __propset __newindex __const __metatable __type
@@ -46,11 +61,63 @@ __class __parent __index __propget __propset __newindex __const __metatable __ty
 
 Inheritance is single-parent through `__parent`. A property registered without a
 setter is additionally mirrored into `__const`, so it reads as read-only from
-Lua. `include/isaec/api/binding.hpp` implements exactly this model. Do not
-"simplify" it into a `lua_register` table — that is a different API.
+Lua. [`include/isaec/api/binding.hpp`](include/isaec/api/binding.hpp) implements
+exactly this model — do not "simplify" it into a `lua_register` table, that is a
+different API.
 
-The header is deliberately free of any Lua include so that callers can register
+The header is deliberately free of any Lua include, so callers can register
 classes without Lua on their include path. Only `binding.cpp` includes Lua.
+
+## Progress
+
+| Area | State |
+|---|---|
+| Class registry, metatable model, inheritance | **done** — 16 tests green |
+| Declarative `ApiSpec` → `Binding` codegen | **done** |
+| Recovered 655-method surface registers and resolves | **done** (as stubs) |
+| Directory-backed data source | **done** |
+| Headless renderer (counts, draws nothing) | **done** |
+| **655 native function bodies** | **0 / 655** |
+| **Method signatures** (`argc`, return shape) | **0 / 655** |
+| **Packed archive (`ARCH000`) format** | **not started** |
+| **GPU rendering** | **not started** |
+| **Class coverage** | 9 of ~23 classes |
+| **Repentance+ (2024 co-op update) API** | **not examined at all** |
+
+Every recovered method currently resolves to a `not_implemented_trampoline`.
+That is the honest state: the *names* are recovered and the *dispatch* works,
+but no function does anything yet.
+
+The class-coverage number is blocked on the same work as the function bodies,
+not independent of it. See issue #3.
+
+## Build
+
+Requires CMake ≥ 3.16 and a C++17 compiler. Lua 5.3.6 is vendored, so no
+system Lua is needed.
+
+```sh
+cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake --build build -j$(nproc)
+ctest --test-dir build --output-on-failure
+```
+
+Headless smoke test against a real install:
+
+```sh
+./build/isaec_headless "/path/to/steamapps/common/The Binding of Isaac Rebirth"
+```
+
+Cross-compiling for Android (requires the NDK):
+
+```sh
+cmake -S . -B build-android \
+  -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-android-arm64.cmake \
+  -DANDROID_NDK=$ANDROID_NDK_HOME
+```
+
+CI builds on Linux (gcc and clang) and macOS, configures against the Android
+NDK, and additionally gates on `-Werror`, ASan+UBSan, and spec-freshness.
 
 ## Layout
 
@@ -66,65 +133,49 @@ include/isaec/
   engine/clock.hpp         SteadyClock
   platform/                null_renderer (headless)
 src/                       implementations
-tools/gen-api-spec.py      regenerates the binding spec from recovered data
-bindings/                  isaac-api-spec.json, the checked-in source of truth
+tools/                     research + codegen scripts; see tools/README.md
+bindings/                  recovered surface + generated spec
 tests/                     16 cases, ctest
-third_party/lua-5.3.6/     vendored, checksum recorded in third_party/CMakeLists.txt
+third_party/lua-5.3.6/     vendored, checksum in third_party/CMakeLists.txt
 ```
 
-Lua is pinned to **5.3** and vendored. Isaac's interpreter is Lua 5.3; 5.4,
-5.5, and LuaJIT are all wrong. Do not switch this to `find_package(Lua)`.
+Lua is pinned to **5.3** and must stay that way — Isaac's interpreter is Lua 5.3.
+5.4, 5.5, and LuaJIT are all wrong. Do not replace this with
+`find_package(Lua)`.
 
-## Build
+Namespace is `isaec`, not `isaac`, deliberately, so nothing here reads as an
+official Nicalis artifact.
 
-```sh
-cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
-cmake --build build -j$(nproc)
-ctest --test-dir build
-```
+## Issues
 
-Regenerate the binding spec after changing the recovered method list:
+Open work is tracked as numbered GitHub issues with acceptance criteria. The
+milestone `M1 Foundation` covers the current blockers:
+
+- Recover the 655 native function bodies and signatures (#3) — also unblocks
+  per-class attribution and therefore full class coverage.
+- Reverse the `ARCH000` packed-archive format (#4).
+- Implement a real GPU renderer backend (#5).
+- Survey the Repentance+ API surface (#6).
+
+`tools/README.md` documents how the binding surface was recovered, which leads
+are dead, and two address-arithmetic traps that cost real time.
+
+## Regenerating the binding spec
 
 ```sh
 python3 tools/gen-api-spec.py
 ```
 
-It is idempotent, and writes both the JSON and a C++ header, so a malformed
-method name is caught at compile time rather than at load time.
+Idempotent. Writes both the JSON and a C++ header, so a malformed method name
+fails at compile time rather than at load time. CI enforces freshness with a
+`git diff --exit-code` check.
 
-## Where this actually stands
+## Credits
 
-Done:
-
-- Class registry with the recovered metatable model, single-parent inheritance,
-  read-only property mirroring, cycle-safe lineage (16 tests, all green).
-- Declarative `ApiSpec` -> `Binding` codegen path.
-- The recovered 655-method surface registers, resolves, and inherits correctly.
-- Directory-backed data source and a headless renderer.
-
-Not done:
-
-- **The 655 function bodies.** Every one is a `not_implemented_trampoline`.
-  Signatures (`argc`, return shape) are not recovered; they need a disassembly
-  pass over the registration table in the shipped binary.
-- **The packed archive format.** Isaac's `.a` files begin `ARCH000\0` or
-  `ARCH000\1` and carry no plaintext filenames. The runtime loader has been
-  located only as far as a generic stdio file wrapper whose member selects the
-  read strategy — the archive reader itself has not been found. Note that the
-  manifest baked into the binary is build-pipeline residue and is never read at
-  runtime, so it is not a usable shortcut.
-- **Nothing renders.** `NullRenderer` counts calls and draws nothing.
-- Only 9 of the ~23 classes Nicalis exposes have had their method tables
-  extracted, and the `HUD` and `Isaac` buckets still contain some animation and
-  table-field names that were not filtered out.
-
-## Licence
-
-MIT. See `LICENSE`.
-
-This is an independent reimplementation. It contains no code, data, or text from
-Nicalis or Edmund McMillen. Method *names* are facts about an interface and were
-recovered by reading the user's own copy of the game; every implementation is
-written from scratch here.
-</content>
-</</invoke>
+* The Binding of Isaac was created by Edmund McMillen and published by Nicalis.
+  This project is an independent reimplementation and is not endorsed by either.
+* Method names and structural observations were recovered by the maintainer
+  from a copy of the game they own, using their own tooling. No game code or
+  assets are redistributed here.
+* Inspired by the OpenMW and OpenTTD model of shipping an engine that reads a
+  user's own game install.
