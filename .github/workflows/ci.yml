@@ -229,6 +229,29 @@ jobs:
             echo "::error::extractor must fail when the game binary is absent"
             exit 1
           fi
+
+      - name: Archive inspector rejects input that is not an archive
+        run: |
+          python3 -c "import ast,sys; ast.parse(open('tools/inspect-archive.py').read())"
+          # A file whose header claims an index that cannot fit must be refused.
+          # An inspector that prints a confident table for garbage is worse than
+          # one that prints nothing, so the failure path is the thing under test.
+          python3 - <<'PY'
+          import struct
+          blob = bytearray(b"ARCH000" + bytes([1]) + b"\0" * 6)
+          blob[8:12] = struct.pack("<I", 0xFFFFFFF0)
+          blob[12:14] = struct.pack("<H", 4)
+          open("not-an-archive.a", "wb").write(bytes(blob))
+          PY
+          if python3 tools/inspect-archive.py not-an-archive.a; then
+            echo "::error::inspector accepted a malformed archive"
+            exit 1
+          fi
+          python3 -c "open('real-archive.a','wb').write(b'ARCH000' + bytes([1]) + b'x'*20)"
+          if python3 tools/inspect-archive.py real-archive.a; then
+            echo "::error::inspector accepted an archive with no valid index"
+            exit 1
+          fi
   # Self-test of the release plumbing, not a gate on the current version.
   #
   # A version with no CHANGELOG section is a legitimate state on main: the

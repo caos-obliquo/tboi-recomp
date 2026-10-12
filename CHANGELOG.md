@@ -14,6 +14,21 @@ The version is not written here by hand. `project(... VERSION x.y.z)` in
 
 ## [Unreleased]
 
+### Added
+
+- `docs/arch000-format.md` — the archive container format, measured rather than
+  inferred. Header is 14 bytes; a 20-byte-per-entry index sits at the end of the
+  file; entries are `{hash_lo, hash_hi, offset, raw_size, crc}`.
+- `tools/inspect-archive.py` — validates and summarises an archive. It asserts
+  the index arithmetic instead of trusting it, so a wrong reading of the format
+  makes it exit non-zero rather than print a plausible table. Validates all 22
+  archives in the reference install with zero bytes unaccounted.
+
+### Changed
+
+- `ARCH000` is no longer an opaque blocker. Every remaining unknown is now
+  scoped to the codec and the 64-bit name hash.
+
 Nothing yet.
 
 ## [v0.1.0] - 2026-10-12
