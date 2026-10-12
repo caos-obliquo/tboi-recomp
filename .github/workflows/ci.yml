@@ -61,7 +61,6 @@ jobs:
 
       - name: Install NDK
         uses: nttld/setup-ndk@v1
-        id: ndk
         with:
           ndk-version: r26d
 
@@ -70,7 +69,11 @@ jobs:
       # `command -v clang` returned the host /usr/bin/clang. No single
       # variable names the NDK we compile with, so we glob for a real driver
       # and log every candidate to make a future failure diagnosable.
+      #
+      # A step id must be unique within a job. The install step above owns
+      # "ndk", so reusing it here silently discards our own outputs.
       - name: Resolve NDK root
+        id: locate_ndk
         run: |
           wanted="aarch64-linux-android24-clang"
           want_series="26."
@@ -114,12 +117,16 @@ jobs:
 
       - name: Configure
         env:
-          NDK: ${{ steps.ndk.outputs.ndk_root }}
-        run: >-
-          cmake -S . -B build-android
-          -DCMAKE_BUILD_TYPE=Release
-          -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-android-arm64.cmake
-          -DANDROID_NDK="$NDK"
+          NDK: ${{ steps.locate_ndk.outputs.ndk_root }}
+        run: |
+          if [ -z "$NDK" ]; then
+            echo "::error::NDK resolved empty; refusing to configure against the host toolchain"
+            exit 1
+          fi
+          cmake -S . -B build-android \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-android-arm64.cmake \
+            -DANDROID_NDK="$NDK"
 
       # Proves the compile actually targeted arm64 rather than silently falling
       # back to the host toolchain, which is the failure this job exists to
