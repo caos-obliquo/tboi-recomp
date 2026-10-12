@@ -61,27 +61,53 @@ jobs:
 
       - name: Install NDK
         uses: nttld/setup-ndk@v1
+        id: ndk
         with:
           ndk-version: r26d
 
-      # ANDROID_NDK_ROOT is what nttld/setup-ndk exports for the version it
-      # installed. ANDROID_NDK_LATEST_HOME is a different, pre-existing runner
-      # variable and pointed at NDK 30 instead of the requested r26d.
+      # The NDK root is derived from the clang that setup-ndk put on PATH,
+      # because none of the ambient runner variables name the NDK it just
+      # installed: ANDROID_NDK_LATEST_HOME resolved to NDK 30 and
+      # ANDROID_NDK_ROOT to NDK 27.3, while r26d (26.1.10909125) was what
+      # setup-ndk actually installed. Deriving from PATH removes the guesswork.
+      - name: Resolve NDK root
+        run: |
+          clang_bin="$(command -v clang)"
+          echo "clang on PATH: $clang_bin"
+          ndk="${clang_bin%/toolchains/llvm/prebuilt/*}/"
+          if [ ! -d "$ndk" ]; then
+            echo "::error::could not derive an NDK root from $clang_bin" && exit 1
+          fi
+          echo "NDK=$ndk" >> "$GITHUB_OUTPUT"
+
       - name: Configure
+        env:
+          NDK: ${{ steps.ndk.outputs.ndk }}
         run: >-
           cmake -S . -B build-android
           -DCMAKE_BUILD_TYPE=Release
           -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-android-arm64.cmake
-          -DANDROID_NDK="$ANDROID_NDK_ROOT"
+          -DANDROID_NDK="$NDK"
 
       # Proves the compile actually targeted arm64 rather than silently falling
       # back to the host toolchain, which is the failure this job exists to
-      # catch.
+      # catch. CMake resolves the NDK's generic clang driver and passes the
+      # triple as a --target flag, so the triple is not in the cache as a
+      # compiler name.
       - name: Verify target triple
-        run: grep -qE 'aarch64' build-android/CMakeCache.txt
+        run: |
+          grep -qE '^CMAKE_SYSTEM_NAME:INTERNAL=Android$' build-android/CMakeCache.txt
+          grep -qE '^CMAKE_ANDROID_ARCH_ABI:STRING=arm64-v8a$' build-android/CMakeCache.txt
 
       - name: Build
         run: cmake --build build-android -j
+
+      # A build that silently used the host compiler would still produce
+      # objects; these are ARM64 ELF files or the build did not target Android.
+      - name: Verify objects are ARM64
+        run: |
+          objdump -f build-android/CMakeFiles/isaec_core.dir/src/engine/engine.cpp.o \
+            | grep -qE 'file format elf64-littleaarch64'
 
   # Warnings are already enabled in the project; this job turns them into a hard
   # failure so a new one cannot land unnoticed. -Werror is deliberately not set
