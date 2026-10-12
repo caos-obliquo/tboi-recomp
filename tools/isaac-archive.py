@@ -224,7 +224,7 @@ def main(argv: list[str]) -> int:
             print(f"error: {error}", file=sys.stderr)
             failed = True
             continue
-        codec = "lzw" if mode == MODE_LZW else "obfuscated"
+        codec = {MODE_LZW: "lzw", MODE_ASSETS: "obfuscated"}.get(mode, "unknown")
         print(f"{path}  mode=0x{mode:02x} codec={codec} entries={len(entries)}")
         for i, (name_hash, special, offset, size, checksum) in enumerate(entries):
             print(
