@@ -20,20 +20,37 @@ if(NOT ANDROID_NDK)
     "ANDROID_NDK is not set. Pass -DANDROID_NDK=/path/to/ndk or export it.")
 endif()
 
+set(CMAKE_SYSTEM_NAME Android)
+set(CMAKE_SYSTEM_VERSION 24)
+
 set(ANDROID_ABI arm64-v8a)
 set(ANDROID_PLATFORM android-24)
 set(ANDROID_STL c++_static)
 set(CMAKE_ANDROID_ARCH_ABI ${ANDROID_ABI})
 set(CMAKE_ANDROID_NDK ${ANDROID_NDK})
+set(CMAKE_ANDROID_STL_TYPE ${ANDROID_STL})
 
-# Prebuilt toolchain binaries shipped inside the NDK.
-set(CMAKE_C_COMPILER   "${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android${ANDROID_PLATFORM}-clang")
-set(CMAKE_CXX_COMPILER "${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android${ANDROID_PLATFORM}-clang++")
+# The NDK names its compiler wrappers aarch64-linux-android<API>-clang, where
+# <API> is the bare API level. ANDROID_PLATFORM is the string "android-24", so
+# it cannot be concatenated directly into the binary name -- doing so yields
+# "aarch64-linux-androidandroid-24-clang", which does not exist.
+string(REGEX REPLACE "^android-" "" ANDROID_API_LEVEL "${ANDROID_PLATFORM}")
+
+# Host tag for the NDK's own prebuilt tree. Hardcoding linux-x86_64 works on the
+# CI runner but breaks on Apple silicon, where the NDK ships darwin-arm64.
+if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64|ARM64)$")
+  set(ANDROID_NDK_HOST_TAG darwin-arm64)
+else()
+  set(ANDROID_NDK_HOST_TAG linux-x86_64)
+endif()
+set(ANDROID_NDK_TOOLCHAIN "${ANDROID_NDK}/toolchains/llvm/prebuilt/${ANDROID_NDK_HOST_TAG}")
+
+set(CMAKE_C_COMPILER   "${ANDROID_NDK_TOOLCHAIN}/bin/aarch64-linux-android${ANDROID_API_LEVEL}-clang")
+set(CMAKE_CXX_COMPILER "${ANDROID_NDK_TOOLCHAIN}/bin/aarch64-linux-android${ANDROID_API_LEVEL}-clang++")
 
 # NDK ships the runtime libraries in per-ABI directories; the CMake Android
 # support modules find them from these paths.
-set(ANDROID_NDK_LLVM  "${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64")
-set(ANDROID_NDK_TOOLCHAIN "${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64")
+set(ANDROID_NDK_LLVM  "${ANDROID_NDK_TOOLCHAIN}")
 set(ANDROID_NDK_ROOT  "${ANDROID_NDK}")
 
 # Desktop-only dependencies are disabled here; a mobile build must not try to

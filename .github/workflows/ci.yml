@@ -64,17 +64,15 @@ jobs:
         with:
           ndk-version: r26d
 
-      # Referenced as a shell variable, not through the ${{ env }} context. The
-      # step above exports ANDROID_NDK_LATEST_HOME into the environment, and a
-      # shell expansion picks that up at run time. The ${{ env }} form is
-      # evaluated earlier and arrived empty, which made the toolchain file
-      # abort with "ANDROID_NDK is not set".
+      # ANDROID_NDK_ROOT is what nttld/setup-ndk exports for the version it
+      # installed. ANDROID_NDK_LATEST_HOME is a different, pre-existing runner
+      # variable and pointed at NDK 30 instead of the requested r26d.
       - name: Configure
         run: >-
           cmake -S . -B build-android
           -DCMAKE_BUILD_TYPE=Release
           -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-android-arm64.cmake
-          -DANDROID_NDK="$ANDROID_NDK_LATEST_HOME"
+          -DANDROID_NDK="$ANDROID_NDK_ROOT"
 
       # Proves the compile actually targeted arm64 rather than silently falling
       # back to the host toolchain, which is the failure this job exists to
