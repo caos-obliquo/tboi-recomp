@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Generate the Lua binding surface from recovered binary data.
 
-Input is the per-class method list recovered from isaac-ng.exe's binding
-tables: NUL-separated name tables clustered around 0x76xxxx, bucketed between
-class anchors. Every name came out of the shipped binary, so this file is a
-read-only record of what that binary exposes to Lua.
+Input is bindings/recovered-binding-surface.json: the per-class method names
+recovered from isaac-ng.exe's binding tables (NUL-separated name tables
+clustered around 0x76xxxx, bucketed between class anchors). Every name came out
+of the shipped binary, so that file is a read-only record of what the binary
+exposes to Lua. It is committed rather than regenerated because the binary
+itself is not distributable; tools/extract-binding-tables.py produces it.
 
 Two artifacts come out of here:
 
@@ -23,7 +25,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 
-SOURCE_JSON = "/tmp/opencode/isaac-binding-clean.json"
+SOURCE_JSON = os.path.join(ROOT, "bindings", "recovered-binding-surface.json")
 SPEC_JSON = os.path.join(ROOT, "bindings", "isaac-api-spec.json")
 SPEC_HEADER = os.path.join(ROOT, "include", "isaec", "api", "generated", "isaac_api_spec.hpp")
 
@@ -126,7 +128,7 @@ def main():
         raw = json.load(fh)
 
     classes = []
-    for name in sorted(raw):
+    for name in sorted(k for k in raw if not k.startswith("_")):
         methods = sorted(set(raw[name]["api"]))
         classes.append(
             {"name": name, "parent": PARENTS.get(name, ""), "methods": methods}

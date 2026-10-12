@@ -20,6 +20,7 @@ counts as region sizes, not API sizes. See issue #4.
 
 import json
 import re
+import os
 import sys
 
 MAX_GAP = 3  # measured: separators are 0-3 bytes, run boundaries are >= 4
@@ -130,6 +131,12 @@ def extract(data, cls, offset, window):
 def main(argv):
     exe = argv[1] if len(argv) > 1 else DEFAULT_EXE
     window = int(argv[2], 0) if len(argv) > 2 else 8192
+    if not os.path.exists(exe):
+        sys.stderr.write(
+            "game binary not found: %s\n"
+            "Pass the path to your own isaac-ng.exe as the first argument.\n" % exe
+        )
+        return 2
     with open(exe, "rb") as handle:
         data = handle.read()
 
@@ -162,4 +169,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    sys.exit(main(sys.argv))

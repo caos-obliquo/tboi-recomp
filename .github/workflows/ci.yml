@@ -1,0 +1,146 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Desktop builds are the reference configuration. Anything that breaks here
+  # breaks every other target, so this job runs first and gates the rest.
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: linux-gcc
+            os: ubuntu-latest
+            cc: gcc
+            cxx: g++
+          - name: linux-clang
+            os: ubuntu-latest
+            cc: clang
+            cxx: clang++
+          - name: macos-appleclang
+            os: macos-latest
+            cc: clang
+            cxx: clang++
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: >-
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          -DCMAKE_C_COMPILER=${{ matrix.cc }}
+          -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
+
+      - name: Build
+        run: cmake --build build -j
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  # The primary shipping target. Configuring against the NDK is the only thing
+  # that proves the Android build has not silently acquired a host dependency.
+  android:
+    name: android-arm64
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r26d
+
+      - name: Configure
+        run: >-
+          cmake -S . -B build-android
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-android-arm64.cmake
+          -DANDROID_NDK=${{ env.ANDROID_NDK_LATEST_HOME }}
+
+      - name: Build
+        run: cmake --build build-android -j
+
+  # Warnings are already enabled in the project; this job turns them into a hard
+  # failure so a new one cannot land unnoticed. -Werror is deliberately not set
+  # in CMakeLists: this only gates Linux CI, not contributor builds.
+  warnings:
+    name: warnings-as-errors
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: >-
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_CXX_FLAGS=-Werror
+
+      - name: Build
+        run: cmake --build build -j
+
+  # Memory errors in the binding layer and the data source are the failure modes
+  # most likely to survive a green unit suite.
+  sanitizers:
+    name: asan-ubsan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: >-
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+          -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined"
+
+      - name: Build
+        run: cmake --build build -j
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  # Guards the generated artifacts against drift: the spec header and the JSON
+  # are produced from the binary by hand, and a stale copy is a silent lie.
+  spec-freshness:
+    name: generated-spec-is-current
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Regenerate and diff
+        run: |
+          python3 tools/gen-api-spec.py
+          git diff --exit-code bindings/isaac-api-spec.json include/isaec/api/generated/isaac_api_spec.hpp
+
+  # The extractor reads the shipped binary, which is not distributable and is
+  # not in the repository. Verify only that the tool still parses and that its
+  # self-check rejects a bad anchor.
+  extractor-selfcheck:
+    name: binding-extractor-selfcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compiles and runs
+        run: |
+          python3 -c "import ast,sys; ast.parse(open('tools/extract-binding-tables.py').read())"
+          # Without the binary present the tool must exit non-zero with a clear
+          # message rather than emitting an empty survey.
+          if python3 tools/extract-binding-tables.py >/dev/null 2>&1; then
+            echo "::error::extractor must fail when the game binary is absent"
+            exit 1
+          fi
