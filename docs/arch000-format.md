@@ -130,3 +130,56 @@ repository.** The container parser, the mode `0x00` obfuscation and the LZW
 decoder here are independent implementations written from the algorithm
 descriptions. That project's format does not document mode `0x02`, which predates
 it.
+
+## 9. Mode 0x02 decoder (recovered from disassembly)
+
+The mode dispatch lives at VA `0xa68c50`. Byte 7 of the header selects the arm:
+
+| mode | path |
+|---|---|
+| `0x01` | `0xa850f0` — LZW (section 6) |
+| `0x02` | `0xa89c90` — PRNG keystream (this section) |
+| `0x00` | inline at `0xa68cc5` — XOR (section 4) |
+
+All three arms end with the same virtual call
+`output_buffer->vtbl[3](field_c->field_c, 0)`; the per-mode transform runs
+before it.
+
+### 9.1 Wrapper at `0xa89c90`
+
+Allocates a buffer, calls `0xaef15c` (a thin forwarder to `0xa0f500`, an
+SEH-protected allocator at `0xa648b0`), allocates a second buffer, then calls
+the PRNG at `0xaa93e0` with the entry's `specialHash` as the seed.
+
+### 9.2 PRNG at `0xaa93e0`
+
+Seed preparation (32-bit):
+
+```
+h  = (seed << 15) ^ seed
+h ^= (seed >> 9)
+h  = (h << 8) ^ seed
+```
+
+The 64-bit LCG state is initialised to `state_lo = h`, `state_hi = seed`.
+Each of the 256 iterations performs:
+
+```
+state = state * 0x4c957f2d5851f42d + 0x7f      (64-bit)
+```
+
+and emits one 32-bit word:
+
+```
+n   = state_hi >> 27
+v   = ((state >> 27) & 0xffffffff) ^ (state_hi >> 13)
+out = rotate_right(v, n)
+```
+
+The rotation amount is the 5-bit field `state_hi >> 27`, **not**
+`state & 31` as an earlier note in this file claimed — the disassembly at
+`aa9450`–`aa9467` computes `32 - n` with `neg`/`and`, shifts left by that and
+right by `n`, and ORs the halves, which is a right rotation.
+
+The function returns 256 dwords (1024 bytes) per call. The caller is expected
+to invoke it repeatedly for inputs longer than 1024 bytes.
