@@ -99,7 +99,9 @@ classes without Lua on their include path. Only `binding.cpp` includes Lua.
 | Headless renderer (counts, draws nothing) | **done** |
 | **655 native function bodies** | **0 / 655** |
 | **Method signatures** (`argc`, return shape) | **0 / 655** |
-| **Packed archive (`ARCH000`) format** | **not started** |
+| **Packed archive (`ARCH000`) container** | **container solved**, codec open |
+| **→ `ARCH000` payload codec** | **not started** — blocked on #1 |
+| **→ `ARCH000` 64-bit name hash** | **not started** — lower priority, see #2 |
 | **GPU rendering** | **not started** |
 | **Class coverage** | 9 of ~23 classes |
 | **Repentance+ (2024 co-op update) API** | **not examined at all** |
@@ -154,6 +156,8 @@ include/isaec/
   platform/                null_renderer (headless)
 src/                       implementations
 tools/                     research + codegen scripts; see tools/README.md
+  inspect-archive.py        ARCH000 reader; asserts the index arithmetic
+docs/                       measured format specs; see docs/arch000-format.md
 bindings/                  recovered surface + generated spec
 tests/                     16 cases, ctest
 third_party/lua-5.3.6/     vendored, checksum in third_party/CMakeLists.txt
@@ -173,9 +177,15 @@ milestone `M1 Foundation` covers the current blockers:
 
 - Recover the 655 native function bodies and signatures (#3) — also unblocks
   per-class attribution and therefore full class coverage.
-- Reverse the `ARCH000` packed-archive format (#4).
+- Locate the runtime archive loader, then recover the `ARCH000` payload codec
+  (#1, #2). The container itself is solved; see
+  [`docs/arch000-format.md`](docs/arch000-format.md).
 - Implement a real GPU renderer backend (#5).
 - Survey the Repentance+ API surface (#6).
+
+`tools/inspect-archive.py` parses and validates any Isaac archive today. It
+refuses to print a table for input whose index arithmetic does not close, so a
+wrong reading of the format fails loudly instead of producing confident garbage.
 
 `tools/README.md` documents how the binding surface was recovered, which leads
 are dead, and two address-arithmetic traps that cost real time.

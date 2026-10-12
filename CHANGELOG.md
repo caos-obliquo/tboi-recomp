@@ -28,6 +28,9 @@ The version is not written here by hand. `project(... VERSION x.y.z)` in
 
 - `ARCH000` is no longer an opaque blocker. Every remaining unknown is now
   scoped to the codec and the 64-bit name hash.
+- README progress table no longer claims the container format is "not started".
+  A status table that outlives its facts is worse than no status table: it is
+  the part a reader trusts without checking.
 
 Nothing yet.
 
