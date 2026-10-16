@@ -2,6 +2,7 @@ add_executable(isaec_tests
     test_main.cpp
     test_binding.cpp
     test_spec.cpp
+    test_codec.cpp
 )
 
 target_include_directories(isaec_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

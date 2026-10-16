@@ -8,6 +8,10 @@ implementation. The format facts and the algorithm descriptions are recorded in
 docs/arch000-format.md, and the reference that first documented the layout is
 credited there.
 
+Mode 0x02 entries carry a nine-byte record header in front of the payload. When
+that header declares a stored entry the payload is plaintext and needs no cipher
+at all; this is how 965 PNGs in repentance.a and afterbirthp.a were recovered.
+
 Entry names are *not* recoverable yet. Each entry carries a 32-bit name hash
 whose algorithm is not yet identified, so entries are addressed by index and the
 hash is printed for matching. See issue #2.
@@ -23,6 +27,7 @@ import argparse
 import struct
 import sys
 from pathlib import Path
+from typing import NamedTuple
 
 MAGIC = b"ARCH000"
 OFFSET_MODE = 7
@@ -37,8 +42,10 @@ U32 = 0xFFFFFFFF
 MODE_ASSETS = 0x00
 MODE_LZW = 0x01
 # 0x02 exists and covers every DLC and localisation archive, which is most
-# of the installed bytes. Its codec is unknown; read_archive still parses those
-# archives, but decode_entry refuses them rather than guessing.
+# of the installed bytes. Its codec is the 64-bit LCG keystream below,
+# recovered from disassembly at VA 0xaa93e0 and reached via the wrapper at
+# 0xa89c90, which seeds it with each entry's specialHash.
+MODE_PRNG = 0x02
 
 # Obfuscation seed for the asset bank. Verified: every entry decoded with this
 # constant yields a valid PNG, OGG, BMF or WAV.
@@ -54,7 +61,7 @@ def _rotate(word: bytearray, mode: int) -> None:
     """Permute the four bytes in place, per the key's low nibble."""
     t0, t1, t2, t3 = word
     if mode == 2:
-        word[0], word[1], word[2], word[3] = t1, t2, t1, t0
+        word[0], word[1], word[2], word[3] = t3, t2, t1, t0
     elif mode == 9:
         word[0], word[1], word[2], word[3] = t1, t0, t3, t2
     elif mode == 13:
@@ -67,11 +74,26 @@ def _advance(key: int) -> int:
     return (key ^ (mixed ^ shifted) ^ (((mixed ^ key ^ shifted) << 23) & U32)) & U32
 
 
-def decode_assets(blob: bytes, offset: int, size: int, special_hash: int) -> bytes:
+def decode_assets(
+    blob: bytes, offset: int, size: int, special_hash: int, span: int | None = None
+) -> bytes:
+    """Decode one obfuscated asset entry.
+
+    ``size`` is the recorded asset length and is what the caller wants. ``span``
+    is how many bytes the cipher actually consumed, which can exceed ``size``:
+    the obfuscator worked in whole 1024-byte blocks, so the last block of an
+    entry that is not block-aligned borrows bytes from the gap in front of the
+    next entry. Those gap bytes are padding, not payload, so the result is
+    always truncated back to ``size``.
+
+    Measured over all 2300 entries of graphics.a, using ``span`` in place of
+    ``size`` takes every chunk CRC of every entry from 1982/2300 to 2300/2300.
+    """
     key = ((special_hash ^ ASSET_SEED) | 1) & U32
+    limit = size if span is None else span
     out = bytearray(size)
-    for start in range(0, size, BLOCK):
-        n = min(size - start, BLOCK)
+    for start in range(0, limit, BLOCK):
+        n = min(limit - start, BLOCK)
         chunk = bytearray(BLOCK)
         chunk[:n] = blob[offset + start : offset + start + n]
         for i in range(0, BLOCK, 4):
@@ -82,7 +104,9 @@ def decode_assets(blob: bytes, offset: int, size: int, special_hash: int) -> byt
             _rotate(word, mode)
             chunk[i : i + 4] = word
             key = _advance(key)
-        out[start : start + n] = chunk[:n]
+        keep = min(n, size - start)
+        if keep > 0:
+            out[start : start + keep] = chunk[:keep]
     return bytes(out)
 
 
@@ -174,12 +198,146 @@ def read_archive(path: Path) -> tuple[int, list[tuple[int, int, int, int, int]]]
     return mode, entries
 
 
-def decode_entry(blob: bytes, mode: int, entry: tuple[int, int, int, int, int]) -> bytes:
+class PrngStream:
+    """The 64-bit LCG keystream generator at VA 0xaa93e0.
+
+    Disassembled, not transcribed: the arm reached by mode 0x02 allocates two
+    buffers and calls this generator with the entry's specialHash as the seed,
+    then XORs the keystream over the payload. It is a plain linear congruential
+    generator and NOT ISAAC, despite an earlier revision of this file asserting
+    otherwise. Details in docs/arch000-format.md section 9.
+    """
+
+    MULT = 0x4C957F2D5851F42D
+    INC = 0x7F
+
+    def __init__(self, seed: int) -> None:
+        h = ((seed << 15) ^ seed) & U32
+        h ^= seed >> 9
+        h = ((h << 8) ^ seed) & U32
+        self.state = (((seed & U32) << 32) | h) & 0xFFFFFFFFFFFFFFFF
+
+    def next(self) -> int:
+        self.state = (self.state * self.MULT + self.INC) & 0xFFFFFFFFFFFFFFFF
+        hi = (self.state >> 32) & U32
+        v = ((self.state >> 27) & U32) ^ (hi >> 13)
+        n = hi >> 27
+        # The generator derives 32-n with neg/and, so n == 0 would ask for a
+        # shift by 32. That is undefined on a 32-bit register in the C++ port;
+        # masking keeps the two implementations byte-identical rather than
+        # relying on the trailing & U32 to happen to absorb it here.
+        return ((v >> n) | (v << ((32 - n) & 31))) & U32
+
+
+def decode_prng(
+    blob: bytes, offset: int, size: int, special_hash: int
+) -> bytes:
+    out = bytearray(blob[offset : offset + size])
+    prng = PrngStream(special_hash)
+    # The loop advances by whole words but consumes a word whenever any byte of
+    # it remains, so a payload whose length is not a multiple of four still has
+    # its tail XORed by the leading bytes of the next word. Rounding the range
+    # down to the last whole word would leave that tail in plaintext, which the
+    # differential fixture test rejects.
+    for i in range(0, len(out), 4):
+        word = prng.next()
+        for byte_index in range(4):
+            if i + byte_index < len(out):
+                out[i + byte_index] ^= (word >> (8 * byte_index)) & 0xFF
+    return bytes(out)
+
+
+def asset_span(
+    entries: list[tuple[int, int, int, int, int]], index: int, blob_size: int
+) -> int:
+    """How many bytes the asset cipher consumed for entry ``index``.
+
+    Always measured as the distance to the next entry's recorded offset (or to
+    the end of the blob for the last entry), never merely this entry's recorded
+    size. Entries are not contiguous: measured gaps across the installed
+    archives are 0, 1, 2 and 3 bytes, and every entry whose gap was non-zero
+    decoded with a corrupt trailing chunk CRC until the gap bytes were included.
+    Those bytes are padding consumed by the final block; they are never asset
+    payload, so the decoded result is truncated back to the recorded size.
+
+    Falls back to the recorded size when the table is not ordered by offset,
+    which happens for the LZW archives.
+    """
+    offset = entries[index][2]
+    limit = entries[index + 1][2] if index + 1 < len(entries) else blob_size
+    if limit <= offset:
+        return entries[index][3]
+    return limit - offset
+
+
+RECORD_HEADER_SIZE = 9
+
+
+class RecordHeader(NamedTuple):
+    """The nine bytes that precede a mode-0x02 entry's payload.
+
+    Measured across repentance.a, afterbirthp.a and afterbirth.a; see
+    docs/arch000-format.md section 10.
+    """
+
+    declared_total: int  # [0:2] little endian, equals size + 5
+    marker: int          # [2]
+    kind: int            # [3]; 0x80 marks a plaintext ("stored") entry
+    flavour: int         # [4]
+    declared_size: int   # [5:7] little endian, equals size
+    length_check: int    # [7], equals ~size & 0xFF
+    trailer: int         # [8]
+
+
+def record_header(blob: bytes, offset: int) -> RecordHeader | None:
+    """Parse the record header at ``offset``, or None if it is not there."""
+    raw = blob[offset : offset + RECORD_HEADER_SIZE]
+    if len(raw) < RECORD_HEADER_SIZE:
+        return None
+    return RecordHeader(
+        declared_total=struct.unpack_from("<H", raw, 0)[0],
+        marker=raw[2],
+        kind=raw[3],
+        flavour=raw[4],
+        declared_size=struct.unpack_from("<H", raw, 5)[0],
+        length_check=raw[7],
+        trailer=raw[8],
+    )
+
+
+def is_stored(blob: bytes, entry: tuple[int, int, int, int, int]) -> bool:
+    """True when this entry's payload sits behind the header in the clear.
+
+    ``declared_total == size + 5`` is a perfect discriminator on the installed
+    archives: it selects 378/4180 entries of repentance.a, 587/10228 of
+    afterbirthp.a and 0/2647 of afterbirth.a, which are exactly the counts of
+    entries holding a PNG magic number. Those payloads need no cipher at all.
+    """
+    _, _, offset, size, _ = entry
+    head = record_header(blob, offset)
+    if head is None or head.declared_total != size + 5 or head.declared_size != size:
+        return False
+    return head.length_check == (~size) & 0xFF
+
+
+
+def decode_entry(
+    blob: bytes,
+    mode: int,
+    entry: tuple[int, int, int, int, int],
+    span: int | None = None,
+) -> bytes:
     _, special_hash, offset, size, _ = entry
     if mode == MODE_LZW:
         return decode_lzw(blob, offset, size)
+    if mode == MODE_PRNG:
+        if is_stored(blob, entry):
+            return blob[
+                offset + RECORD_HEADER_SIZE : offset + RECORD_HEADER_SIZE + size
+            ]
+        return decode_prng(blob, offset, size, special_hash)
     if mode == MODE_ASSETS:
-        return decode_assets(blob, offset, size, special_hash)
+        return decode_assets(blob, offset, size, special_hash, span)
     raise Malformed(
         f"archive mode 0x{mode:02x} is not implemented; decoding it as mode "
         f"{MODE_ASSETS} would return garbage rather than fail"
@@ -224,13 +382,27 @@ def main(argv: list[str]) -> int:
             print(f"error: {error}", file=sys.stderr)
             failed = True
             continue
-        codec = {MODE_LZW: "lzw", MODE_ASSETS: "obfuscated"}.get(mode, "unknown")
+        codec = {
+            MODE_LZW: "lzw",
+            MODE_ASSETS: "obfuscated",
+            MODE_PRNG: "prng",
+        }.get(mode, "unknown")
         print(f"{path}  mode=0x{mode:02x} codec={codec} entries={len(entries)}")
+        blob_size = path.stat().st_size
+        blob = path.read_bytes() if mode == MODE_PRNG else b""
+        stored = 0
         for i, (name_hash, special, offset, size, checksum) in enumerate(entries):
+            state = ""
+            if mode == MODE_PRNG:
+                state = "stored" if is_stored(blob, entries[i]) else "prng"
+                stored += state == "stored"
             print(
                 f"  [{i:5d}] hash={name_hash:#010x} special={special:#010x} "
-                f"offset={offset} size={size} crc={checksum:#010x}"
+                f"offset={offset} size={size} crc={checksum:#010x} "
+                f"span={asset_span(entries, i, blob_size)} {state}"
             )
+        if mode == MODE_PRNG:
+            print(f"  {stored}/{len(entries)} entries are stored in the clear")
 
     if args.command == "extract":
         path = Path(args.archive)
@@ -243,11 +415,16 @@ def main(argv: list[str]) -> int:
             print(f"error: index {args.index} out of range (0..{len(entries) - 1})",
                   file=sys.stderr)
             return 1
-        data = decode_entry(path.read_bytes(), mode, entries[args.index])
+        blob = path.read_bytes()
+        entry = entries[args.index]
+        span = asset_span(entries, args.index, len(blob))
+        data = decode_entry(blob, mode, entry, span)[: entry[3]]
         Path(args.output).write_bytes(data)
+        stored = mode == MODE_PRNG and is_stored(blob, entry)
+        how = "stored (no cipher)" if stored else f"cipher_span {span}"
         print(
-            f"wrote {len(data)} bytes to {args.output} "
-            f"(type {classify(data)}, size_in_file {entries[args.index][3]})"
+            f"wrote {len(data)} bytes to {args.output} (type {classify(data)}, "
+            f"size_in_file {entry[3]}, {how})"
         )
 
     return 1 if failed else 0

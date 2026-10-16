@@ -8,6 +8,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 option(ISAEC_BUILD_TESTS "Build the test suite" ON)
 option(ISAEC_WITH_LUA "Build the Lua binding layer when Lua 5.3 is available" ON)
 
+
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "" FORCE)
 endif()
@@ -31,6 +32,30 @@ if(ISAEC_WITH_LUA)
 endif()
 
 # ---------------------------------------------------------------------------
+# Windowing and image dependencies
+#
+# libpng is a core dependency: the archives hand back encoded PNG bytes and
+# isaec_core is what turns them into pixels, so the test suite needs it too and
+# it links PUBLIC.
+#
+# SDL2 is not. It is only the first windowed backend, and the whole point of
+# engine/renderer.hpp is that no graphics API is baked into the core, so a host
+# without SDL2 still builds and still runs the headless binary and the tests.
+# This host ships SDL2Config.cmake but no PNGConfig.cmake, hence the two
+# different discovery calls.
+# ---------------------------------------------------------------------------
+find_package(PNG QUIET)
+if(NOT PNG_FOUND)
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(ISAEC_PNG REQUIRED IMPORTED_TARGET libpng16)
+  set(ISAEC_PNG_TARGET PkgConfig::ISAEC_PNG)
+  message(STATUS "isaec: libpng via pkg-config ${ISAEC_PNG_VERSION}")
+else()
+  set(ISAEC_PNG_TARGET PNG::PNG)
+  message(STATUS "isaec: libpng via find_package ${PNG_VERSION}")
+endif()
+
+# ---------------------------------------------------------------------------
 # Core library
 # ---------------------------------------------------------------------------
 add_library(isaec_core
@@ -38,11 +63,14 @@ add_library(isaec_core
   src/engine/clock.cpp
   src/data/source.cpp
   src/data/collection.cpp
+  src/data/codec.cpp
 )
 
 target_include_directories(isaec_core PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
+
+target_link_libraries(isaec_core PUBLIC ${ISAEC_PNG_TARGET})
 
 target_compile_options(isaec_core PRIVATE
   $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall -Wextra>
