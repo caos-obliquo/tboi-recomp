@@ -7,7 +7,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(ISAEC_BUILD_TESTS "Build the test suite" ON)
 option(ISAEC_WITH_LUA "Build the Lua binding layer when Lua 5.3 is available" ON)
-
+option(ISAEC_WITH_WINDOW "Build the SDL2 windowed renderer when SDL2 is available" ON)
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "" FORCE)
@@ -53,6 +53,17 @@ if(NOT PNG_FOUND)
 else()
   set(ISAEC_PNG_TARGET PNG::PNG)
   message(STATUS "isaec: libpng via find_package ${PNG_VERSION}")
+endif()
+
+set(ISAEC_SDL_FOUND OFF)
+if(ISAEC_WITH_WINDOW)
+  find_package(SDL2 CONFIG QUIET)
+  if(SDL2_FOUND)
+    set(ISAEC_SDL_FOUND ON)
+    message(STATUS "isaec: SDL2 ${SDL2_VERSION} via SDL2Config.cmake")
+  else()
+    message(STATUS "isaec: SDL2 not found, isaec_window will not be built")
+  endif()
 endif()
 
 # ---------------------------------------------------------------------------
@@ -114,6 +125,24 @@ target_link_libraries(isaec_headless PRIVATE isaec_core isaec_lua)
 target_compile_options(isaec_headless PRIVATE
   $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall -Wextra>
 )
+
+# ---------------------------------------------------------------------------
+# Reference platform: windowed SDL2 backend
+#
+# Separate from isaec_headless rather than folded into it: the headless binary
+# must keep working on a host with no display and no SDL2, which is how CI and
+# the test run are meant to stay simple.
+# ---------------------------------------------------------------------------
+if(ISAEC_SDL_FOUND)
+  add_executable(isaec_window
+    src/platform/sdl_renderer.cpp
+    src/platform/sdl_main.cpp
+  )
+  target_link_libraries(isaec_window PRIVATE isaec_core SDL2::SDL2)
+  target_compile_options(isaec_window PRIVATE
+    $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall -Wextra>
+  )
+endif()
 
 # ---------------------------------------------------------------------------
 # Tests
