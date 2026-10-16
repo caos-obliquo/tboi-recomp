@@ -65,6 +65,7 @@ add_library(isaec_core
   src/data/collection.cpp
   src/data/codec.cpp
   src/data/image.cpp
+  src/data/archive.cpp
 )
 
 target_include_directories(isaec_core PUBLIC
