@@ -88,9 +88,14 @@ There are no plaintext filenames anywhere. Measured: zero `.png` or `gfx`
 substrings in the 17.5 MB `graphics.a`, and `resources/` contains only `packed/`
 and `scripts/`, so there is no loose copy to diff against.
 
-`+0x00` and `+0x04` are almost certainly a 64-bit name hash. That is consistent
-with an earlier failed sweep of nine 32-bit algorithms: a 64-bit result cannot be
-produced by any of them. The algorithm is still unknown.
+`+0x00` is a 32-bit hash of the resource path. The algorithm is djb2-add seeded
+with 5381, and it is reversible against the shipped resource-path manifest: see
+section 11, which resolves 81.46% of all installed entries.
+
+`+0x04` is not part of a 64-bit name hash. It is the per-entry cipher seed. This
+section previously concluded otherwise, from a sweep of nine algorithms that
+could not match it; they could not match it because they were being asked for a
+64-bit result.
 
 ## 6. The codec is not zlib or deflate
 
@@ -307,3 +312,94 @@ and a PNG length equal to the recorded `size`.
 `tools/isaac-archive.py` exposes this as `RECORD_HEADER_SIZE`,
 `record_header()` and `is_stored()`; `extract` on a stored entry reports
 `stored (no cipher)` and `list` summarises the stored count per archive.
+
+## 11. Entry names
+
+Names are recoverable. `+0x00` of the entry is a 32-bit hash of the resource
+path, and the algorithm is djb2-add seeded with 5381 over the path string
+including its extension:
+
+```python
+def resource_name_hash(path: str) -> int:
+    h = 5381
+    for byte in path.lower().encode("latin-1", "replace"):
+        h = (h * 33 + byte) & 0xFFFFFFFF
+    return h
+```
+
+Note that `+0x04` is *not* the upper half of a 64-bit name hash — it is the
+per-entry cipher seed used by modes 0x00 and 0x02. Section 5 originally guessed
+otherwise, from a sweep of nine algorithms that could not match it. They could
+not match it because they were being asked for a 64-bit result.
+
+### 11.1 The corpus
+
+The modding `ResourceExtractor` ships a complete list of extractable resource
+paths at `tools/ResourceExtractor/filelist.txt` relative to the game install
+(1,028,325 bytes, 18,789 paths, identical copies under `macOS/` and `Linux/`).
+Hashing all of them yields 18,789 distinct values with zero collisions, so the
+hash is injective over the known corpus and a single match is unambiguous.
+
+`tools/isaac-archive.py` uses it as `resource_name_hash()` plus
+`load_name_table()`, and exposes `--names` on both `list` and `extract`. The
+table is located by, in order: an explicit argument, the `ISAEC_FILELIST`
+environment variable, then auto-discovery at
+`<install>/tools/ResourceExtractor/filelist.txt`. No flag is needed in practice.
+
+### 11.2 Coverage
+
+22,186 of 27,236 entries across the 22 installed archives resolve: **81.46%**.
+
+| archive | mode | resolved | entries | % |
+|---|---|---|---|---|
+| `repentance_de.a` | 0x02 | 888 | 888 | 100.00% |
+| `repentance_es.a` | 0x02 | 834 | 834 | 100.00% |
+| `repentance_fr.a` | 0x02 | 914 | 914 | 100.00% |
+| `repentance_jp.a` | 0x02 | 845 | 845 | 100.00% |
+| `repentance_kr.a` | 0x02 | 896 | 896 | 100.00% |
+| `repentance_ru.a` | 0x02 | 875 | 875 | 100.00% |
+| `repentance_zh.a` | 0x02 | 941 | 941 | 100.00% |
+| `videos.a` | 0x00 | 17 | 17 | 100.00% |
+| `animations.a` | 0x01 | 1 | 1 | 100.00% |
+| `afterbirthp.a` | 0x02 | 10185 | 10228 | 99.58% |
+| `music.a` | 0x00 | 82 | 83 | 98.80% |
+| `afterbirth_jp.a` | 0x02 | 393 | 404 | 97.28% |
+| `afterbirthp_jp.a` | 0x02 | 166 | 176 | 94.32% |
+| `graphics.a` | 0x00 | 2060 | 2300 | 89.57% |
+| `afterbirth.a` | 0x02 | 2396 | 2647 | 90.52% |
+| `config.a` | 0x01 | 21 | 24 | 87.50% |
+| `afterbirth_kr.a` | 0x02 | 458 | 657 | 69.71% |
+| `sfx.a` | 0x00 | 205 | 301 | 68.11% |
+| `fonts.a` | 0x01 | 6 | 10 | 60.00% |
+| `rooms.a` | 0x01 | 3 | 13 | 23.08% |
+| `afterbirthp_kr.a` | 0x02 | 0 | 2 | 0.00% |
+| `repentance.a` | 0x02 | 0 | 4180 | 0.00% |
+
+The four entries that resolve at 100% in the localized archives pin the
+namespace convention: `repentance_de.a` entry 0 is
+`resources.de/gfx/backdrop/controls.png`. Paths are stored and hashed
+lower-cased.
+
+`graphics.a` entry 0, `0x503f9b44`, is
+`resources/font/pftempestasevencondensed_0.png`. That is confirmed
+independently by content: the entry decodes to a 512x256 RGBA PNG, which is a
+font atlas page, and the matching `pftempestasevencondensed.fnt` sits in
+`fonts.a` as its entry 0.
+
+### 11.3 The `repentance.a` gap
+
+The main DLC archive resolves nothing at all. This is *not* a hash failure.
+Its 4,180 entry hashes are disjoint from `filelist.txt`, and also disjoint from
+`afterbirthp.a` and `afterbirth.a`. Zero overlap is exactly what a correct hash
+over absent paths predicts — 4,180 x 18,789 / 2^32 is about 1.8% of accidental
+collisions — so the paths are simply not enumerated by the base-game extractor,
+while `afterbirthp.a` is 99.58% named because Afterbirth+ shipped folded into
+the same install.
+
+Attempts that found nothing new: regex-harvesting resource paths from all 4,357
+text files under `mods/`, `resources/`, `data/` and `tools/` (0 of 4,180);
+harvesting from partially decoded LZW XML (0); searching the install for any
+other path manifest (only the three identical `filelist.txt` copies exist).
+
+4,180 entries, 15% of the total, stay unnamed. Recovering them needs a path
+manifest for the DLC itself, which the game does not ship in a readable form.

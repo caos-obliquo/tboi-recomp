@@ -5,6 +5,7 @@
 #include <fstream>
 #include <ios>
 #include <iterator>
+#include <utility>
 
 #include "isaec/data/codec.hpp"
 
@@ -174,4 +175,55 @@ bool Archive::decode(usize index, std::vector<u8>& out) {
     return true;
 }
 
+u32 resource_name_hash(const std::string& path) {
+    u32 hash = 5381u;
+    for (const char raw : path) {
+        u8 byte = static_cast<u8>(raw);
+        if (byte >= 'A' && byte <= 'Z') {
+            byte = static_cast<u8>(byte - 'A' + 'a');
+        }
+        hash = hash * 33u + byte;
+    }
+    return hash;
+}
+
+bool Archive::load_names(const std::filesystem::path& source) {
+    names_.clear();
+    std::ifstream input(source);
+    if (!input) {
+        return fail("cannot open name list " + source.string());
+    }
+    std::string line;
+    while (std::getline(input, line)) {
+        if (!line.empty() && line.back() == '\r') {
+            line.pop_back();
+        }
+        if (line.empty()) {
+            continue;
+        }
+        names_.emplace(resource_name_hash(line), line);
+    }
+    if (names_.empty()) {
+        return fail("name list " + source.string() + " held no paths");
+    }
+    return true;
+}
+
+std::string Archive::name(usize index) const {
+    if (index >= entries_.size()) {
+        return {};
+    }
+    const auto found = names_.find(entries_[index].name_hash);
+    return found == names_.end() ? std::string{} : found->second;
+}
+
+usize Archive::named_count() const noexcept {
+    usize named = 0;
+    for (const ArchiveEntry& entry : entries_) {
+        if (names_.find(entry.name_hash) != names_.end()) {
+            ++named;
+        }
+    }
+    return named;
+}
 }  // namespace isaec::data

@@ -124,6 +124,24 @@ std::filesystem::path scratch(const char* name, const std::vector<u8>& blob) {
     out.close();
     return path;
 }
+
+// A mode 0x02 record header in front of a stored payload of `size` bytes.
+// Byte 2 is always zero, byte 3 carries the 0x80 "stored in the clear" flag and
+// byte 4 is 0x01 for the plaintext kind.
+// The resource-name manifest is a plain text list, so it gets its own writer
+// rather than reusing the binary one above.
+std::filesystem::path text_scratch(const char* name, const std::string& text) {
+    const std::filesystem::path dir =
+        std::filesystem::temp_directory_path() / "isaec_archive_tests";
+    std::error_code ignored;
+    std::filesystem::create_directories(dir, ignored);
+    const std::filesystem::path path = dir / name;
+    std::ofstream out(path, std::ios::trunc);
+    out << text;
+    out.close();
+    return path;
+}
+
 std::vector<u8> stored_record(const std::vector<u8>& payload) {
     const u32 size = static_cast<u32>(payload.size());
     std::vector<u8> record;
@@ -440,4 +458,121 @@ ISAEC_TEST(archive_decode_of_a_xor_entry_matches_the_reference_decoder) {
             }
         }
     }
+}
+
+// ---- resource name resolution ------------------------------------------------
+//
+// The four paths below are the ones whose hash was independently observed in a
+// shipped archive, so they pin the C++ hash to the same value the Python
+// reference and the real entry tables agree on. If this test ever fails, either
+// the hash drifted or the constants are wrong; either way names stop resolving.
+
+ISAEC_TEST(resource_name_hash_matches_the_shipped_entry_hashes) {
+    CHECK(::isaec::data::resource_name_hash("resources/font/pftempestasevencondensed_0.png") ==
+          0x503f9b44u);
+    CHECK(::isaec::data::resource_name_hash("resources/font/teammeatfont16bold_0.png") ==
+          0x4986ce24u);
+    CHECK(::isaec::data::resource_name_hash("resources/gfx/ui/ui_hearts.png") == 0xa277e327u);
+    CHECK(::isaec::data::resource_name_hash(
+              "resources/gfx/items/levelitem_001_itemaltar.png") == 0xa3576ca0u);
+}
+
+ISAEC_TEST(resource_name_hash_folds_case_and_starts_from_5381) {
+    // The shipped manifest is already lowercased, so folding only has to agree
+    // with itself -- but it must not be a no-op.
+    CHECK(::isaec::data::resource_name_hash("Resources/Font/UI_Hearts.PNG") ==
+          ::isaec::data::resource_name_hash("resources/font/ui_hearts.png"));
+    CHECK(::isaec::data::resource_name_hash("") == 5381u);
+}
+
+ISAEC_TEST(archive_name_is_empty_until_a_manifest_is_loaded) {
+    std::vector<Slot> slots(1);
+    slots[0].payload = {0x89, 0x50, 0x4E, 0x47};
+    slots[0].name_hash = 0x503f9b44u;
+
+    Archive archive;
+    REQUIRE(archive.open(scratch("names_none.a", build(0x00, slots))));
+    // No table: the lookup must be inert rather than fabricating a path.
+    CHECK(archive.name(0).empty());
+    CHECK(archive.named_count() == 0);
+    CHECK(archive.name(9).empty());  // out of range stays empty too
+}
+
+ISAEC_TEST(archive_load_names_resolves_a_known_hash) {
+    const std::filesystem::path manifest = text_scratch(
+        "filelist_ok.txt",
+        "resources/font/pftempestasevencondensed_0.png\n"
+        "resources/font/teammeatfont16bold_0.png\n"
+        "resources/gfx/ui/ui_hearts.png\n");
+
+    std::vector<Slot> slots(2);
+    slots[0].payload = {0x89, 0x50, 0x4E, 0x47};
+    slots[0].name_hash = 0x503f9b44u;
+    slots[1].payload = {0x89, 0x50, 0x4E, 0x47};
+    slots[1].name_hash = 0xa277e327u;
+
+    Archive archive;
+    REQUIRE(archive.open(scratch("names_ok.a", build(0x00, slots))));
+    REQUIRE(archive.load_names(manifest));
+    CHECK(archive.name(0) == "resources/font/pftempestasevencondensed_0.png");
+    CHECK(archive.name(1) == "resources/gfx/ui/ui_hearts.png");
+    CHECK(archive.named_count() == 2);
+}
+
+ISAEC_TEST(archive_name_is_empty_for_a_hash_the_manifest_does_not_hold) {
+    const std::filesystem::path manifest =
+        text_scratch("filelist_partial.txt", "resources/gfx/ui/ui_hearts.png\n");
+
+    std::vector<Slot> slots(2);
+    slots[0].payload = {0x89, 0x50, 0x4E, 0x47};
+    slots[0].name_hash = 0x503f9b44u;  // absent from the manifest
+    slots[1].payload = {0x89, 0x50, 0x4E, 0x47};
+    slots[1].name_hash = 0xa277e327u;
+
+    Archive archive;
+    REQUIRE(archive.open(scratch("names_partial.a", build(0x00, slots))));
+    REQUIRE(archive.load_names(manifest));
+    CHECK(archive.name(0).empty());
+    CHECK(archive.name(1) == "resources/gfx/ui/ui_hearts.png");
+    // named_count reports resolved entries, not manifest lines.
+    CHECK(archive.named_count() == 1);
+}
+
+ISAEC_TEST(archive_load_names_ignores_blank_lines_and_carriage_returns) {
+    // A CRLF manifest must not leak '\r' into the stored path, and a trailing
+    // newline must not create an empty entry that shadows a real hash.
+    const std::filesystem::path manifest = text_scratch(
+        "filelist_crlf.txt",
+        "\r\nresources/font/pftempestasevencondensed_0.png\r\n\r\nresources/gfx/ui/ui_hearts.png\r\n");
+
+    std::vector<Slot> slots(1);
+    slots[0].payload = {0x89, 0x50, 0x4E, 0x47};
+    slots[0].name_hash = 0x503f9b44u;
+
+    Archive archive;
+    REQUIRE(archive.open(scratch("names_crlf.a", build(0x00, slots))));
+    REQUIRE(archive.load_names(manifest));
+    CHECK(archive.name(0) == "resources/font/pftempestasevencondensed_0.png");
+    CHECK(archive.named_count() == 1);
+}
+
+ISAEC_TEST(archive_load_names_rejects_an_unreadable_source_and_clears_the_table) {
+    const std::filesystem::path good =
+        text_scratch("filelist_then_gone.txt", "resources/gfx/ui/ui_hearts.png\n");
+    const std::filesystem::path missing =
+        std::filesystem::temp_directory_path() / "isaec_archive_tests" / "absent_filelist.txt";
+
+    std::vector<Slot> slots(1);
+    slots[0].payload = {0x89, 0x50, 0x4E, 0x47};
+    slots[0].name_hash = 0xa277e327u;
+
+    Archive archive;
+    REQUIRE(archive.open(scratch("names_missing.a", build(0x00, slots))));
+    REQUIRE(archive.load_names(good));
+    REQUIRE(archive.name(0) == "resources/gfx/ui/ui_hearts.png");
+
+    CHECK(!archive.load_names(missing));
+    // A failed reload must not leave the previous table behind looking valid.
+    CHECK(archive.name(0).empty());
+    CHECK(archive.named_count() == 0);
 }

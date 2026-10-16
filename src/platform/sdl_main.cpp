@@ -26,6 +26,7 @@
 
 #include <chrono>
 #include <cstdio>
+#include <filesystem>
 #include <cstdlib>
 #include <string>
 #include <thread>
@@ -126,9 +127,21 @@ int main(int argc, char** argv) {
         }
         const isaec::data::ArchiveEntry& entry = archive.entries()[entry_index];
 
-        // describe() covers mode and entry count; the stored marker and the name
-        // hash are the two facts that explain what decode() did with the entry.
-        origin = archive.describe();
+        // The official modding ResourceExtractor ships the resource manifest at
+        // <install>/tools/ResourceExtractor/filelist.txt and the archives sit at
+        // <install>/resources/packed/*.a, so three parent_path() hops reach the
+        // install root. Missing manifest is not an error: names are a nicety.
+        std::filesystem::path manifest =
+            std::filesystem::path(source).parent_path().parent_path().parent_path() /
+            "tools" / "ResourceExtractor" / "filelist.txt";
+        const bool named = archive.load_names(manifest);
+        if (named) {
+            origin = std::string(archive.describe()) + "  " +
+                     std::to_string(archive.named_count()) + "/" +
+                     std::to_string(archive.entries().size()) + " named";
+        } else {
+            origin = archive.describe();
+        }
         if (archive.is_stored(entry_index)) origin += " stored";
         origin += "  hash=" + [&] {
             char hash[16];
@@ -136,7 +149,10 @@ int main(int argc, char** argv) {
             return std::string(hash);
         }();
 
-        label = "entry " + std::to_string(entry_index);
+        const std::string resource = named ? archive.name(entry_index) : std::string{};
+        label = resource.empty() ? std::string("entry ") + std::to_string(entry_index)
+                                 : "entry " + std::to_string(entry_index) + " " + resource;
+        if (!resource.empty()) origin += "  " + resource;
     } else if (!read_file(source.c_str(), encoded)) {
         return 1;
     }
