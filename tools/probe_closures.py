@@ -241,15 +241,8 @@ def main() -> int:
     bodies = {b["body"] for b in bound}
     print(f"\ndistinct bodies among bound: {len(bodies)} "
           f"(from {len(bound)} names)")
-
-    # A `__`-leading name is a metatable key, not a method. The key closures are
-    # the bulk of the named registrations, so reporting them merged with method
-    # names would overstate the recovered method surface.
-    keys = [b for b in bound if b["name"].startswith("__")]
-    methods = [b for b in bound if not b["name"].startswith("__")]
-    print(f"  of which metatable keys : {len(keys)} "
-          f"({', '.join(sorted({b['name'] for b in keys}))})")
-    print(f"  of which method names   : {len(methods)}")
+    print(f"  registrations accounted for: {len(rows)} named, {unnamed} unnamed,"
+          f" {no_body} without a body")
 
     if args.json_out:
         Path(args.json_out).write_text(json.dumps(
