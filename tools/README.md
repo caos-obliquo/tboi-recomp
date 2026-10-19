@@ -172,6 +172,71 @@ API.
 table-config field names that were not filtered out. Treat those two buckets as
 provisional.
 
+## `decompile_corpus.py`
+
+Decompiles the 441 recovered closure bodies in **small, flushed, resumable
+batches**. This exists because the first attempt at exactly this work lost all
+of it, and the failure was invisible.
+
+```
+python3 tools/decompile_corpus.py \
+  --seeds ~/.local/share/rea/seeds/isaac-ng-body-seeds.tsv \
+  --out /tmp/corpus.c --batch 25
+```
+
+### Why it is shaped this way
+
+The earlier sweep ran the decompiler once per address and composed the output
+file **at the end**. It reached 400 of 441 bodies — 400 successful, 0 failures,
+547 seconds — and was aborted. The output file was **0 bytes**. Every
+decompilation had already been paid for and discarded, and the run had invoked
+the decompiler a *second* time per address while composing, so it did twice the
+work for one result. From the process's point of view it looked fine right up to
+the abort.
+
+Three properties are therefore enforced rather than hoped for:
+
+- **Written as produced.** Each body is flushed to the output the moment the
+  decompiler returns. Nothing accumulates in memory.
+- **Resumable.** An append-only JSONL index records completed addresses and is
+  the resume point. Re-running continues.
+- **Batch size is an argument.** An abort costs at most `--batch` bodies rather
+  than the whole run.
+
+### Verified
+
+| check | result |
+|---|---|
+| fresh run, `--batch 2 --limit 4` | 4 bodies, 0 failed |
+| identical rerun | `already_done=4`, 4 more, no duplicates |
+| headers in output | 8 unique, 8 records — no address recorded twice |
+| corrupt index line | `ValueError`, exit 1 — **not** silently skipped |
+
+That last row is a negative control. A resume mechanism that silently drops an
+unreadable index line would quietly redo or skip work, which is the failure this
+script exists to prevent.
+
+### Completeness is the caller's job
+
+This script counts bodies and reports failures. It does not decide a corpus is
+correct. Assert the produced address set against the seed set — 441/441 equal was
+checked that way, not by counting lines.
+
+### kuna, and why not through REA
+
+REA's Kuna provider refuses this PE with `target_format_unsupported`: *"REA
+verified the Kuna provider on ELF and thin Mach-O images; pe is not admitted."*
+That is true about REA's **verified matrix** and false about kuna, which loads
+the file standalone and reports 4236 functions. Treating a wrapper's allowlist as
+the tool's capability ceiling is issue #14.
+
+kuna reports every one of the 441 bodies as *"interior to
+std::basic_streambuf::~basic_streambuf"*, which is its nearest-symbol attribution
+and is wrong. The bodies are real `lua_pushcclosure` closure entries by
+`probe_closures.py`'s independent, call-anchored analysis. Two methods agreeing on
+addresses and disagreeing about naming is the useful case; neither is trusted for
+addresses here.
+
 ## Dead ends — do not re-mine these
 
 Recorded so the next person does not repeat them. Every one of these was
