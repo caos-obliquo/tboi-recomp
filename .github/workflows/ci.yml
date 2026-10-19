@@ -52,7 +52,7 @@ jobs:
             cc: clang
             cxx: clang++
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Configure
         run: >-
@@ -73,7 +73,7 @@ jobs:
     name: android-arm64
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install NDK
         uses: nttld/setup-ndk@v1
@@ -182,7 +182,7 @@ jobs:
     name: warnings-as-errors
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Configure
         run: >-
@@ -199,7 +199,7 @@ jobs:
     name: asan-ubsan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Configure
         run: >-
@@ -220,7 +220,7 @@ jobs:
     name: generated-spec-is-current
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Regenerate and diff
         run: |
@@ -234,7 +234,7 @@ jobs:
     name: binding-extractor-selfcheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Compiles and runs
         run: |
@@ -279,7 +279,7 @@ jobs:
     name: release-notes-are-writable
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
