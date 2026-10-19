@@ -8,6 +8,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 option(ISAEC_BUILD_TESTS "Build the test suite" ON)
 option(ISAEC_WITH_LUA "Build the Lua binding layer when Lua 5.3 is available" ON)
 option(ISAEC_WITH_WINDOW "Build the SDL2 windowed renderer when SDL2 is available" ON)
+option(ISAEC_WITH_PNG "Build the PNG decoder when libpng is available" ON)
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "" FORCE)
@@ -44,15 +45,31 @@ endif()
 # This host ships SDL2Config.cmake but no PNGConfig.cmake, hence the two
 # different discovery calls.
 # ---------------------------------------------------------------------------
-find_package(PNG QUIET)
-if(NOT PNG_FOUND)
-  find_package(PkgConfig REQUIRED)
-  pkg_check_modules(ISAEC_PNG REQUIRED IMPORTED_TARGET libpng16)
-  set(ISAEC_PNG_TARGET PkgConfig::ISAEC_PNG)
-  message(STATUS "isaec: libpng via pkg-config ${ISAEC_PNG_VERSION}")
+# PNG is a hard dependency whenever it is enabled. It is NOT discovered
+# opportunistically: the archives only carry PNG bytes, so a build without a
+# decoder cannot read a single image, and silently producing one would hide that.
+#
+# ISAEC_WITH_PNG exists for the one measured case where the platform has no
+# libpng at all -- cross-compiling to Android, whose sysroot ships none. The
+# Android toolchain file turns it off explicitly rather than letting it fail in
+# the middle of a link. Nothing is lost silently: decode_png() then always
+# reports failure, and the tests that need it are not built.
+set(ISAEC_PNG_FOUND OFF)
+if(ISAEC_WITH_PNG)
+  find_package(PNG QUIET)
+  if(NOT PNG_FOUND)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(ISAEC_PNG REQUIRED IMPORTED_TARGET libpng16)
+    set(ISAEC_PNG_TARGET PkgConfig::ISAEC_PNG)
+    set(ISAEC_PNG_FOUND ON)
+    message(STATUS "isaec: libpng via pkg-config ${ISAEC_PNG_VERSION}")
+  else()
+    set(ISAEC_PNG_TARGET PNG::PNG)
+    set(ISAEC_PNG_FOUND ON)
+    message(STATUS "isaec: libpng via find_package ${PNG_VERSION}")
+  endif()
 else()
-  set(ISAEC_PNG_TARGET PNG::PNG)
-  message(STATUS "isaec: libpng via find_package ${PNG_VERSION}")
+  message(STATUS "isaec: ISAEC_WITH_PNG=OFF, decode_png() will always report failure")
 endif()
 
 set(ISAEC_SDL_FOUND OFF)
@@ -69,13 +86,18 @@ endif()
 # ---------------------------------------------------------------------------
 # Core library
 # ---------------------------------------------------------------------------
+set(ISAEC_IMAGE_SRC src/data/image_stub.cpp)
+if(ISAEC_PNG_FOUND)
+  set(ISAEC_IMAGE_SRC src/data/image.cpp)
+endif()
+
 add_library(isaec_core
   src/engine/engine.cpp
   src/engine/clock.cpp
   src/data/source.cpp
   src/data/collection.cpp
   src/data/codec.cpp
-  src/data/image.cpp
+  ${ISAEC_IMAGE_SRC}
   src/data/archive.cpp
 )
 
@@ -83,7 +105,9 @@ target_include_directories(isaec_core PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 
-target_link_libraries(isaec_core PUBLIC ${ISAEC_PNG_TARGET})
+if(ISAEC_PNG_FOUND)
+  target_link_libraries(isaec_core PUBLIC ${ISAEC_PNG_TARGET})
+endif()
 
 target_compile_options(isaec_core PRIVATE
   $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall -Wextra>
