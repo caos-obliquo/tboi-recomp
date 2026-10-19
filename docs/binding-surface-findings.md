@@ -181,3 +181,90 @@ Next step, in order:
 | `docs/arch000-format.md` | authoritative archive format spec |
 | `docs/HANDOFF.md` | session state and operational gotchas |
 | `tools/README.md` | how the surface was recovered; dead ends |
+---
+
+## 10. Name to body attribution — measured
+
+Added after the sections above. Four probes established this, in order, and each
+one ruled out the previous hypothesis.
+
+### The name blob has no pointer array
+
+`tools/probe_regtables.py` scanned `.rdata` for runs of 8-byte
+`(name pointer, .text pointer)` pairs at strides 8, 12 and 16. At stride 8 it
+found exactly one table — Lua's own `luaL_openlibs` array, whose seven entries
+match the seven `luaopen_*` imports exactly. Strides 12 and 16 found nothing new.
+
+That single result is a useful positive control: the signature is real, it just
+describes Lua's stdlib table rather than the game's.
+
+Dumping raw bytes around a known name shows why: the names are a **dense blob of
+NUL-terminated strings separated by single NULs**, with no interleaved pointers.
+Any dword in that span that decodes to a `.text` address is ASCII that happens to
+look like an address.
+
+So the name to body mapping cannot be read off a table. It has to come from the
+code that references each name — which is what `tools/README.md` predicted when it
+said attribution is "blocked on the same disassembly pass".
+
+### The backwards window around lua_pushcclosure does not find them
+
+`tools/probe_methods.py` walks backwards from all 1064 `lua_pushcclosure` sites
+looking for pushed immediates. It recovers class names (`Room`, `Game`, `HUD`,
+`ItemPool`, `Entity`, …) and the property machinery — `__propget` at 210 sites
+and `__propset` at 174 — but only **36 of the 655** committed methods. Those 36
+are property accessors, not the API surface.
+
+### What actually works: attribute from the name's own reference
+
+`tools/probe_namexrefs.py` inverts the question. It locates each committed name
+in `.rdata`, finds every `push imm32` in `.text` that materialises that name's
+address, and looks for a `.text` pointer near those sites.
+
+| measure | count |
+| --- | --- |
+| committed names | 655 |
+| located in `.rdata` as NUL-terminated | **654** |
+| with at least one `push imm32` reference | 472 |
+| with no `push` reference at all | 182 |
+| **candidate (name → body) recovered** | **376 / 654 (57.5%)** |
+| candidates whose body is ambiguous | 249 |
+
+Per class:
+
+| class | candidates |
+| --- | --- |
+| EntityPlayer | 74 / 77 |
+| Entity | 212 / 261 |
+| KColor | 8 / 18 |
+| Input | 39 / 118 |
+| Isaac | 19 / 76 |
+| HUD | 7 / 42 |
+| Sprite | 9 / 33 |
+| Vector | 6 / 22 |
+| Font | 2 / 8 |
+
+`EntityPlayer` and `Entity` are close to complete. `Font`, the project's
+calibration class, is the worst at 2/8 — consistent with it being the class the
+adjacency heuristic over-reports on.
+
+### The 182 unreferenced names corroborate the known contamination
+
+Their sample is `Ambush`, `Arcade`, `BarOverlay1`, `BarOverlay2` … `Boss`. Those
+are animation and overlay field names, not methods. This independently confirms
+the `_caveat` on `HUD` and `Isaac`: those buckets were never method lists, which
+is why their names have no code reference to register.
+
+### What these candidates are, and are not
+
+They are **candidates**. A `.text` pointer within 48 bytes of a name's push site
+is a guess at which argument it is. 249 of 376 are ambiguous by that measure
+alone.
+
+They are good enough to be worth keeping and not good enough to generate from.
+Confirmation requires reading the registration code at each site and seeing which
+pushed value becomes `lua_pushcclosure`'s second argument.
+
+Next: for the unambiguous 127, disassemble the registration site and confirm;
+then handle the 182 unreferenced names, which are registered by some mechanism
+this probe does not yet model.
