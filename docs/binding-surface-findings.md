@@ -371,3 +371,110 @@ The registration idiom for the property path is
 consistent with `__propget`/`__propset` accounting for 384 `lua_pushcclosure`
 sites between them and explains why 380 names have no nearby call. Anchoring on
 that triple is the next step, not a wider window.
+
+---
+
+## 13. Method bindings, recovered by anchoring on the call
+
+§11's failure was structural, not a bug to patch: it anchored on a name and
+looked *forward* for `lua_pushcclosure` inside a fixed window. One function can
+hold hundreds of registration records -- a single data-table initializer at
+`0x00868800` pushes thousands of name literals in a row -- so "the next call
+within 96 instructions" is not a record boundary, and not even a function
+boundary. Adding a terminator check did not catch it, because the whole
+initializer lives inside one function with no `ret` in sight.
+
+An intermediate version that did stop at terminators still produced 46 wrong
+"unique" bindings, all of them property names like `Friction` and
+`GridCollision` resolved against unrelated calls in that same initializer.
+
+The working anchor is the call itself. `lua_pushcclosure` has an unambiguous
+argument shape:
+
+```
+push   0x1                  ; nupvalues
+push   0x8bb960             ; fn          <- the body
+mov    DWORD PTR [eax],0x0  ; upvalue setup, often present
+push   DWORD PTR [esi]      ; L
+call   DWORD PTR ds:0xb183fc ; lua_pushcclosure
+```
+
+Walking backward from a real call site, the body is the nearest `push imm32`
+carrying a `.text` address, and the name is the literal fed to the nearest
+preceding `lua_pushstring`. Every step stops at a terminator. New tool
+`tools/disasm.py` supplies the instruction stream from `objdump -d -M intel`;
+2,165,555 instructions parse in 1.5s, so nothing scans bytes any more.
+
+### Counts, and how the window was chosen
+
+```
+lua_pushcclosure call sites        : 1064
+named registrations                :  524
+distinct names bound 1:1           :   63
+metatable keys, many bodies        :    4
+names bound to >1 body             :    4
+closures with no name in reach     :  539
+call sites with no body            :    1
+```
+
+`BACK = 24` is measured, not chosen. Distance from a call site back to its
+nearest `lua_pushstring` saturates at 24: the count of reachable sites is
+identical at 32, 48, 64, 96 and 120 instructions back (524 in every case). All
+539 unreachable sites hit a `ret`/`int3` before any `lua_pushstring`, so their
+name genuinely lives in another function. Closure-named recovery is therefore
+**complete**, not truncated by an arbitrary window.
+
+### Metatable keys carry one closure per property
+
+| key | bodies | registrations |
+|---|---|---|
+| `__propget` | 203 | 209 |
+| `__propset` | 155 | 173 |
+| `__gc` | 49 | 49 |
+| `__len` | 10 | 10 |
+
+`__gc` and `__len` are exactly 1:1. A name with many bodies is the shape of a
+metatable key, not a contradiction, so keys are reported separately from a
+genuine name/body disagreement. This independently corroborates §4's push-site
+counts (`__propget` 421, `__propset` 184); the closure count is lower because
+some property registrations use the `pushstring`/`rotate`/`rawset` path with no
+closure at all.
+
+The remaining four multi-body method names are real disagreements, not key
+plumbing: `Get` (6 bodies), `Size` (10), `Room` (2), `RoomDescriptor` (2). These
+are properties of several types sharing one name, so they are expected.
+
+### The 63 one-to-one bindings are type constructors, not methods
+
+Every one is a class or type name whose body is a small constructor in the band
+`0x008c2c10`–`0x008c3250`: `Entity` -> `0x008c2fb0`, `Color` -> `0x008c3210`,
+`Font` -> `0x008c3230`, `Game` -> `0x008c2c10`, `HUD` -> `0x008c2c30`,
+`EntityPtr` -> `0x008c32b0`. These bodies build the metatable for the type. The
+recovered method surface is therefore **not** 63 methods; it is 63 type
+constructors, and the actual methods are the `__propget`/`__propset` bodies,
+which are property accessors rather than named methods.
+
+### Control
+
+`0x0087c60e`, the call the old probe attributed to `AddTrinketEffect`, is
+resolved as body `0x008ab2a0` with no `AddTrinketEffect` literal in reach. The
+probe exits non-zero if that call ever binds to that name, or if it cannot be
+found at all.
+
+### Defects found while doing this
+
+- `Section.vma` is an RVA. Its absolute VA is `vma + image_base`. Using `vma`
+  directly put every window below the real image and truncated `.text` at
+  `0x717133` instead of `0xB17134` -- a run that reported zero bindings while
+  exiting 0. `.text` is `0x401000..0xB17134`; `0x401000 + 0x716134` is
+  `0xB17134`, not `0x717134`.
+- `pe_vaddr.va_to_offset` and `Section.contains_va` are named for VAs but take
+  **RVAs**; every existing caller in `tools/` passes an RVA. Not renamed, since
+  that would break five tools, but the unit is now documented at the call site.
+- Passing a VA to `offset_to_va` (which expects a file offset) produced body
+  addresses of `0x00cf...`–`0x00d0...`, outside `.text` entirely. The tell was
+  that every address landed in a plausible-looking but wrong band.
+- A name pushed at several sites now resolves only if every resolving site
+  agreed; disagreement is demoted to `conflicting` rather than tie-broken.
+- Class attribution was a single arbitrary winner whenever a name appeared in
+  several classes' candidate lists. All claiming classes are now reported.
