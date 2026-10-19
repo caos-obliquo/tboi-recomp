@@ -31,12 +31,46 @@ jobs:
             os: ubuntu-latest
             cc: clang
             cxx: clang++
-          - name: macos-appleclang
-            os: macos-latest
+          # Native ARM64, so ctest executes real aarch64 binaries instead of
+          # inspecting cross-compiled objects. Cross-compilation is already
+          # covered by the android-arm64 job below.
+          - name: linux-arm64
+            os: ubuntu-24.04-arm
+            cc: gcc
+            cxx: g++
+          # The -arm64 suffix is explicit. GitHub's plain "macos-14" label is
+          # the Intel image, so an unpinned label can report Apple Silicon
+          # coverage while testing Intel, or the reverse.
+          #
+          # There is deliberately no Intel macOS job. GitHub has retired the
+          # macos-13 image entirely -- it is absent from actions/runner-images,
+          # leaving macos-14, macos-14-arm64, macos-15, macos-15-arm64,
+          # macos-26 and macos-26-arm64. A job on an unavailable label is not
+          # failed, it is left queued forever, which wedges the whole workflow
+          # and suppresses the logs needed to diagnose anything else. The repo
+          # previously used macos-latest, which is Apple Silicon, so omitting
+          # Intel loses no coverage that ever existed.
+          - name: macos-arm64
+            os: macos-14-arm64
             cc: clang
             cxx: clang++
     steps:
       - uses: actions/checkout@v7
+
+      # libpng is a real dependency of isaec_core, not an optional extra:
+      # src/data/image.cpp includes <png.h> and calls
+      # png_image_begin_read_from_memory. CMakeLists.txt tries find_package(PNG)
+      # first and falls back to a REQUIRED pkg_check_modules(libpng16), so a
+      # runner without the development package dies in Configure instead of
+      # reporting the missing dependency.
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpng-dev
+
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: brew install libpng
 
       - name: Configure
         run: >-
@@ -58,6 +92,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+
+      # No Android libpng exists in the sysroot, so the REQUIRED pkg-config
+      # fallback resolves against the runner's host packages. This job only
+      # verifies that our own objects are AArch64 and never runs tests, so this
+      # makes the codegen check reachable. It does not make the resulting binary
+      # shippable -- a real Android build needs a cross-built libpng.
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpng-dev
 
       - name: Install NDK
         uses: nttld/setup-ndk@v1
@@ -168,6 +212,17 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # libpng is a real dependency of isaec_core, not an optional extra:
+      # src/data/image.cpp includes <png.h> and calls
+      # png_image_begin_read_from_memory. CMakeLists.txt tries find_package(PNG)
+      # first and falls back to a REQUIRED pkg_check_modules(libpng16), so a
+      # runner without the development package dies in Configure instead of
+      # reporting the missing dependency.
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpng-dev
+
       - name: Configure
         run: >-
           cmake -S . -B build
@@ -184,6 +239,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+
+      # libpng is a real dependency of isaec_core, not an optional extra:
+      # src/data/image.cpp includes <png.h> and calls
+      # png_image_begin_read_from_memory. CMakeLists.txt tries find_package(PNG)
+      # first and falls back to a REQUIRED pkg_check_modules(libpng16), so a
+      # runner without the development package dies in Configure instead of
+      # reporting the missing dependency.
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpng-dev
 
       - name: Configure
         run: >-

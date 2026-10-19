@@ -97,8 +97,9 @@ classes without Lua on their include path. Only `binding.cpp` includes Lua.
 | Recovered 655-method surface registers and resolves | **done** (as stubs) |
 | Directory-backed data source | **done** |
 | Headless renderer (counts, draws nothing) | **done** |
-| **655 native function bodies** | **0 / 655** |
-| **Method signatures** (`argc`, return shape) | **0 / 655** |
+| **Native function bodies located** | **441 addresses known** of 1064 closure sites |
+| **Native function bodies** *implemented* | **0 / 441** |
+| **Method signatures** (`argc`, return shape) | **0 / 441** — `argc` is now readable per body |
 | **Packed archive (`ARCH000`) container** | **container solved**, codec open |
 | **→ `ARCH000` payload codec** | **not started** — blocked on #1 |
 | **→ `ARCH000` 64-bit name hash** | **not started** — lower priority, see #2 |
@@ -112,6 +113,31 @@ but no function does anything yet.
 
 The class-coverage number is blocked on the same work as the function bodies,
 not independent of it. See issue #3.
+
+### What "located" means, and what it does not
+
+441 closure bodies are now known **by address**, recovered by walking backwards
+from each of the 1064 `lua_pushcclosure` call sites and reading the argument
+shape, which is fixed: `push <nupvalues>`, `push <fn>`, optional upvalue setup,
+`push L`, `call`. The accounting is complete — 524 named registrations, 539
+closures whose name lives in another function, 1 call site with no body.
+
+An address is not an implementation. None of the 441 has been disassembled into
+a signature, let alone reimplemented, and they still resolve to
+`not_implemented_trampoline`. Two of these numbers are worth stating plainly
+because they are easy to read as more than they are:
+
+- The **63** one-to-one name bindings are *type constructors*, not methods.
+  `Entity`, `Color`, `Font`, `Game` and `HUD` each resolve to a small metatable
+  builder. Counting them as recovered methods would overstate the surface.
+- The **417** metatable-key bodies are property accessors. `__propget` alone
+  carries 203 distinct bodies from 209 registrations. They are real function
+  bodies, but they are getters and setters, so they map onto the *field* layer
+  rather than the method layer.
+
+The 655 figure this project has been tracking is a count of recovered *names*,
+and it is not yet shown to equal a count of *bodies*. Closing issue #3 depends on
+resolving that, not on adding to the number.
 
 ## Build
 

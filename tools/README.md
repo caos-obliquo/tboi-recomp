@@ -10,6 +10,101 @@ a binary **you** already own, from a path **you** pass in.
 |---|---|---|
 | `extract-binding-tables.py` | Surveys the native→Lua binding surface from `isaac-ng.exe`. Hard-fails if its class anchors do not validate. | yes |
 | `gen-api-spec.py` | Turns committed recovered data into `bindings/isaac-api-spec.json` + a generated C++ header. | no |
+| `pe_vaddr.py` | PE section reader. Translates addresses and **refuses to guess** when a VA is ambiguous. | yes |
+| `probe_metatable_keys.py` | Locates the nine recovered metatable keys in `.rdata`. | yes |
+| `probe_xrefs.py` | Counts `.text` references to each metatable key address. | yes |
+| `probe_iat.py` | Walks the PE import directory, maps every IAT slot to its imported name, and finds each `call dword ptr [slot]` site. | yes |
+| `negctl-baseline.py` | Negative control for the test suite. Proves a green baseline can go red. | no |
+
+Current findings from these probes are written up in
+[`../docs/binding-surface-findings.md`](../docs/binding-surface-findings.md).
+That document is the place to look first for measured addresses and call-site
+counts; this file stays the map of what each tool does.
+
+## `pe_vaddr.py`
+
+```sh
+tools/pe_vaddr.py --self-test /path/to/isaac-ng.exe
+```
+
+A library, not a script — the probes import it. The name has an underscore
+because a hyphen makes it unimportable.
+
+**It has no default.** `va_to_offset` returns every section that claims an
+address and refuses to translate when more than one does. Callers must either
+name the section or assert the candidate list was a singleton. In `isaac-ng.exe`
+`.rdata` and `.data` sit at different bases (`0x00718000` vs `0x007f8000`), so a
+single-base helper silently resolves one and emits garbage for the other. `.data`
+also has a virtual tail that is not on disk, and the reader says so rather than
+returning an offset into unrelated bytes.
+
+Addresses are RVAs internally, with `rva_to_va`/`va_to_rva` for the absolute
+form binutils prints. Mixing the two is the other easy way to be wrong, and it
+already caused two disassemblies to be aimed at unrelated code.
+
+`--self-test` validates the parse against `objdump -h` rather than hard-coded
+expectations, and pins `.text`'s first byte to the VMA binutils prints.
+
+## `probe_metatable_keys.py`
+
+```sh
+tools/probe_metatable_keys.py /path/to/isaac-ng.exe
+```
+
+Exact NUL-terminated search for each recovered metatable key. Carries a canary
+control (a key that cannot exist must return zero hits) and a reachability
+control (a key known to exist must return at least one). Those controls earned
+their keep: an off-by-one in the scan was dropping every string followed by
+ordinary data and reporting four of nine keys as absent.
+
+## `probe_xrefs.py`
+
+```sh
+tools/probe_xrefs.py /path/to/isaac-ng.exe
+```
+
+Counts `.text` occurrences of each key's absolute address as an immediate. The
+near-universal idiom is `push <key-address>` / `call dword ptr [IAT]`.
+
+**A byte match is not a finding.** It proves the value is materialised in
+`.text`, not that the instruction intends a metatable lookup. This tool reports
+candidates.
+
+The counts are diagnostic: the property keys dominate because property
+registration is the most common operation, while the rare keys pin down the
+metatable core.
+
+## `probe_iat.py`
+
+```sh
+tools/probe_iat.py /path/to/isaac-ng.exe
+tools/probe_iat.py /path/to/isaac-ng.exe lua_pushcclosure
+tools/probe_iat.py /path/to/isaac-ng.exe --dll=Lua5.3.3r.dll
+```
+
+Walks the PE import directory directly rather than scraping `objdump -p`, then
+finds each call site by matching the six-byte x86-32 indirect-call encoding
+`ff 15 <slot:le32>` in one pass over `.text`.
+
+This is the tool that removes the guesswork: `isaac-ng.exe` imports Lua from
+`Lua5.3.3r.dll` and every slot is named, so binding code reads with exact
+semantics. `lua_pushcclosure` (1064 call sites) is where a native method becomes
+a Lua closure; `lua_createtable` (8 call sites) is effectively one function that
+builds the metatables.
+
+## `negctl-baseline.py`
+
+```sh
+tools/negctl-baseline.py                 # break, expect red
+tools/negctl-baseline.py --no-break      # control mode, expect green
+```
+
+Copies the tree to scratch, applies exactly one surgical behavioural break (the
+bogocrypt1 word-rotation mask), and asserts the suite reports precisely the two
+expected failures and no others. The break must compile — a syntax error is not
+a control. The copy's mtime is forced forward, because `tar` and `shutil.copy2`
+preserve timestamps and `make` would otherwise skip the recompile and report a
+phantom pass against the unpatched object file.
 
 ## `extract-binding-tables.py`
 
@@ -99,19 +194,26 @@ actually executed and measured.
   djb2, djb2x, sdbm, jenkins one-at-a-time, crc32, adler32, murmur3_32) × 5
   case/separator variants × 1,127 filenames harvested from shipped Lua → 0
   hits. Entry arrays are unsorted with uniform bit distribution, so they are not
-  a sorted lookup table.
+  a sorted lookup table. This is the *archive-name* problem and is already
+  solved at 81.46% by djb2-5381; do not confuse it with method names.
 - **CRC32 over payload** for `animations.a` (count 1): no contiguous byte range
   of the file produces the recorded value.
+- **Assuming `.rdata` and `.data` overlap in VA.** They do not — the ranges are
+  disjoint in this binary. The hazard is that their bases differ, which
+  `tools/pe_vaddr.py` now makes impossible to hit silently.
 
-### Two traps that cost real time
+### Three traps that cost real time
 
-1. `.rdata` and `.data` **share the VA base `0xbf8000`**. A single-base
-   VA→file helper silently works for `.data` and produces garbage for `.rdata`.
-   Branch on the section. See the section table in
-   `docs/re-archive-format.md` when it exists.
-2. objdump prints operands as `ds:0x...`, not `DWORD PTR [0x...]`. A regex
-   written for the latter matches nothing and looks like a negative result.
-   Use plain substring search plus a positive control.
+1. `.rdata` and `.data` **share no base**: `0x00718000` vs `0x007f8000`. A
+   single-base VA→file helper silently works for one and produces garbage for
+   the other. Branch on the section, or use `tools/pe_vaddr.py`.
+2. objdump prints two different operand dialects depending on `-M intel`.
+   A regex written for `DWORD PTR [0x...]` matches nothing under the AT&T form
+   and looks like a negative result. Use plain substring search plus a positive
+   control.
+3. `.text` VAs include `image_base`. Disassembling with a *file offset* as a
+   `--start-address` aims at unrelated code and produces a plausible-looking
+   disassembly of the wrong function. Convert through `tools/pe_vaddr.py`.
 
 ## Conventions for reporting findings
 
@@ -124,3 +226,5 @@ actually executed and measured.
   extracted game bytes.
 - Do all address arithmetic as expressions over the PE section table. Never
   hand-computed hex in a script or an issue.
+- Every search that can return nothing carries a **positive control** that
+  proves it can return something.
