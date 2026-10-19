@@ -12,7 +12,87 @@ The version is not written here by hand. `project(... VERSION x.y.z)` in
 `CMakeLists.txt` is the single source of truth; `tools/release.py` reads it and
 `.github/workflows/release.yml` tags from it.
 
-## [Unreleased]
+## [0.1.2] - 2026-10-19
+
+### Merged: [#22](https://github.com/caos-obliquo/tboi-recomp/pull/22) — feat(release): record every merged PR in the changelog and bump the patch
+
+**Author:** @caos-obliquo  **Merged:** 2026-10-19  **Files:** 5 changed, +329/-56.
+
+<details>
+<summary>Pull request body</summary>
+
+Closes the gap between version bumps and the changelog. `release.py bump-notes` composes the full `## [x.y.z]` section from the merged PR, and a workflow runs it on every merge to main.
+
+Verified by composing against PR #10 and inspecting the result; that caught a bug where the commit list read a field the GitHub CLI does not return, rendering all 26 commits as "(no subject)".
+
+Also includes the HANDOFF rewrite, the README warning/comparison/hyperlinks, and the resumable decompiler.
+
+</details>
+
+#### Closes
+
+- [` `] [#10](https://github.com/caos-obliquo/tboi-recomp/pull/10) ci: cover ARM64 natively and stop macOS coverage silently narrowing (merged)
+
+#### Commits
+
+- `fa160fd3` feat(release): record every merged PR in the changelog and bump the p…
+  …atch
+  The release plumbing existed but the changelog did not move with the code. A
+  version could be bumped by hand and the notes written later, or never, and
+  `release.py body` would then publish a bare commit list and call it an
+  explanation. That gap is now closed at the source.
+  `release.py bump-notes --pr N` composes the whole `## [x.y.z]` section from the
+  pull request: title, body, linked issues with their state, every commit with its
+  full message, a per-file +/- table, the documentation touched, and the PR
+  discussion and review. It is deliberately large. A changelog that summarises a
+  pull request in one line is what forces the next session to redig it in order to
+  understand it, and that is the opposite of a handoff.
+  `.github/workflows/version.yml` runs it on every merge to main, so version and
+  record cannot drift. Bumps are serialised through a concurrency group, because
+  two merges landing together would otherwise race on CMakeLists.txt and produce
+  the same version twice.
+  Measured, not assumed: composed against PR #10 and inspected. The section runs to
+  about 41,000 characters. It also caught a bug before it shipped -- the commit
+  list read a `message` field the GitHub CLI does not return, so all 26 commits
+  rendered as "(no subject)". It now reads messageHeadline and messageBody.
+  Also in this commit, because the same review pass found them:
+  - docs/HANDOFF.md sections 1-3 described a docs-only stub that has not been
+    true for several sessions, and did not mention that the windowed renderer
+    counts calls and draws nothing. Rewritten against what is actually in main.
+  - README.md: the AI-assistance warning, a reference comparison led by repentogxm,
+    hyperlinked issue references, and an open-work table with a current state.
+  - Issue references hyperlinked across AGENTS.md, HANDOFF.md,
+    arch000-format.md, binding-surface-findings.md, tools/README.md.
+  - tools/decompile_corpus.py committed as the resumable batch decompiler.
+  Cross-references verified with a checker over every markdown file: zero broken
+  anchors, zero broken file links, zero unhyperlinked issue references. The two
+  "broken file links" it still reports are inline code and a path resolved relative
+  to its own directory, neither of which is a link.
+- `9392b87b` docs(changelog): put the Unreleased section back in order
+  Two edits to this section had left it with a duplicate '### Changed' header, an
+  'Added' bullet parked under 'Fixed', and no '### Added' entry for the tooling
+  this release actually adds.
+  Also drops the README bullet from this release's 'Changed' list. PR #22 does not
+  touch README.md; the warning and the comparison are PR #21. Attributing them here
+  would make the changelog disagree with the diff that produced it.
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `.github/workflows/version.yml` | 58 | 0 |
+| `CHANGELOG.md` | 28 | 4 |
+| `docs/HANDOFF.md` | 43 | 50 |
+| `docs/rea-toolchain.md` | 1 | 2 |
+| `tools/release.py` | 199 | 0 |
+
+#### Documentation
+
+- `CHANGELOG.md`
+- `docs/HANDOFF.md`
+- `docs/rea-toolchain.md`
+
+#### Carried from Unreleased
 
 ### Added
 
@@ -57,6 +137,9 @@ The version is not written here by hand. `project(... VERSION x.y.z)` in
   does not return, so every commit rendered as `(no subject)`. It reads
   `messageHeadline` and `messageBody`.
 - `docs/rea-toolchain.md` — one sentence of throat-clearing removed.
+
+
+## [Unreleased]
 
 ## [v0.1.0] - 2026-10-12
 
