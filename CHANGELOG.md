@@ -148,6 +148,7 @@ recovered and registered, and nothing renders yet. See the "Where this actually
 stands" section of the README for what exists and what does not.
 
 ### Added
+- `tools/kuna_batch.py` — resumable batch decompiler: writes each body immediately and maintains an append-only index for resume safety (issue #15)
 
 - Class registry implementing Isaac's recovered metatable model — `__class`,
   `__parent`, `__index`, `__propget`, `__propset`, `__newindex`, `__const`,
