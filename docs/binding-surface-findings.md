@@ -321,3 +321,53 @@ They are almost certainly the property path — `__propget` at 210 `pushcclosure
 sites and `__propset` at 174 is exactly this many order-of-magnitude — plus any
 loop-driven registration. Reading those needs the same treatment: find the API
 call that consumes the name and read its arguments.
+
+---
+
+## 12. Review of §11 — the "confirmed" label does not hold
+
+Disassembly of a matched site disproves §11's central claim. `AddTrinketEffect`
+has its name pushed at VA `0x0087c5bd`, inside a `__propset` registration path:
+
+```
+87c5bd:  push 0xb70e28          ; "AddTrinketEffect"
+87c5c5:  call [0xb18414]        ; lua_pushstring
+87c5d0:  call [0xb1840c]        ; lua_rotate
+87c5d8:  call [0xb18408]        ; lua_rawset
+87c5e6:  ret 0x8
+87c5e9:  int3 ...               ; padding
+87c5f0:  push ebx               ; ---- next function starts here
+87c602:  push 0x8ab2a0
+87c608:  mov DWORD PTR [eax],0x930390
+87c60e:  call [0xb183fc]        ; lua_pushcclosure
+```
+
+The `lua_pushcclosure` the probe matched at `0x0087c60e` belongs to a **different
+function**, past the `ret` and `int3` padding. The probe had no boundary check,
+so it attributed an unrelated call to this name. That is why
+`AddCollectibleEffect` and `AddTrinketEffect` both resolved to `0x00ce88a0`.
+
+**§11's 92 bindings are therefore `single_call_site` candidates, not confirmed
+bindings.** The correct label was always weaker than the one used.
+
+Three defects, all in `tools/probe_closures.py`:
+
+1. The forward window does not stop at `ret`/`int3` padding, so it crosses
+   function boundaries.
+2. The scan for `0x68` and `0xff 0x15` is a raw byte search with no instruction
+   alignment, so it matches opcode bytes inside other instructions.
+3. The "last `.text` push" heuristic cannot see the form actually used at
+   `0x0087c608`, where the body is stored with `mov DWORD PTR [eax],imm32` rather
+   than pushed. Any method that stages its closure pointer through memory is
+   invisible to it.
+
+All three must be fixed before the count is trusted, and the corrected count is
+expected to be **lower** than 92. The drop is the real number.
+
+### What the disassembly does establish
+
+The registration idiom for the property path is
+`lua_pushstring` → `lua_rotate` → `lua_rawset`, with no closure at all, which is
+consistent with `__propget`/`__propset` accounting for 384 `lua_pushcclosure`
+sites between them and explains why 380 names have no nearby call. Anchoring on
+that triple is the next step, not a wider window.
