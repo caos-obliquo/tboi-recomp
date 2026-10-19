@@ -268,3 +268,56 @@ pushed value becomes `lua_pushcclosure`'s second argument.
 Next: for the unambiguous 127, disassemble the registration site and confirm;
 then handle the 182 unreferenced names, which are registered by some mechanism
 this probe does not yet model.
+
+---
+
+## 11. Confirmed bindings, and why the proximity heuristic was replaced
+
+`tools/probe_closures.py` replaces guesswork with the API. It knows
+`lua_pushcclosure`'s IAT slot, so for each name reference it walks **forward** to
+the next `call dword ptr [slot]` and reads only the pushes in between. Under
+__stdcall, arguments are pushed right to left, so the value entering the second
+argument slot is the body.
+
+| outcome | count |
+| --- | --- |
+| names considered | 655 |
+| **confirmed, single body** | **92** |
+| ambiguous | **0** |
+| no `lua_pushcclosure` within the window | 380 |
+| no name reference at all | 183 |
+
+Contrast with §10, which scored 376 candidates and 249 of them ambiguous. The
+proximity heuristic could not tell argument position; anchoring on the call
+removes the ambiguity entirely — **0 rather than 0-of-376**. The proximity count
+is not wrong, it is strictly weaker: it found candidate *regions*, not arguments.
+
+Confirmed per class:
+
+| class | confirmed |
+| --- | --- |
+| Entity | 57 / 261 |
+| KColor | 9 / 18 |
+| Font | 4 / 8 |
+| EntityPlayer | 8 / 77 |
+| Sprite | 8 / 33 |
+| Vector | 6 / 22 |
+
+88 distinct body addresses across 92 confirmed names.
+
+### Two things worth checking before trusting these
+
+- `AddCollectibleEffect` and `AddTrinketEffect` both resolve to `0x00ce88a0`. That
+  is possible if the body is a generic effect-application helper, but it is also
+  the classic symptom of an off-by-one in the window. Read one site in full
+  disassembly before relying on it.
+- `EntityPlayer` falls from 74 candidates to 8 confirmed. That is not a
+  regression, it is the heuristic being wrong: most of its names register through
+  a path that does not call `lua_pushcclosure` near the name at all.
+
+### The 380 with no nearby call are the next frontier
+
+They are almost certainly the property path — `__propget` at 210 `pushcclosure`
+sites and `__propset` at 174 is exactly this many order-of-magnitude — plus any
+loop-driven registration. Reading those needs the same treatment: find the API
+call that consumes the name and read its arguments.
