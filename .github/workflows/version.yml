@@ -45,6 +45,8 @@ jobs:
           python3 tools/release.py check
 
       - name: Commit
+        env:
+          PR: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
           git add CMakeLists.txt CHANGELOG.md
