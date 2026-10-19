@@ -175,11 +175,13 @@ class PEImage:
         )
 
     def offset_to_va(self, offset: int, *, section: str | None = None) -> int:
+        """Absolute VA for a file offset. binutils and every disassembler print
+        absolute addresses, so this must include the image base."""
         for s in self.sections:
             if section is not None and s.name != section:
                 continue
             if s.raw_offset <= offset < s.file_end:
-                return s.vma + (offset - s.raw_offset)
+                return self.rva_to_va(s.vma + (offset - s.raw_offset))
         raise ValueError(f"file offset 0x{offset:08x} is not in any section")
 
     def read_va(self, va: int, length: int, *, section: str | None = None) -> bytes:
@@ -283,16 +285,33 @@ def _self_test(path: str | Path) -> int:
         assert chosen == cands[first]
         print(f"    OK: section={first} resolves deterministically to 0x{chosen:08x}")
 
-    # Round-trip check against a section we know is unambiguous.
+    # Guards the image_base: mixing RVA and VA here would hide its absence.
     rdata = pe.section(".rdata")
-    probe = rdata.vma + 0x1000
-    got = pe.va_to_offset(probe)
-    back = pe.offset_to_va(got)
-    if got != rdata.raw_offset + 0x1000 or back != probe:
-        print(f"FAIL round-trip: VA 0x{probe:08x} -> off 0x{got:08x} -> VA 0x{back:08x}")
+    probe_rva = rdata.vma + 0x1000
+    got_off = pe.va_to_offset(probe_rva)
+    got_va = pe.offset_to_va(got_off)
+    want_off = rdata.raw_offset + 0x1000
+    want_va = pe.rva_to_va(probe_rva)
+    if got_off != want_off or got_va != want_va:
+        print(
+            f"FAIL round-trip: rva 0x{probe_rva:08x} -> off 0x{got_off:08x} "
+            f"(want 0x{want_off:08x}) -> va 0x{got_va:08x} (want 0x{want_va:08x})"
+        )
         failures += 1
     else:
-        print(f"OK round-trip .rdata VA 0x{probe:08x} <-> off 0x{got:08x}")
+        print(f"OK round-trip .rdata rva 0x{probe_rva:08x} <-> off 0x{got_off:08x} <-> va 0x{got_va:08x}")
+
+    # Ties the mapping to the VMA binutils prints, not to our own arithmetic.
+    text = pe.section(".text")
+    first_va = pe.offset_to_va(text.raw_offset)
+    if first_va != text.vma + pe.image_base:
+        print(
+            f"FAIL section anchor: .text raw 0x{text.raw_offset:08x} -> "
+            f"va 0x{first_va:08x}, expected 0x{text.vma + pe.image_base:08x}"
+        )
+        failures += 1
+    else:
+        print(f"OK section anchor .text raw 0x{text.raw_offset:08x} -> va 0x{first_va:08x}")
 
     print("\nSELF_TEST", "FAILED" if failures else "PASSED", f"({failures} failures)")
     return 1 if failures else 0
