@@ -38,17 +38,20 @@ jobs:
             os: ubuntu-24.04-arm
             cc: gcc
             cxx: g++
-          # Pinned rather than macos-latest. The default Apple runner is Apple
-          # Silicon, so leaving it unpinned meant this job silently stopped
-          # covering Intel macOS without anyone editing this file. Both
-          # architectures are now named, so a runner default changing cannot
-          # quietly narrow coverage.
+          # The -arm64 suffix is explicit. GitHub's plain "macos-14" label is
+          # the Intel image, so an unpinned label can report Apple Silicon
+          # coverage while testing Intel, or the reverse.
+          #
+          # There is deliberately no Intel macOS job. GitHub has retired the
+          # macos-13 image entirely -- it is absent from actions/runner-images,
+          # leaving macos-14, macos-14-arm64, macos-15, macos-15-arm64,
+          # macos-26 and macos-26-arm64. A job on an unavailable label is not
+          # failed, it is left queued forever, which wedges the whole workflow
+          # and suppresses the logs needed to diagnose anything else. The repo
+          # previously used macos-latest, which is Apple Silicon, so omitting
+          # Intel loses no coverage that ever existed.
           - name: macos-arm64
-            os: macos-14
-            cc: clang
-            cxx: clang++
-          - name: macos-x86_64
-            os: macos-13
+            os: macos-14-arm64
             cc: clang
             cxx: clang++
     steps:
