@@ -97,3 +97,29 @@ end that turns out to be wrong gets corrected before anyone spends time on it.
 - Never suppress a type error, never weaken a test to make a suite green, and
   never leave a failing check unexplained. A pre-existing failure is reported as
   pre-existing, not silently fixed and not silently ignored.
+---
+
+## 5. Progress is updated in the same commit as the work
+
+The `## Progress` table in `README.md` is the project's honest statement of what
+exists. It is updated **in the same commit or pull request as the change it
+describes** — never in a follow-up, never at the end of a batch.
+
+A row that changes meaning gets rewritten, not appended to. If work moves a
+number, the old number does not survive anywhere in the repository.
+
+Keep these distinctions explicit in the table, because collapsing them is how a
+progress table starts lying:
+
+- **located** (an address is known) versus **implemented** (behaviour exists).
+  These moved by very different amounts in the same commit and must not share a
+  row.
+- **recovered** (the name is bound) versus **useful** (the name denotes a method
+  rather than a type constructor or a property accessor).
+- **named** versus **complete**. 524 of 1064 closure sites carry their name
+  inline; the other 539 do not, and that is a different state, not a smaller
+  version of the same one.
+
+If a number cannot be reproduced by a command in `tools/`, it does not go in the
+table. If the table would overstate the work, the fix is to make the table
+smaller and more precise, never to round up.
