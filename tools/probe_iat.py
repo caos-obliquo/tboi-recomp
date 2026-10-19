@@ -47,6 +47,20 @@ def cstring(image: PEImage, rva: int, limit: int = 512) -> str:
     return image.data[off:end].decode("ascii", "replace")
 
 
+def _section_end(image: PEImage, rva: int) -> int:
+    """RVA one past the end of the section holding `rva`.
+
+    Import thunk arrays are NUL-terminated but unbounded on disk, so the walk
+    needs a ceiling. The containing section is that ceiling. Note the ILT here
+    sits far above the IAT (0x7f3cc8 against 0x7189fc), so a bound derived from
+    the IAT address truncates every thunk array to zero entries.
+    """
+    for s in image.sections:
+        if s.vma <= rva < s.vma_end:
+            return s.vma_end
+    return 1 << 32
+
+
 def parse_imports(image: PEImage) -> list[tuple[str, str, int]]:
     """[(dll, function_or_ordinal, iat_va)] in import-table order."""
     imp_rva, imp_size = data_directory(image, IMPORT_DIRECTORY_INDEX)
@@ -55,7 +69,13 @@ def parse_imports(image: PEImage) -> list[tuple[str, str, int]]:
 
     out: list[tuple[str, str, int]] = []
     desc_rva = imp_rva
-    while True:
+    # The descriptor table is 20 bytes per entry and its extent is given by the
+    # data directory size. Without that bound the loop only stops on an all-zero
+    # descriptor, so a truncated or hand-edited import table walks off the end
+    # of the section and terminates on a ValueError from va_to_offset rather
+    # than on a condition we chose.
+    desc_end = imp_rva + imp_size
+    while desc_rva + 20 <= desc_end:
         off = image.va_to_offset(desc_rva)
         ilt_rva, ts, fwd, name_rva, iat_rva = struct.unpack_from("<IIIII", image.data, off)
         if ilt_rva == 0 and name_rva == 0 and iat_rva == 0:
@@ -64,7 +84,8 @@ def parse_imports(image: PEImage) -> list[tuple[str, str, int]]:
 
         thunk_rva = ilt_rva or iat_rva
         idx = 0
-        while True:
+        thunk_limit = _section_end(image, thunk_rva)
+        while thunk_rva + idx * 4 + 4 <= thunk_limit:
             t_off = image.va_to_offset(thunk_rva + idx * 4)
             (entry,) = struct.unpack_from("<I", image.data, t_off)
             if entry == 0:

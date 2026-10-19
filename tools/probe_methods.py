@@ -23,7 +23,6 @@ from __future__ import annotations
 import json
 import struct
 import sys
-from collections import defaultdict
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -102,7 +101,6 @@ def main() -> int:
     recovered: dict[str, int] = {}
     with_name = 0
     with_body = 0
-    by_name: dict[str, list[int]] = defaultdict(list)
 
     for off in sites:
         site_va = image.offset_to_va(off)
@@ -119,7 +117,6 @@ def main() -> int:
                 body = val
         if name:
             with_name += 1
-            by_name[name].append(site_va)
             recovered[name] = recovered.get(name, 0) + 1
         if body:
             with_body += 1

@@ -80,7 +80,11 @@ def committed_names(spec_path: str) -> set[str]:
 def main() -> int:
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     path = args[0]
-    spec_path = args[1] if len(args) > 1 and not sys.argv[1].startswith("--") else None
+    # `args` has already stripped flags, so testing raw sys.argv[1] made the
+    # spec silently vanish whenever a flag preceded the positionals:
+    # `--stride 8 <exe> <spec>` set spec_path=None and disabled the
+    # committed-names filter without any warning.
+    spec_path = args[1] if len(args) > 1 else None
     stride = parse_stride(sys.argv[1:])
 
     image = PEImage(path)
