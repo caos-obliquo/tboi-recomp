@@ -99,7 +99,9 @@ classes without Lua on their include path. Only `binding.cpp` includes Lua.
 | Headless renderer (counts, draws nothing) | **done** |
 | **Native function bodies located** | **441 addresses known** of 1064 closure sites |
 | **Native function bodies** *implemented* | **0 / 441** |
-| **Method signatures** (`argc`, return shape) | **0 / 441** — `argc` is now readable per body |
+| **Method signatures** (`argc`, return shape) | **441 / 441** decompiled and classified into 11 shapes |
+| **Property-accessor ABI** | **recovered** — `binding-surface-findings.md` §14 |
+| **Lua binding index space** | **patched Lua identified** — sentinel `0xfff0b9d8`, §14.6 |
 | **Packed archive (`ARCH000`) container** | **container solved**, codec open |
 | **→ `ARCH000` payload codec** | **not started** — blocked on #1 |
 | **→ `ARCH000` 64-bit name hash** | **not started** — lower priority, see #2 |
@@ -122,9 +124,16 @@ shape, which is fixed: `push <nupvalues>`, `push <fn>`, optional upvalue setup,
 `push L`, `call`. The accounting is complete — 524 named registrations, 539
 closures whose name lives in another function, 1 call site with no body.
 
-An address is not an implementation. None of the 441 has been disassembled into
-a signature, let alone reimplemented, and they still resolve to
-`not_implemented_trampoline`. Two of these numbers are worth stating plainly
+An address is not an implementation. All 441 have now been decompiled — with
+kuna, standalone, at 1.4 s per body rather than Ghidra's 607 s — and every one
+falls into one of 11 recognised shapes. So the signatures are known: 375 of the
+441 read the bound C++ object through the single constant `0xfff0b9d7`, 434
+open with an argument type check, and getters uniformly dispatch through vtable
+slot 0. The full mechanism is written out in `binding-surface-findings.md` §14.
+
+None of it is *reimplemented* yet, and all 441 still resolve to
+`not_implemented_trampoline`. Recovering what a body does and reimplementing it
+are separate steps and only the first one is done. Two of these numbers are worth stating plainly
 because they are easy to read as more than they are:
 
 - The **63** one-to-one name bindings are *type constructors*, not methods.

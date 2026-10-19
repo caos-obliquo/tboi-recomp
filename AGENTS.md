@@ -6,12 +6,46 @@ next to the rule so the reasoning is auditable.
 
 ---
 
-## 1. Answer every issue, properly, or say why not
+## 1. Work is issue-driven, start to finish
 
-**No issue is left silent.** When work in this repository produces a result that
-bears on an open issue, that issue gets a reply in the same turn — not
-deferred to "later", not silently ignored because the work was nominally about
-something else.
+The GitHub issue tracker is the project memory. Work that is not anchored to an
+issue cannot be resumed, reviewed, or trusted, because the next session has no
+way to know what was intended or what is left.
+
+This is a loop, and all three steps are mandatory:
+
+### 1a. Start from an issue
+
+Before doing any work, name the issue it serves. `gh issue list --state open` is
+the starting point, not an afterthought.
+
+**If no open issue covers the work, open one first, then do the work.** Findings
+do not live only in a commit message, a branch name, or a scratch file in
+`/tmp`. If the work was worth doing it is worth being findable.
+
+A finding becomes an issue when it is any of these:
+
+- a bug in our own tooling or process
+- a constraint that will bite the next person
+- an open question with a named next probe
+- a claim that turned out to be wrong, with the disproof
+
+All four happened in one session and produced issues #12–#17. None of them was
+planned; all of them were real.
+
+### 1b. Anchor the work to the issue
+
+- **One branch per issue.** The branch name references it.
+- **The commit message names it.** `feat(bindings): ... (#17)`. A commit whose
+  subject cannot be traced to an issue cannot be traced to an intent.
+- **The issue carries the acceptance criteria**, written before the work starts
+  where that is possible, so "done" is checkable rather than felt.
+
+### 1c. Report back, in the same turn
+
+**No issue is left silent.** When work produces a result that bears on an open
+issue, that issue gets a reply before the turn ends — not deferred to "later",
+not skipped because the work was nominally about something else.
 
 A reply must do one of three things, and must say which:
 
@@ -23,12 +57,21 @@ A reply must do one of three things, and must say which:
 
 "Still working on it" is not one of the three. Neither is a bare status ping.
 
-When a result *partially* closes an issue, say partial. Do not close an issue
-whose acceptance criteria are not met; a half-truth in the issue tracker is
-worse than an open issue, because it removes the reminder that work remains.
+Every reply states the **current** state, not the state at the last reply. If
+another measurement has since superseded part of what an earlier comment claimed,
+say so on the issue. An issue that carries a stale claim and no correction is
+worse than one with no comment, because it looks authoritative.
 
-If new work is discovered that no issue covers, open one. Do not let findings
-live only in a commit message or a private scratch file.
+### 1d. Closing
+
+Close an issue only when **every** acceptance criterion is met and evidenced. A
+result that partially closes an issue says partial, and the issue stays open: a
+half-truth in the tracker is worse than an open issue, because it removes the
+reminder that work remains.
+
+When a finding *invalidates* something an issue asserted, that is a comment too,
+posted in the same turn. Silently superseding a claim is how a tracker starts
+lying.
 
 ---
 
@@ -90,6 +133,9 @@ end that turns out to be wrong gets corrected before anyone spends time on it.
 
 - Conventional prefix, imperative summary: `feat(scope):`, `fix(tools):`,
   `docs(findings):`, `chore(dependabot):`.
+- **Reference the issue it serves**, in the subject or the first body line:
+  `feat(bindings): anchor property names to the call site (#17)`. A commit
+  that cannot be traced to an issue cannot be traced to an intent.
 - The body explains **why**, and for a fix it states what the old code did
   instead, ideally demonstrated rather than asserted.
 - Commit the tool, not its output. Generated evidence files live outside the
@@ -123,3 +169,55 @@ progress table starts lying:
 If a number cannot be reproduced by a command in `tools/`, it does not go in the
 table. If the table would overstate the work, the fix is to make the table
 smaller and more precise, never to round up.
+
+---
+
+## 6. Branching and repository settings
+
+`main` is protected. Direct pushes, force pushes and branch deletion are
+blocked; all 11 CI check contexts are required; history must be linear; review
+threads must be resolved.
+
+- **One branch per issue.** Prefix `feature/`, `fix/`, `add/` or `docs/`,
+  and name the issue in the branch where it stays legible: `fix/17-anonymous-body-names`.
+- **Never commit to `main`.** Work lands through a pull request.
+- **Never weaken the required-context list to make a PR merge.** If a check
+  fails, fix the cause. If a context name is wrong, correct the name — a wrong
+  required context blocks every merge forever, which is worse than a red build.
+- **Adding a CI job means adding its context to the protected list in the same
+  change.** A job that is not required is decorative.
+
+**Required approvals are 0, deliberately.** This repository has one
+collaborator: the owner. GitHub does not count a PR author's own approval, so
+requiring one approval makes every PR permanently unmergeable while the admin
+escape hatch quietly defeats the rule anyway. If a second person with write
+access is ever added, raise it then — and check the rule actually becomes
+satisfiable before setting it.
+
+Admin bypass (`enforce_admins: false`) is intentional. It is an escape hatch
+for the owner, not an oversight; enabling it would mean locking yourself out of
+your own repository with no way to recover without a second account.
+
+---
+
+## 7. A finding becomes an issue the moment it is discovered
+
+Four kinds of thing must be opened as an issue immediately, in the same turn,
+rather than left in a commit message or noted "for later":
+
+1. **A bug in our own tooling.** Nine separate defects in this project's own
+   probe scripts were found in one session. Each one had silently produced a
+   wrong answer first.
+2. **A constraint that will bite the next person.** A branch whose name no
+   longer matches its content looks correct to every command that inspects
+   status, and pushes the wrong work to the wrong pull request.
+3. **An open question with a named next probe.** "What does this constant mean"
+   is not an issue; "what does this constant mean, and here is the probe that
+   would answer it" is.
+4. **A claim that turned out to be wrong, with the disproof.** The 92 confirmed
+   bindings, and the first assessment's malware verdict, were both retracted.
+   Both retractions belong in the record permanently, because a retraction with
+   no stated cause is just a quieter error.
+
+Retraction is a first-class outcome here, equal in value to a confirmation.
+Suppressing one to protect a previous claim is the worst move available.

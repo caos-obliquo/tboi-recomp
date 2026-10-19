@@ -440,3 +440,142 @@ that made it.
 Container tests write synthetic archives to
 `std::filesystem::temp_directory_path()/"isaec_archive_tests"`, so the suite runs with
 no game install.
+
+---
+
+## 11. Reverse-engineering tooling state
+
+Added 2026-10-18. Full detail in `docs/rea-toolchain.md`; summary:
+
+| tool | version | state |
+|---|---|---|
+| rea-agents | 6.7.0 | 207 MCP tools; registered for OpenCode |
+| ghidra | 12.1.4 | available, `doctor --provider ghidra` → `healthy: true` |
+| kuna | 1.906 | available at `~/.local/bin/kuna`, `REA_KUNA_COMMAND` |
+| hopper | — | declined (needs sudo); installable later, not the blocker |
+| ida | — | blocked, commercial IDA Pro |
+
+Every Ghidra call on `isaac-ng.exe` used to time out. Root cause: REA imports
+the 9,362,440-byte PE into an **ephemeral** Ghidra project, runs whole-program
+auto-analysis, answers one query, and deletes it. Each request repeats the whole
+import, so nothing is ever cached. Proof: `pgrep -c java` returned **0** while
+calls were timing out, and REA documents a 330,000 ms startup deadline that an
+MCP client can beat.
+
+Applied in `mcp.rea.environment`:
+
+```
+REA_GHIDRA_STARTUP_TIMEOUT_MS=900000     # 330s -> 15min
+GHIDRA_HEADLESS_MAXMEM=6G                # 2G default is tight for 9.3MB
+REA_GHIDRA_SEED_FILE=~/.local/share/rea/seeds/isaac-ng-body-seeds.tsv   # 441 lines
+```
+
+The seed file is the real lever: it tells Ghidra the 441 body addresses we
+already know so it defines those functions instead of searching for them.
+Its digest is part of the analysis profile and a session **fails to open** if the
+seeds differ, so it must be regenerated deliberately.
+
+**Not yet demonstrated.** Configuration is verified healthy; no decompilation of
+`isaac-ng.exe` has succeeded. Status is "configured, not proven".
+
+## 12. Repository workflow
+
+`main` is protected (set 2026-10-18):
+
+```
+approvals required   0     solo repo: the owner cannot approve their own PR,
+                            so requiring 1 blocked every merge forever
+required checks     11     every real CI job context, verified against the
+                            contexts GitHub has actually recorded on main
+force push / delete  blocked
+linear history      required
+conversation        must be resolved
+enforce admins      false   deliberate escape hatch
+```
+
+Branch model: one branch per issue, `feature/` `fix/` `add/` `docs/` prefixed,
+opened as a PR. Never commit to `main`.
+
+**The 11 required contexts include `linux-arm64`, `macos-arm64` and
+`macos-x86_64`, which do not exist yet** — PR #10 adds them. They are required
+by name; if a name is wrong, PRs block permanently. Confirm they report under
+those exact names when PR #10's CI runs, and correct the list if not.
+
+Open: **PR #10** `feature/arm-ci-coverage` — native ARM64 CI, explicit macOS
+architectures.
+
+## 13. Method-binding recovery (supersedes the earlier 92)
+
+The earlier claim of 92 confirmed bindings was **wrong** and was retracted. The
+correct anchor is the `lua_pushcclosure` call site, not the method name.
+
+```
+1064 lua_pushcclosure call sites
+  524 named registrations
+  539 closures whose name lives in another function (terminator hit first)
+    1 call site with no body
+distinct bodies: 63 + 417 metatable-key + 20 shared-name = 441
+```
+
+Nothing is unaccounted for. Detail and the disproof in
+`docs/binding-surface-findings.md` §13.
+
+The 63 one-to-one bindings are **type constructors**, not methods. The 417
+metatable-key bodies are property accessors (`__propget` alone: 203 bodies from
+209 registrations). The 655 this project tracks is a count of *names*, and
+nothing yet shows it equals a count of *bodies* — issue #3 turns on that.
+
+## 14. The property-accessor ABI is recovered (supersedes "0 of 441 signatures")
+
+All 441 bodies are decompiled and classified. Mechanism, evidence and the
+instruction-level disassembly are in
+`docs/binding-surface-findings.md` §14; the toolchain correction is in
+`docs/rea-toolchain.md`.
+
+```
+441 / 441 decompiled, 0 failures, ~1.4 s each (kuna standalone)
+434 / 441 begin with a lua_type argument guard
+375 / 441 read the bound object through the single constant 0xfff0b9d7
+ 64       dispatch through vtable slot 0 (60 getters, 4 setters)
+ 90       construct an 8-byte userdata of { type tag, payload }
+ 11 shapes, 441 of 441 classified, no residual bucket
+```
+
+The uniform accessor:
+
+```c
+// verify this object is a userdata (434/441 bodies do exactly this)
+if (lua_type(L, 1) != LUA_TUSERDATA) return luaL_argerror(L, 1, "expected object");
+
+IsaacObject *obj = (IsaacObject *)lua_touserdata(L, 0xfff0b9d7); // the receiver
+void *result      = (*obj->vtable->slot0)(obj);                  // the getter
+
+if (!result) { lua_pushnil(L); return 1; }                       // null path
+IsaacRef *ref = (IsaacRef *)lua_newuserdata(L, 8);
+ref->tag = 0x00b753c8; ref->payload = result;                     // wrap
+lua_rawgetp(L, 0xfff0b9d8, 0x00c8297f);                          // metatable
+lua_setmetatable(L, -2);
+return 1;                                                        // getters return 1
+```
+
+Setters are the same shape with `luaL_checkinteger(L, 2)` and `return 0`.
+
+**`0xfff0b9d7` is resolved.** It looked like a corrupt stack index; it is not.
+The shipped `Lua5.3.3r.dll` contains the sentinel `0xfff0b9d8` inside Lua's own
+index translation and routes values below it into a typed array lookup, so
+`0xfff0b9d7` is slot 1 of a hidden array anchored on the current stack frame.
+Stock Lua 5.3.6, vendored in `third_party/`, is the positive control and has no
+such sentinel. 772 of 833 `lua_touserdata` call sites in `.text` pass it. Full
+disassembly and reconstruction in `docs/binding-surface-findings.md` §14.6.
+
+## 15. Next steps, in order
+
+1. Resolve what `0xfff0b9d7` means (see above). Highest leverage.
+2. Fix CI: `CMakeLists.txt:50` `pkg_check_modules(libpng16)` is a hard
+   requirement and no runner has it, so every build job dies in Configure.
+   Root cause is a missing dependency, not the runner labels — those are fixed.
+3. Split the recovered surface into one source file per domain
+   (`entity`, `player`, `render`, `input`, `audio`, `data`, `lua`), following
+   the `runtime_<subsystem>` pattern in `docs/reimplementation-references.md`.
+4. Instrument which Lua methods the game actually calls during boot, and
+   implement in that measured order rather than address order.

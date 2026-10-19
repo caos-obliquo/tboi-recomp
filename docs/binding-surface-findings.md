@@ -478,3 +478,319 @@ found at all.
   agreed; disagreement is demoted to `conflicting` rather than tie-broken.
 - Class attribution was a single arbitrary winner whenever a name appeared in
   several classes' candidate lists. All claiming classes are now reported.
+---
+
+## 14. The property-accessor ABI — how a bound feature actually runs
+
+§13 ended with "0 of 441 signatures". That is no longer true. All 441 recovered
+closure bodies have now been decompiled, and they are not 441 unrelated
+functions: they are instances of a small number of shapes, and one of those
+shapes is the mechanism that binds C++ objects to Lua properties.
+
+### 14.1 Corpus provenance
+
+`kuna` was driven **standalone**, not through the REA MCP server. REA's Kuna
+provider refuses this file with `target_format_unsupported`:
+
+> REA verified the Kuna provider on ELF and thin Mach-O images; pe is not
+> admitted.
+
+That is a statement about REA's *verified* matrix, not about kuna's capability.
+Standalone `kuna` loads this PE without complaint and reports 4236 functions.
+Treating a provider's verified-format matrix as the tool's capability ceiling is
+the mistake this section exists to prevent.
+
+| | |
+|---|---|
+| bodies decompiled | 441 / 441 |
+| failures | 0 |
+| address set vs `isaac-ng-body-seeds.tsv` | identical (asserted, not assumed) |
+| headers present in `kuna-all.c` | 441, all unique |
+| wall clock | ~1.4 s per body, ~10 min total |
+| output | `~/.omo/evidence/pseudocode/kuna-all.c` (9600 lines), `kuna-index.jsonl` |
+
+The first attempt at this sweep buffered the composed file and was aborted at
+400/441, which left a **0-byte output** — the work was lost even though every
+individual decompilation had succeeded. The runner now flushes per body and
+keeps an append-only index, so an abort costs at most one batch and a rerun
+resumes. Evidence integrity was then checked by asserting the produced address
+set equals the seed set, not by counting lines.
+
+Speed, for the record: kuna 1.4 s per body versus Ghidra 607 s for the same
+address on this file. That is a ~430x difference, and it is why this corpus was
+obtainable at all.
+
+### 14.2 A caveat that must not be dropped
+
+For **all 441** bodies kuna emits:
+
+> `0x… is interior to std::basic_streambuf::~basic_streambuf (0x41423a+…)`,
+> not an entry kuna discovered; decompiled from 0x… as asked
+
+kuna's nearest-function attribution is garbage here — one symbol swallowing
+0x41423a through 0x8F9xxxx. What matters is that kuna still decompiles from the
+requested address, which is what was asked. The claim that these 441 addresses
+are real `lua_pushcclosure` closure entries comes from §12/§13's call-anchored
+analysis of the `.text` instruction stream, **not** from kuna. The two
+independent methods agree on the addresses and disagree about naming.
+
+### 14.3 Shape taxonomy
+
+Classifying all 441 bodies by which Lua entry points they touch, every one
+falls into a known shape — 441 of 441 classified, no residual bucket:
+
+| bodies | shape |
+|---:|---|
+| 118 | `lua_touserdata(0xfff0b9d7)` → push → `return 1` |
+| 72 | `lua_touserdata` → `luaL_check*` → `return 0` |
+| 68 | `lua_touserdata` → `return 0` |
+| 60 | `lua_touserdata` → vtable deref → wrap or nil → `return 1` |
+| 49 | upvalue resolver → vtable deref → `return 0` |
+| 24 | `…` → `lua_pushboolean` → `return 1` |
+| 17 | `return 1` |
+| 16 | `…` → `luaL_*` → `return 1` |
+| 8 | `lua_touserdata` → `luaL_*` |
+| 5 | `lua_touserdata` only |
+| 4 | `…` → vtable deref → `return 0` |
+
+`lua_type` appears in **434 of 441** bodies — almost every accessor opens with an
+argument type check. That is the dispatch guard, and it is why the bindings are
+safe to call from untyped Lua.
+
+Two constants dominate: `0xfff0b9d7` in 375 bodies, `0xfff0b9d8` in 90 bodies,
+with `lua_rawgetp` in those same 90. They are a constant family, not noise.
+
+### 14.4 The mechanism, verified at the instruction level
+
+The largest shape is a property getter. Representative body `0x00899030`
+(kuna's rendering):
+
+```c
+unsigned int sub_899030(unsigned int a0)
+{
+  v2 = lua_type(a0, 1);
+  if (v2)
+    sub_85c590(0xc82a13, 1);          // type-assert arg 1
+  v2 = (**(void **)lua_touserdata(v1, 0xfff0b9d7))();
+  if (!v2) {
+    lua_pushnil(v1);
+    return 1;
+  }
+  v3 = (struct_0 *)lua_newuserdata(v1, 8);
+  v3->field_0x0 = 0xb753c8;           // metatable / type tag
+  v3->field_0x4 = v2;                 // the C++ object
+  lua_rawgetp(v1, 0xfff0b9d8, 0xc8297f);
+  lua_setmetatable(v1, 0xfffffffe);    // -2: the new userdata
+  return 1;
+}
+```
+
+Every claim in that listing was re-derived from the actual instruction stream
+(`tools/disasm.py`), and every IAT slot was resolved out of the PE import
+directory rather than taken from kuna's symbol rendering:
+
+```
+0x00899030: push     ebp
+0x00899031: mov      ebp,esp
+0x00899033: push     esi
+0x00899034: mov      esi,DWORD PTR [ebp+0x8]      ; esi = lua_State *L
+0x00899038: push     0x1
+0x0089903a: push     esi
+0x0089903b: call     DWORD PTR ds:0xb18400        ; lua_type(L, 1)
+0x00899041: add      esp,0x8
+0x00899044: test     eax,eax
+0x00899046: jne      0x89904c
+0x00899048: xor      edi,edi
+0x0089904a: jmp      0x899065
+--- taken branch: assert the type, recover the C++ `this` ---
+0x0089904c: push     0x1
+0x0089904e: push     0xc82a13
+0x00899053: mov      edx,0x1
+0x00899058: mov      ecx,esi
+0x0089905a: call     0x85c590                      ; luaL-type assert helper
+0x00899062: mov      edi,DWORD PTR [eax+0x4]      ; edi = the wrapped C++ pointer
+--- the property dispatch ---
+0x00899065: push     0xfff0b9d7
+0x0089906a: push     esi
+0x0089906b: call     DWORD PTR ds:0xb183b0        ; lua_touserdata(L, 0xfff0b9d7)
+0x00899071: add      esp,0x8
+0x00899074: mov      ecx,edi                       ; this
+0x00899076: mov      eax,DWORD PTR [eax]           ; load vtable slot 0
+0x00899078: call     eax                           ; call the member function
+0x0089907a: mov      edi,eax
+0x0089907c: test     edi,edi
+0x0089907e: je       0x8990b8
+--- wrap the result ---
+0x00899080: push     0x8
+0x00899082: push     esi
+0x00899083: call     DWORD PTR ds:0xb1839c        ; lua_newuserdata(L, 8)
+0x00899089: push     0xc8297f
+0x0089908e: push     0xfff0b9d8
+0x00899093: push     esi
+0x00899094: mov      DWORD PTR [eax],0xb753c8      ; tag
+0x0089909a: mov      DWORD PTR [eax+0x4],edi       ; payload
+0x0089909d: call     DWORD PTR ds:0xb183bc        ; lua_rawgetp(L, 0xfff0b9d8, 0xc8297f)
+0x008990a3: push     0xfffffffe
+0x008990a5: push     esi
+0x008990a6: call     DWORD PTR ds:0xb18398        ; lua_setmetatable(L, -2)
+0x008990af: mov      eax,0x1
+--- null path ---
+0x008990b8: push     esi
+0x008990b9: call     DWORD PTR ds:0xb183e0        ; lua_pushnil(L)
+0x008990c2: mov      eax,0x1
+0x008990ca: ret
+```
+
+IAT slots resolved from the import directory:
+
+| IAT | import | role in this body |
+|---|---|---|
+| `0x00b18400` | `lua_type` | argument type check |
+| `0x00b183b0` | `lua_touserdata` | fetch the bound object |
+| `0x00b1839c` | `lua_newuserdata` | allocate the 8-byte wrapper |
+| `0x00b183bc` | `lua_rawgetp` | fetch the wrapper's metatable |
+| `0x00b18398` | `lua_setmetatable` | attach it |
+| `0x00b183e0` | `lua_pushnil` | null result |
+
+The C level of this feature, which is what a reimplementation has to match:
+
+```c
+// The uniform shape of every one of the 1064 closure bodies' accessors.
+static int isaac_property_get(lua_State *L)
+{
+    if (lua_type(L, 1) != LUA_TUSERDATA)          // 434/441 guard this
+        return luaL_argerror(L, 1, "expected object");
+
+    // 1. the receiver, as stored by the binder at __index time
+    void  *holder   = lua_touserdata(L, ISAAC_OBJ_SLOT_1);   // 0xfff0b9d7
+    IsaacObject *obj = (IsaacObject *)holder;
+
+    // 2. the getter, taken from the object's vtable slot 0
+    void *result = (*obj->vtable->slot0)(obj);
+
+    // 3. wrap: 8 bytes = { type tag, payload }, tagged from a metatable registry
+    if (result == NULL) {
+        lua_pushnil(L);
+        return 1;                                   // one value returned
+    }
+    IsaacRef *ref = (IsaacRef *)lua_newuserdata(L, 8);
+    ref->tag     = 0x00b753c8;                       // per-type metatable id
+    ref->payload = result;
+    lua_rawgetp(L, ISAAC_META_SLOT_2, 0x00c8297f);  // 0xfff0b9d8 -> metatable
+    lua_setmetatable(L, -2);
+    return 1;
+}
+```
+
+### 14.5 What this settles, and what it does not
+
+Settled:
+
+- **Every bound object is an 8-byte userdata** of `{ type tag, payload }`. 90
+  bodies construct one; 374 read one.
+- **C++ pointers cross into Lua through one constant**, `0xfff0b9d7`, in 375 of
+  441 bodies. There is a single object slot, not a per-type one.
+- **Getters dispatch through vtable slot 0**, 64 bodies. Setters likewise
+  (`0x008990d0`: `lua_touserdata` → `luaL_checkinteger` → `(*vtable->slot0)(v)`,
+  `return 0`).
+- **The return arity is 1** for getters and 0 for setters, uniformly.
+- The 49 no-argument bodies are the module singletons (`Game`, `HUD`,
+  `MusicManager`, …): upvalue resolver → vtable deref → `return 0`.
+
+### 14.6 `0xfff0b9d7` is a patched-Lua pseudo-index, not a corrupt value
+
+§14.5 originally left this open. It is now closed, and the answer was in the
+shipped `Lua5.3.3r.dll` the whole time.
+
+The game calls `lua_touserdata(L, 0xfff0b9d7)` 772 times out of 833 call sites
+in `.text`; the remaining 61 pass a register or a small constant (`-3`, `-4`,
+`1`). So the value is a deliberate fixed key, not corruption.
+
+Disassembling the DLL shows `0xfff0b9d8` **inside Lua's own index translation**
+(`Lua5.3.3r.dll`, RVA `0x1000`):
+
+```
+10001000: mov    0x14(%ecx),%eax        ; eax = L->stack
+10001003: test   %edx,%edx
+10001005: jle    0x10001018             ; idx > 0 -> positive index
+10001007: shl    $0x4,%edx              ; 16 bytes per TValue
+1000100a: add    (%eax),%edx
+10001018: cmp    $0xfff0b9d8,%edx       ; <-- THE SENTINEL
+1000101e: jle    0x10001029
+10001029: jne    0x10001032
+1000102b: mov    0x10(%ecx),%eax        ; idx == 0xfff0b9d8 -> ci->func + 0x28
+10001032: mov    $0xfff0b9d8,%ecx
+10001037: sub    %edx,%ecx              ; ecx = 0xfff0b9d8 - idx  == 1 for our key
+10001039: mov    (%eax),%edx
+1000103b: cmpl   $0x16,0x8(%edx)        ; type-tag check on the anchored value
+10001041: jne    0x10001047
+10001047: mov    (%edx),%edx
+10001049: movzbl 0x6(%edx),%eax         ; array size
+1000104d: cmp    %eax,%ecx
+1000104f: jg     0x10001059
+10001051: shl    $0x4,%ecx
+10001054: add    %edx,%ecx              ; -> &array[slot]
+```
+
+Reconstructed:
+
+```c
+// Reconstructed from the disassembly above. Slot arithmetic is certain; the
+// identity of the anchored value is not, so it is not asserted here.
+static TValue *rebirth_index2addr(lua_State *L, int idx) {
+  if (idx > 0) { ... normal positive index ... }
+  if (idx > 0xfff0b9d8) { return (TValue *)((char *)L->top + ((size_t)idx << 4)); }
+  if (idx == 0xfff0b9d8) return (TValue *)L->ci->func + 0x28;
+  int slot = 0xfff0b9d8 - idx;          // 0xfff0b9d7 -> slot 1
+  ... if (anchored_value is not the expected type) return G(L)->nilvalue;
+  return slot <= size ? &anchored_array[slot] : G(L)->nilvalue;
+}
+```
+
+**Positive control.** Stock Lua 5.3.6, vendored at
+`third_party/lua-5.3.6/src/lapi.c:60`, is the comparison:
+
+```c
+static TValue *index2addr (lua_State *L, int idx) {
+  CallInfo *ci = L->ci;
+  if (idx > 0) { ... }
+  else if (!ispseudo(idx)) { return L->top + idx; }
+  else if (idx == LUA_REGISTRYINDEX) return &G(L)->l_registry;
+  else { idx = LUA_REGISTRYINDEX - idx; ... }   /* upvalues */
+}
+```
+
+Stock Lua's sentinel is `LUA_REGISTRYINDEX` == -10000 == `0xFFFFD8F0`, and it
+contains **no** comparison against `0xfff0b9d8` anywhere. The shipped DLL's
+sentinel is 1000x further out and routes *below* it into a typed array lookup
+rather than into upvalues.
+
+So the conclusion is not "the game passes a bad index". It is: **the shipped
+`Lua5.3.3r.dll` is a patched Lua whose index space was extended below
+`0xfff0b9d8`, and `0xfff0b9d7` is slot 1 of a hidden array anchored on the
+current stack frame.** Every one of the 772 call sites is well-formed against
+that build.
+
+This also retro-explains `0xfff0b9d8` in 90 bodies: that is the sentinel itself,
+used as the "anchored table" index — slot 0 — in `lua_rawgetp`, with a string
+key like `0x00c8297f` selecting the per-type metatable. The two constants are
+consecutive slots of one structure, which is exactly what the reconstructed
+code predicts.
+
+Still open, and now the only real gap: the *type* of the anchored value and how
+the game populates slot 1. That lives in the game's own Lua glue, not in Lua.
+
+Not settled — and deliberately left open rather than guessed:
+- Which of the 64 vtable-deref bodies are getters versus methods that merely
+  happen to return a pointer.
+- The 69 seed entries that carry a real identifier are all module singletons and
+  named types; the other 372 are anonymous per-property closures. Attaching
+  property *names* to the anonymous ones is still open (issue #4).
+
+### 14.7 Correction to an earlier claim in this document
+
+§12 recorded that kuna's `lua_touserdata(a0, 0xfff0b9d7)` was faithfully
+rendered but semantically suspicious. That suspicion was worth checking and the
+check came back clean: the IAT slot really is `lua_touserdata`, and the constant
+really is in the instruction stream. kuna did not invent either. The remaining
+question is the semantics of the constant, not the fidelity of the decompiler.
