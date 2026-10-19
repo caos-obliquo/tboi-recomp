@@ -11,6 +11,9 @@ drift.
     release.py check              exit nonzero if CHANGELOG has no section for it
     release.py documented         print the newest version that has a section
     release.py bump patch         bump and rewrite CMakeLists.txt in place
+    release.py bump-notes --pr N  bump patch and write the CHANGELOG section
+                              from pull request N: title, body, linked
+                              issues, changed files and docs touched
 
 `body` prefers the curated CHANGELOG section, because that is where the Why and
 Effect lines live, and falls back to the commit log only when there is no
@@ -22,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import json
 import re
 import subprocess
 import sys
@@ -171,6 +175,193 @@ def render_body(version: str) -> str:
     return "\n".join(parts).rstrip() + "\n"
 
 
+def gh_pr(number: str) -> dict:
+    """Pull request metadata, from the GitHub CLI that runners already have."""
+    out = subprocess.run(
+        ["gh", "pr", "view", str(number),
+         "--json", "title,body,number,mergedAt,files,url,commits,"
+                  "comments,reviews,author"],
+        capture_output=True, text=True, check=True,
+    )
+    return json.loads(out.stdout)
+
+
+def gh_issue(number: int) -> dict:
+    out = subprocess.run(
+        ["gh", "issue", "view", str(number), "--json", "title,state,url"],
+        capture_output=True, text=True, check=True,
+    )
+    return json.loads(out.stdout)
+
+
+def short(oid: str) -> str:
+    return oid[:8]
+
+
+def compose_version_section(pr: dict, version: str, date: str, carried: str) -> str:
+    """Build the `## [x.y.z]` section for one merged pull request.
+
+    Deliberately large. A changelog is the durable record of what shipped and why,
+    and a terse one-line summary is what forces the next session to redig the pull
+    request in order to understand it. Every field here is pulled from GitHub, so
+    the section cannot drift from the change it describes.
+
+    `carried` is whatever was sitting under `## [Unreleased]`, which this version
+    is taking out of flight.
+    """
+    lines = [f"## [{version}] - {date}", ""]
+    lines.append(
+        f"### Merged: [#{pr['number']}]({pr.get('url', '')}) — {pr['title']}"
+    )
+    lines.append("")
+
+    files = pr.get("files") or []
+    adds = sum(f.get("additions", 0) for f in files)
+    dels = sum(f.get("deletions", 0) for f in files)
+    author = (pr.get("author") or {}).get("login", "unknown")
+    merged = (pr.get("mergedAt") or "")[:10]
+    lines += [
+        f"**Author:** @{author}  **Merged:** {merged or date}  "
+        f"**Files:** {len(files)} changed, +{adds}/-{dels}.",
+        "",
+    ]
+
+    body = (pr.get("body") or "").strip()
+    if body:
+        lines += [
+            "<details>",
+            "<summary>Pull request body</summary>",
+            "",
+            body,
+            "",
+            "</details>",
+            "",
+        ]
+
+    linked = sorted({int(n) for n in re.findall(r"#(\d+)", body or "")})
+    if linked:
+        lines.append("#### Closes")
+        lines.append("")
+        for n in linked:
+            info = gh_issue(n)
+            if not info:
+                continue
+            state = info.get("state", "?").lower()
+            marker = "x" if state == "closed" else " "
+            lines.append(
+                f"- [`{marker}`] [#{n}]({info.get('url', '')}) "
+                f"{info.get('title', '')} ({state})"
+            )
+        lines.append("")
+
+    commits = pr.get("commits") or []
+    if commits:
+        lines.append("#### Commits")
+        lines.append("")
+        for commit in commits:
+            # The GitHub CLI returns these as messageHeadline/messageBody,
+            # not as a single `message`. Reading the wrong key produced a
+            # changelog of 26 identical "(no subject)" lines.
+            subject = (commit.get("messageHeadline") or "").strip() or "(no subject)"
+            detail = (commit.get("messageBody") or "").strip()
+            lines.append(f"- `{short(commit.get('oid', ''))}` {subject}")
+            if detail:
+                lines += [f"  {line}" for line in detail.splitlines() if line.strip()]
+        lines.append("")
+
+    if files:
+        lines.append("#### Files changed")
+        lines.append("")
+        lines.append("| file | + | - |")
+        lines.append("|---|---:|---:|")
+        for f in sorted(files, key=lambda x: str(x.get("path", ""))):
+            lines.append(
+                f"| `{f.get('path', '')}` | {f.get('additions', 0)} "
+                f"| {f.get('deletions', 0)} |"
+            )
+        lines.append("")
+
+    docs = sorted(f.get("path", "") for f in files if str(f.get("path", "")).endswith(".md"))
+    if docs:
+        lines.append("#### Documentation")
+        lines.append("")
+        lines += [f"- `{d}`" for d in docs]
+        lines.append("")
+
+    comments = pr.get("comments") or []
+    if comments:
+        lines.append("#### Discussion")
+        lines.append("")
+        for comment in comments:
+            who = (comment.get("author") or {}).get("login", "unknown")
+            when = (comment.get("createdAt") or "")[:10]
+            text = (comment.get("body") or "").strip()
+            lines.append(f"**@{who}** ({when}):")
+            lines.append("")
+            for paragraph in text.split("\n\n"):
+                lines += [f"> {line}" for line in paragraph.splitlines()]
+                lines.append(">")
+        lines.append("")
+
+    reviews = pr.get("reviews") or []
+    if reviews:
+        lines.append("#### Review")
+        lines.append("")
+        for review in reviews:
+            who = (review.get("author") or {}).get("login", "unknown")
+            state = review.get("state", "?")
+            text = (review.get("body") or "").strip()
+            lines.append(f"- **@{who}** — {state}" + (f": {text}" if text else ""))
+        lines.append("")
+
+    if carried.strip():
+        lines += ["#### Carried from Unreleased", "", carried.strip(), ""]
+
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def cmd_bump_notes(pr_number: str) -> int:
+    """Bump the patch and record the pull request that caused it.
+
+    The section is written *before* the bump is reported, so a failure here
+    leaves CMakeLists.txt untouched: a version with no notes must never exist,
+    because `release.py check` would then pass a release built on a commit list.
+    """
+    old = read_version()
+    major, minor, patch = (int(part) for part in old.split("."))
+    new = f"{major}.{minor}.{patch + 1}"
+
+    pr = gh_pr(pr_number)
+
+    text = CHANGELOG.read_text(encoding="utf-8")
+    headers = list(HEADER.finditer(text))
+    unreleased = next(
+        (h for h in headers if h.group("tag").lstrip("v").lower() == "unreleased"),
+        None,
+    )
+    if unreleased is None:
+        raise SystemExit(f"{CHANGELOG.name} has no `## [Unreleased]` section")
+
+    index = headers.index(unreleased)
+    carried_end = headers[index + 1].start() if index + 1 < len(headers) else len(text)
+    carried = text[unreleased.end():carried_end].strip()
+    section = compose_version_section(pr, new, dt.date.today().isoformat(), carried)
+
+    # Replace everything from `## [Unreleased]` up to the next version header
+    # with the new section followed by a fresh, empty Unreleased.
+    text = (
+        text[:unreleased.start()]
+        + section
+        + "\n\n## [Unreleased]\n\n"
+        + text[carried_end:]
+    )
+
+    write_version(new)
+    CHANGELOG.write_text(text, encoding="utf-8")
+    print(f"{old} -> {new}   (PR #{pr_number})")
+    return 0
+
+
 def cmd_bump(part: str) -> int:
     old = read_version()
     major, minor, patch = (int(p) for p in old.split("."))
@@ -204,6 +395,12 @@ def main(argv: list[str]) -> int:
     )
     bump = sub.add_parser("bump")
     bump.add_argument("part", choices=["major", "minor", "patch"])
+    bump_notes = sub.add_parser(
+        "bump-notes",
+        help="bump patch and write the changelog section from a merged PR",
+    )
+    bump_notes.add_argument("--pr", required=True, metavar="N",
+                            help="merged pull request number")
 
     args = parser.parse_args(argv)
 
@@ -222,6 +419,8 @@ def main(argv: list[str]) -> int:
         return 0
     if args.command == "bump":
         return cmd_bump(args.part)
+    if args.command == "bump-notes":
+        return cmd_bump_notes(args.pr)
     if args.command == "check":
         version = args.expect or read_version()
         if args.expect is None and section_for(version) is None:

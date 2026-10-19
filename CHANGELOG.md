@@ -16,6 +16,39 @@ The version is not written here by hand. `project(... VERSION x.y.z)` in
 
 ### Added
 
+- `tools/release.py bump-notes --pr N` — bumps the patch version and writes the
+  CHANGELOG section from a merged pull request: its title, body, linked issues
+  with state, every commit with its full message, a per-file `+/-` table, the
+  documentation touched, and the PR discussion and review. Nothing is typed by
+  hand, so the section cannot drift from the change it describes.
+- `.github/workflows/version.yml` — runs `bump-notes` on every merge to `main`,
+  so the version number and the record of what changed move together. Bumps are
+  serialised through a concurrency group; two merges landing together cannot
+  produce the same version twice.
+- `tools/decompile_corpus.py` — resumable batch decompiler for the 441 recovered
+  closure bodies. Flushes per body and resumes from an index, so an abort costs
+  one batch rather than the whole run.
+
+### Changed
+
+- `docs/HANDOFF.md` — the opening three sections described a docs-only stub that
+  has not been true for several sessions. Rewritten against what is actually in
+  `main`, including the fact that the windowed renderer counts calls and draws
+  nothing. The reference sections below are unchanged.
+- `README.md` — the AI-assistance warning, a reference comparison led by
+  `repentogxm` (the closest existing port of this same game), hyperlinked issue
+  references throughout, and an open-work table with a current state per issue.
+- Issue references are now hyperlinks in `AGENTS.md`, `HANDOFF.md`,
+  `arch000-format.md`, `binding-surface-findings.md`, `tools/README.md` and this
+  file, so a reader can follow any of them.
+
+### Fixed
+
+- `tools/release.py` — the commit list read a `message` field the GitHub CLI
+  does not return, so every commit rendered as `(no subject)`. It reads
+  `messageHeadline` and `messageBody`.
+- `docs/rea-toolchain.md` — one sentence of throat-clearing removed.
+
 - `docs/arch000-format.md` — the archive container format, measured rather than
   inferred. Header is 14 bytes; a 20-byte-per-entry index sits at the end of the
   file; entries are `{hash_lo, hash_hi, offset, raw_size, crc}`.
