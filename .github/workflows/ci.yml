@@ -57,6 +57,21 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # libpng is a real dependency of isaec_core, not an optional extra:
+      # src/data/image.cpp includes <png.h> and calls
+      # png_image_begin_read_from_memory. CMakeLists.txt tries find_package(PNG)
+      # first and falls back to a REQUIRED pkg_check_modules(libpng16), so a
+      # runner without the development package dies in Configure instead of
+      # reporting the missing dependency.
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpng-dev
+
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: brew install libpng
+
       - name: Configure
         run: >-
           cmake -S . -B build
@@ -77,6 +92,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+
+      # No Android libpng exists in the sysroot, so the REQUIRED pkg-config
+      # fallback resolves against the runner's host packages. This job only
+      # verifies that our own objects are AArch64 and never runs tests, so this
+      # makes the codegen check reachable. It does not make the resulting binary
+      # shippable -- a real Android build needs a cross-built libpng.
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpng-dev
 
       - name: Install NDK
         uses: nttld/setup-ndk@v1
@@ -187,6 +212,17 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # libpng is a real dependency of isaec_core, not an optional extra:
+      # src/data/image.cpp includes <png.h> and calls
+      # png_image_begin_read_from_memory. CMakeLists.txt tries find_package(PNG)
+      # first and falls back to a REQUIRED pkg_check_modules(libpng16), so a
+      # runner without the development package dies in Configure instead of
+      # reporting the missing dependency.
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpng-dev
+
       - name: Configure
         run: >-
           cmake -S . -B build
@@ -203,6 +239,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+
+      # libpng is a real dependency of isaec_core, not an optional extra:
+      # src/data/image.cpp includes <png.h> and calls
+      # png_image_begin_read_from_memory. CMakeLists.txt tries find_package(PNG)
+      # first and falls back to a REQUIRED pkg_check_modules(libpng16), so a
+      # runner without the development package dies in Configure instead of
+      # reporting the missing dependency.
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpng-dev
 
       - name: Configure
         run: >-
