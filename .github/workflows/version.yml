@@ -36,6 +36,7 @@ jobs:
       - name: Bump and record
         env:
           PR: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           python3 tools/release.py bump-notes --pr "${PR}"
