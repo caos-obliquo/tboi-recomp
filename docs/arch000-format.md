@@ -115,7 +115,7 @@ period; a strong single-byte skew (period-1 bias 36.9 against 0.13 at period 256
 combined with an entropy ramp from 7.07 in the first 256 bytes to 7.93 over the
 whole payload points at a custom LZ variant rather than a cipher.
 
-Recovering it needs the decompressor in the shipped binary. See issues #1 and #2.
+Recovering it needs the decompressor in the shipped binary. See [#1](https://github.com/caos-obliquo/tboi-recomp/issues/1) and [#2](https://github.com/caos-obliquo/tboi-recomp/issues/2).
 
 ## 7. A build-pipeline leftover, now explained
 

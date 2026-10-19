@@ -1,6 +1,6 @@
 # Binding surface — recovered locations and how they were measured
 
-Status of issue **#3** (recover the 655 native method bodies and signatures) as of
+Status of issue **[#3](https://github.com/caos-obliquo/tboi-recomp/issues/3)** (recover the 655 native method bodies and signatures) as of
 the session that produced this file.
 
 Everything here was measured by running a committed tool against the Steam
@@ -785,7 +785,7 @@ Not settled — and deliberately left open rather than guessed:
   happen to return a pointer.
 - The 69 seed entries that carry a real identifier are all module singletons and
   named types; the other 372 are anonymous per-property closures. Attaching
-  property *names* to the anonymous ones is still open (issue #4).
+  property *names* to the anonymous ones is still open ([#4](https://github.com/caos-obliquo/tboi-recomp/issues/4)).
 
 ### 14.7 Correction to an earlier claim in this document
 

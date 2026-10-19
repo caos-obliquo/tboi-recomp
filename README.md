@@ -1,5 +1,14 @@
 # tboi-recomp
 
+> ⚠️ !! WARNING !! ⚠️
+> **THE MOST AI-SLOP SHIT YOU HAVE EVER SEEN**
+>
+> This repository contains industrial quantities of AI-assisted reverse engineering, vibe coding, ugly experiments, suspiciously effective slop, and a clean-room engine that does not yet play a single frame.
+>
+> **If you are anti-AI, please close this repository now.** Continued exposure may be harmful to your blood pressure, sleep schedule, and faith in software engineering. Yes, it is AI-assisted. You have been warned.
+
+---
+
 A clean-room reimplementation of *The Binding of Isaac: Repentance*, built to run
 on arm64 Android and Linux x86_64 from one source tree.
 
@@ -8,9 +17,28 @@ connected to Nicalis or Edmund McMillen.** "The Binding of Isaac" is a trademark
 of its respective owners and is used here only to identify the game this project
 aims to be compatible with.
 
-> **Status: early scaffold. 0 of 655 native function bodies are implemented.
-> Nothing here plays the game.** The table below is the honest picture. See
-> [Progress](#progress) before you get excited.
+> **Status: nothing here plays the game.** The binding surface is fully mapped
+> and every recovered function body has been decompiled, but **0 of 441 are
+> implemented**. Read [Progress](#progress) before getting excited.
+
+---
+
+## Contents
+
+- [Why it exists](#why-it-exists)
+- [Legal boundary](#legal-boundary)
+- [What is being rebuilt, and from what](#what-is-being-rebuilt-and-from-what)
+- [How this compares to other recompilations](#how-this-compares-to-other-recompilations)
+- [The binding surface](#the-binding-surface)
+- [Progress](#progress)
+- [What "located" means, and what it does not](#what-located-means-and-what-it-does-not)
+- [Build](#build)
+- [Layout](#layout)
+- [Open work](#open-work)
+- [Documentation](#documentation)
+- [Credits](#credits)
+
+---
 
 ## Why it exists
 
@@ -32,6 +60,8 @@ Fitting that is the point of this.
 If this works, the game comes back to people the hardware already left behind.
 That is worth the months.
 
+---
+
 ## Legal boundary
 
 This repository contains **no code, data, sprites, audio, video, or text** from
@@ -48,6 +78,8 @@ way OpenMW points at Morrowind and OpenTTD points at Transport Tycoon. If you
 do not own *The Binding of Isaac*, this project has nothing to show you.
 
 MIT licensed. See [`LICENSE`](LICENSE).
+
+---
 
 ## What is being rebuilt, and from what
 
@@ -69,6 +101,107 @@ repack with an injected cheat framework, and a clean-room project cannot be
 built on a tampered artifact. The legally-owned Steam install is both the
 correct and the ethical reference.
 
+---
+
+## How this compares to other recompilations
+
+Four projects are worth reading side by side. Between them they cover every
+approach available to someone in this position, and **none of them shares code
+with this repository or with each other**.
+
+### The closest one: [repentogxm](https://github.com/0xl0cal/repentogxm)
+
+A PlayStation Vita port of **this exact game**, by static recompilation of the PC
+executable to ARM. Not a similar game — the same binary class, targeted at a
+handheld, GPL-2.0, 31 stars.
+
+It works: title screen, menus, rooms, bosses, saves, music, and the External
+Item Descriptions mod, at the Vita's native 960x544, with game logic at 30
+updates per second presenting up to 60 FPS. There is no emulator — the PC
+functions are translated ahead of time into C and loaded at a fixed address.
+
+Two things in it matter more here than the port itself:
+
+1. **It publishes its measurements**, including the failures:
+
+   | scene | result |
+   |---|---|
+   | menus | 60 FPS |
+   | rooms with enemies | 55–59 FPS |
+   | dense rooms (~78 draw calls/frame) | 33–34 FPS |
+   | door transition with resource loads | 0.9–1.1 s stall |
+   | floor change | 1.5–4.3 s |
+
+   Its conclusion — *below 60 FPS the cost is CPU render time: translated game
+   code, draws, and Lua* — is the same conclusion [#19](https://github.com/caos-obliquo/tboi-recomp/issues/19)
+   needs to reach, and it is a reminder that the binding surface being
+   reconstructed here *is* the per-frame cost centre.
+
+2. **Its credits are a map.** It names
+   [`TeamREPENTOGON`](https://github.com/TeamREPENTOGON/REPENTOGON) as the
+   source of "most of the useful Isaac function names, signatures, layouts" —
+   a LibZHL project targeting **Repentance+**, the same version as the binary
+   this project reads. That turns
+   [#17](https://github.com/caos-obliquo/tboi-recomp/issues/17) from a derivation
+   problem into a cross-check, and it is tracked as
+   [#20](https://github.com/caos-obliquo/tboi-recomp/issues/20). Its credits also
+   name [`Gibbed.Rebirth`](https://github.com/gibbed/Gibbed.Rebirth) for archive
+   encryption and framing, which is the open half of
+   [#2](https://github.com/caos-obliquo/tboi-recomp/issues/2).
+
+Its README describes itself, in the author's words, as AI-assisted and
+experimental. That is worth stating plainly rather than hiding: it is a
+different project with a different licence, consulted as a reference. No code
+from it is used here.
+
+### The other three
+
+| | **this project** | [skate3recomp](https://github.com/mchughalex/skate3recomp) | [ReSkate](https://github.com/Dingo-Shenanigans/ReSkate) |
+|---|---|---|---|
+| Target | *Isaac: Repentance* (2021, PC 32-bit) | *Skate 3* (2010, Xbox 360) | *skate.* (2025, EA free-to-play) |
+| Technique | **clean-room reimplementation** | **static recompilation** via ReXGlue | **runtime injection** into the shipping game |
+| Reads the original by | recovering the interface, writing fresh behaviour | translating the code ahead of time | leaving the code alone |
+| You must own | your own Steam copy | your own Xbox 360 disc dump | your own Steam copy |
+| Scale | 441 bodies mapped, **0 implemented** | 1.6k stars, playable end to end | 1.2k stars, GPL-3.0 |
+| Renderer | `NullRenderer` — counts calls, draws nothing | native D3D12/Vulkan, **>2x fps at ~¼ GPU power** | inherits the original's |
+
+### What skate3recomp proves is possible
+
+Its [v2.0.0 release notes](https://github.com/mchughalex/skate3recomp/releases)
+replaced an emulated console GPU with a native renderer covering the whole game,
+reporting **more than double the frame rate at roughly a quarter of the GPU
+power draw**, with Apple Silicon going from ~25 FPS to ~250 FPS at 4K.
+
+Two of its decisions are worth copying regardless of technique:
+
+1. **Visual parity before enhancement.** It ports the original's *own* material
+   shading first, so "looks different" is never confused with "looks better".
+   Enhancements — MSAA, soft shadows, bloom, render scale up to 3x, ultrawide —
+   are opt-in and off the critical path.
+2. **The old path stays reachable.** A live renderer toggle plus automatic
+   fallback on an unrecoverable error, with an on-screen indicator. A
+   reimplementation with no escape hatch is worse than the thing it replaced.
+
+Both are now scoped in [#19](https://github.com/caos-obliquo/tboi-recomp/issues/19),
+together with the frame-rate cap and low-end-device targets Isaac's 2021 build
+cannot offer: selectable 30/60 caps, render scale independent of window size, and
+upscaling so a weak GPU can lower internal resolution and stay smooth.
+
+### What ReSkate shows about the other approach
+
+ReSkate loads a runtime *into* a live game process and extends it: offline play,
+multiplayer, mods. That route needs no reimplementation at all, which is exactly
+why it is unavailable here — a clean-room project has no business injecting into
+code it is supposed to be independently rebuilding. Its
+[settings surface](https://reskate.app/) is still a useful model for how the
+graphics session should eventually be presented to a player.
+
+The same split is documented for Bloodborne in
+[`docs/reimplementation-references.md`](docs/reimplementation-references.md):
+bbport runs the original code, its Android port adds a guest-CPU translation
+layer, and this project takes the third path.
+---
+
 ## The binding surface
 
 Isaac's gameplay is Lua. That Lua calls into 655 native methods across at least
@@ -88,70 +221,81 @@ different API.
 The header is deliberately free of any Lua include, so callers can register
 classes without Lua on their include path. Only `binding.cpp` includes Lua.
 
+The game also ships a **patched Lua**, not stock 5.3: its index space is extended
+below a sentinel so the game can address a hidden per-frame array. That is
+established from the shipped DLL rather than assumed — see
+[`docs/binding-surface-findings.md` §14.6](docs/binding-surface-findings.md).
+
+---
+
 ## Progress
 
 | Area | State |
 |---|---|
 | Class registry, metatable model, inheritance | **done** — 16 tests green |
 | Declarative `ApiSpec` → `Binding` codegen | **done** |
-| Recovered 655-method surface registers and resolves | **done** (as stubs) |
+| Recovered 655-name surface registers and resolves | **done** (as stubs) |
 | Directory-backed data source | **done** |
 | Headless renderer (counts, draws nothing) | **done** |
-| **Native function bodies located** | **441 addresses known** of 1064 closure sites |
-| **Native function bodies** *implemented* | **0 / 441** |
-| **Method signatures** (`argc`, return shape) | **441 / 441** decompiled and classified into 11 shapes |
-| **Property-accessor ABI** | **recovered** — `binding-surface-findings.md` §14 |
-| **Lua binding index space** | **patched Lua identified** — sentinel `0xfff0b9d8`, §14.6 |
+| **Closure bodies located** | **441 addresses** of 1064 call sites — accounting complete |
+| **Closure bodies decompiled** | **441 / 441**, 0 failures, classified into 11 shapes |
+| **Property-accessor ABI** | **recovered** — [§14](docs/binding-surface-findings.md) |
+| **Lua binding index space** | **patched Lua identified** — [§14.6](docs/binding-surface-findings.md) |
+| **Closure bodies named** | **69 / 441** — the other 372 are still anonymous |
+| **Closure bodies implemented** | **0 / 441** — all resolve to `not_implemented_trampoline` |
 | **Packed archive (`ARCH000`) container** | **container solved**, codec open |
-| **→ `ARCH000` payload codec** | **not started** — blocked on #1 |
-| **→ `ARCH000` 64-bit name hash** | **not started** — lower priority, see #2 |
-| **GPU rendering** | **not started** |
+| → `ARCH000` payload codec | **not started** — see [#2](https://github.com/caos-obliquo/tboi-recomp/issues/2) |
+| → `ARCH000` 64-bit name hash | **not started** — see [#1](https://github.com/caos-obliquo/tboi-recomp/issues/1) |
+| GPU rendering | **not started** — see [#5](https://github.com/caos-obliquo/tboi-recomp/issues/5) |
+| Graphics/performance epic | **scoped, not started** — see [#19](https://github.com/caos-obliquo/tboi-recomp/issues/19) |
 | **Class coverage** | 9 of ~23 classes |
-| **Repentance+ (2024 co-op update) API** | **not examined at all** |
+| **Repentance+ (2024 co-op update) API** | **not examined at all** — see [#6](https://github.com/caos-obliquo/tboi-recomp/issues/6) |
 
 Every recovered method currently resolves to a `not_implemented_trampoline`.
-That is the honest state: the *names* are recovered and the *dispatch* works,
-but no function does anything yet.
+That is the honest state: the *names* are recovered, the *dispatch* works, the
+*bodies* are read — and no function does anything yet.
 
-The class-coverage number is blocked on the same work as the function bodies,
-not independent of it. See issue #3.
+The last three rows of the "located / decompiled / named / implemented" block are
+four different states and are deliberately not collapsed. **An address is not an
+implementation**, and a decompiled body is not a named one.
 
-### What "located" means, and what it does not
+---
 
-441 closure bodies are now known **by address**, recovered by walking backwards
-from each of the 1064 `lua_pushcclosure` call sites and reading the argument
-shape, which is fixed: `push <nupvalues>`, `push <fn>`, optional upvalue setup,
-`push L`, `call`. The accounting is complete — 524 named registrations, 539
-closures whose name lives in another function, 1 call site with no body.
+## What "located" means, and what it does not
 
-An address is not an implementation. All 441 have now been decompiled — with
-kuna, standalone, at 1.4 s per body rather than Ghidra's 607 s — and every one
-falls into one of 11 recognised shapes. So the signatures are known: 375 of the
-441 read the bound C++ object through the single constant `0xfff0b9d7`, 434
-open with an argument type check, and getters uniformly dispatch through vtable
-slot 0. The full mechanism is written out in `binding-surface-findings.md` §14.
+The 441 addresses come from walking backwards from each of the 1064
+`lua_pushcclosure` call sites and reading the argument shape, which is fixed:
+`push <nupvalues>`, `push <fn>`, optional upvalue setup, `push L`, `call`. The
+accounting closes exactly — 524 named registrations, 539 closures whose name
+lives in another function, 1 call site with no body.
 
-None of it is *reimplemented* yet, and all 441 still resolve to
-`not_implemented_trampoline`. Recovering what a body does and reimplementing it
-are separate steps and only the first one is done. Two of these numbers are worth stating plainly
-because they are easy to read as more than they are:
+All 441 have since been decompiled, with kuna standalone at 1.4 s per body
+against Ghidra's 607 s on the same address. Every one falls into one of 11
+recognised shapes, and the property-accessor mechanism is now written out in
+full — including the instruction-level disassembly and the PE import directory
+that back it. See [`docs/binding-surface-findings.md` §14](docs/binding-surface-findings.md).
+
+Three numbers are easy to read as more than they are:
 
 - The **63** one-to-one name bindings are *type constructors*, not methods.
   `Entity`, `Color`, `Font`, `Game` and `HUD` each resolve to a small metatable
   builder. Counting them as recovered methods would overstate the surface.
-- The **417** metatable-key bodies are property accessors. `__propget` alone
-  carries 203 distinct bodies from 209 registrations. They are real function
-  bodies, but they are getters and setters, so they map onto the *field* layer
-  rather than the method layer.
+- The **417** metatable-key bodies are property accessors, so they map onto the
+  *field* layer rather than the method layer.
+- The **372** anonymous bodies are real, correctly located functions that simply
+  do not yet have a property name attached. Naming them is
+  [#17](https://github.com/caos-obliquo/tboi-recomp/issues/17).
 
-The 655 figure this project has been tracking is a count of recovered *names*,
-and it is not yet shown to equal a count of *bodies*. Closing issue #3 depends on
-resolving that, not on adding to the number.
+The 655 figure this project has tracked since the beginning is a count of
+recovered *names*, and it was never shown to equal a count of *bodies*. It is
+now known not to.
+
+---
 
 ## Build
 
 Requires CMake ≥ 3.16 and a C++17 compiler. Lua 5.3.6 is vendored, so no
-system Lua is needed.
+system Lua is needed. libpng is required unless you pass `-DISAEC_WITH_PNG=OFF`.
 
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
@@ -173,8 +317,16 @@ cmake -S . -B build-android \
   -DANDROID_NDK=$ANDROID_NDK_HOME
 ```
 
-CI builds on Linux (gcc and clang) and macOS, configures against the Android
-NDK, and additionally gates on `-Werror`, ASan+UBSan, and spec-freshness.
+The Android toolchain turns `ISAEC_WITH_PNG` off, because the sysroot ships no
+libpng and the alternative is linking a host x86-64 archive into an AArch64
+binary. Nothing decodes images on Android until that is solved — see
+[#16](https://github.com/caos-obliquo/tboi-recomp/issues/16).
+
+CI builds on Linux (gcc and clang) and macOS, configures against the Android NDK,
+and additionally gates on `-Werror`, ASan+UBSan, spec freshness, and the binding
+extractor's self-check.
+
+---
 
 ## Layout
 
@@ -184,18 +336,22 @@ include/isaec/
   api/registry.hpp         declarative ApiSpec -> Binding, missing-symbol table
   api/generated/           codegen output, do not edit
   data/source.hpp          DataSource: one interface over directories
+  data/image.hpp           decoded RGBA raster; the one place PNG is spoken
   data/collection.hpp      ordered string-keyed collection
   engine/engine.hpp        mount / start / tick / stop
   engine/renderer.hpp      Renderer: pure virtual, platform fills it in
   engine/clock.hpp         SteadyClock
-  platform/                null_renderer (headless)
+  platform/                null_renderer (headless), sdl_renderer
 src/                       implementations
 tools/                     research + codegen scripts; see tools/README.md
-  inspect-archive.py        ARCH000 reader; asserts the index arithmetic
-docs/                       measured format specs; see docs/arch000-format.md
+  inspect-archive.py       ARCH000 reader; asserts the index arithmetic
+  disasm.py                objdump-backed aligned instruction stream
+  probe_closures.py        name -> closure body, anchored on the call site
+  decompile_corpus.py      resumable batch decompiler for the 441 bodies
+docs/                      measured findings; see docs/binding-surface-findings.md
 bindings/                  recovered surface + generated spec
-tests/                     16 cases, ctest
-third_party/lua-5.3.6/     vendored, checksum in third_party/CMakeLists.txt
+tests/                     62 cases with PNG, 57 without, ctest
+third_party/lua-5.3.6/    vendored, checksum in third_party/CMakeLists.txt
 ```
 
 Lua is pinned to **5.3** and must stay that way — Isaac's interpreter is Lua 5.3.
@@ -205,35 +361,48 @@ Lua is pinned to **5.3** and must stay that way — Isaac's interpreter is Lua 5
 Namespace is `isaec`, not `isaac`, deliberately, so nothing here reads as an
 official Nicalis artifact.
 
-## Issues
+---
 
-Open work is tracked as numbered GitHub issues with acceptance criteria. The
-milestone `M1 Foundation` covers the current blockers:
+## Open work
 
-- Recover the 655 native function bodies and signatures (#3) — also unblocks
-  per-class attribution and therefore full class coverage.
-- Locate the runtime archive loader, then recover the `ARCH000` payload codec
-  (#1, #2). The container itself is solved; see
-  [`docs/arch000-format.md`](docs/arch000-format.md).
-- Implement a real GPU renderer backend (#5).
-- Survey the Repentance+ API surface (#6).
+Work is issue-driven; [`AGENTS.md` §1](AGENTS.md) defines the loop. The
+milestone `M1 Foundation` covers the current blockers.
+
+| # | What | State |
+|---|---|---|
+| [#1](https://github.com/caos-obliquo/tboi-recomp/issues/1) | Locate the runtime archive loader | **blocked** — enumeration ruled out; approach exhausted |
+| [#2](https://github.com/caos-obliquo/tboi-recomp/issues/2) | `ARCH000` payload codec | **partially advanced** — mode 0x02 is an LCG, constants not recovered |
+| [#3](https://github.com/caos-obliquo/tboi-recomp/issues/3) | Recover bodies and signatures | **largely resolved** — 441/441 decompiled and classified |
+| [#4](https://github.com/caos-obliquo/tboi-recomp/issues/4) | Per-class attribution | **blocked** on [#17](https://github.com/caos-obliquo/tboi-recomp/issues/17) |
+| [#5](https://github.com/caos-obliquo/tboi-recomp/issues/5) | Real GPU renderer | **blocked** — nothing to draw yet |
+| [#6](https://github.com/caos-obliquo/tboi-recomp/issues/6) | Repentance+ API surface | **partially advanced** |
+| [#7](https://github.com/caos-obliquo/tboi-recomp/issues/7) | Purge HUD/Isaac contamination | **open** |
+| [#12](https://github.com/caos-obliquo/tboi-recomp/issues/12) | Name the patched-Lua anchored value | **open** — the last gap in the ABI |
+| [#16](https://github.com/caos-obliquo/tboi-recomp/issues/16) | Cross-built libpng for Android | **open** |
+| [#17](https://github.com/caos-obliquo/tboi-recomp/issues/17) | Name the 372 anonymous bodies | **open** — blocks [#4](https://github.com/caos-obliquo/tboi-recomp/issues/4) and [#5](https://github.com/caos-obliquo/tboi-recomp/issues/5) |
+| [#18](https://github.com/caos-obliquo/tboi-recomp/issues/18) | `macos-arm64` never dispatches | **blocked** — required context, holds every merge |
+| [#19](https://github.com/caos-obliquo/tboi-recomp/issues/19) | Graphics + performance epic | **scoped, not started** |
+| [#20](https://github.com/caos-obliquo/tboi-recomp/issues/20) | Cross-check the 372 anonymous bodies against REPENTOGON | **open** — highest-leverage item on the board |
+
+---
+
+## Documentation
+
+| Document | What it is authoritative for |
+|---|---|
+| [`docs/binding-surface-findings.md`](docs/binding-surface-findings.md) | **addresses, counts, and the accessor ABI** — the source of truth |
+| [`docs/arch000-format.md`](docs/arch000-format.md) | container format claims only |
+| [`docs/HANDOFF.md`](docs/HANDOFF.md) | what is in flight, what is blocked, what is a dead end |
+| [`docs/rea-toolchain.md`](docs/rea-toolchain.md) | the reverse-engineering toolchain and its traps |
+| [`docs/reimplementation-references.md`](docs/reimplementation-references.md) | what was borrowed from other recompilations, and what was rejected |
+| [`tools/README.md`](tools/README.md) | what each tool does, and what it does *not* establish |
+| [`AGENTS.md`](AGENTS.md) | working rules |
 
 `tools/inspect-archive.py` parses and validates any Isaac archive today. It
 refuses to print a table for input whose index arithmetic does not close, so a
 wrong reading of the format fails loudly instead of producing confident garbage.
 
-`tools/README.md` documents how the binding surface was recovered, which leads
-are dead, and two address-arithmetic traps that cost real time.
-
-## Regenerating the binding spec
-
-```sh
-python3 tools/gen-api-spec.py
-```
-
-Idempotent. Writes both the JSON and a C++ header, so a malformed method name
-fails at compile time rather than at load time. CI enforces freshness with a
-`git diff --exit-code` check.
+---
 
 ## Credits
 
@@ -244,3 +413,11 @@ fails at compile time rather than at load time. CI enforces freshness with a
   assets are redistributed here.
 * Inspired by the OpenMW and OpenTTD model of shipping an engine that reads a
   user's own game install.
+* [`repentogxm`](https://github.com/0xl0cal/repentogxm),
+  [`skate3recomp`](https://github.com/mchughalex/skate3recomp) and
+  [`ReSkate`](https://github.com/Dingo-Shenanigans/ReSkate) are unrelated
+  projects by other authors, consulted as references. No code from any of them is
+  used here.
+* Interface facts learned from other projects are **verified against this
+  project's own binary** before being recorded, and disagreements are reported
+  rather than averaged away.
