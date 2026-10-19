@@ -110,7 +110,7 @@ stands" section of the README for what exists and what does not.
   and carry no plaintext filenames. The reader was written before the real data
   was inspected and modelled a format this game has never used.
   Effect: `DataSource` supports directories only. The container format is
-  tracked as issues #1 and #2 with the disassembly already done.
+  tracked as [#1](https://github.com/caos-obliquo/tboi-recomp/issues/1) and [#2](https://github.com/caos-obliquo/tboi-recomp/issues/2) with the disassembly already done.
 
 [Unreleased]: https://github.com/caos-obliquo/tboi-recomp/compare/v0.1.0...HEAD
 [v0.1.0]: https://github.com/caos-obliquo/tboi-recomp/releases/tag/v0.1.0

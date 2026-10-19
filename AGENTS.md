@@ -30,13 +30,13 @@ A finding becomes an issue when it is any of these:
 - an open question with a named next probe
 - a claim that turned out to be wrong, with the disproof
 
-All four happened in one session and produced issues #12–#17. None of them was
+All four happened in one session and produced [#12](https://github.com/caos-obliquo/tboi-recomp/issues/12), [#13](https://github.com/caos-obliquo/tboi-recomp/issues/13), [#14](https://github.com/caos-obliquo/tboi-recomp/issues/14), [#15](https://github.com/caos-obliquo/tboi-recomp/issues/15), [#16](https://github.com/caos-obliquo/tboi-recomp/issues/16) and [#17](https://github.com/caos-obliquo/tboi-recomp/issues/17). None of them was
 planned; all of them were real.
 
 ### 1b. Anchor the work to the issue
 
 - **One branch per issue.** The branch name references it.
-- **The commit message names it.** `feat(bindings): ... (#17)`. A commit whose
+- **The commit message names it.** `feat(bindings): ... [#17](https://github.com/caos-obliquo/tboi-recomp/issues/17)`. A commit whose
   subject cannot be traced to an issue cannot be traced to an intent.
 - **The issue carries the acceptance criteria**, written before the work starts
   where that is possible, so "done" is checkable rather than felt.
@@ -134,7 +134,7 @@ end that turns out to be wrong gets corrected before anyone spends time on it.
 - Conventional prefix, imperative summary: `feat(scope):`, `fix(tools):`,
   `docs(findings):`, `chore(dependabot):`.
 - **Reference the issue it serves**, in the subject or the first body line:
-  `feat(bindings): anchor property names to the call site (#17)`. A commit
+  `feat(bindings): anchor property names to the call site [#17](https://github.com/caos-obliquo/tboi-recomp/issues/17)`. A commit
   that cannot be traced to an issue cannot be traced to an intent.
 - The body explains **why**, and for a fix it states what the old code did
   instead, ideally demonstrated rather than asserted.

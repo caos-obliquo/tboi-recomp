@@ -497,11 +497,11 @@ Branch model: one branch per issue, `feature/` `fix/` `add/` `docs/` prefixed,
 opened as a PR. Never commit to `main`.
 
 **The 11 required contexts include `linux-arm64`, `macos-arm64` and
-`macos-x86_64`, which do not exist yet** — PR #10 adds them. They are required
+`macos-x86_64`, which do not exist yet** — [PR #10](https://github.com/caos-obliquo/tboi-recomp/pull/10) adds them. They are required
 by name; if a name is wrong, PRs block permanently. Confirm they report under
-those exact names when PR #10's CI runs, and correct the list if not.
+those exact names when [PR #10](https://github.com/caos-obliquo/tboi-recomp/pull/10)'s CI runs, and correct the list if not.
 
-Open: **PR #10** `feature/arm-ci-coverage` — native ARM64 CI, explicit macOS
+Open: **[PR #10](https://github.com/caos-obliquo/tboi-recomp/pull/10)** `feature/arm-ci-coverage` — native ARM64 CI, explicit macOS
 architectures.
 
 ## 13. Method-binding recovery (supersedes the earlier 92)
@@ -523,7 +523,7 @@ Nothing is unaccounted for. Detail and the disproof in
 The 63 one-to-one bindings are **type constructors**, not methods. The 417
 metatable-key bodies are property accessors (`__propget` alone: 203 bodies from
 209 registrations). The 655 this project tracks is a count of *names*, and
-nothing yet shows it equals a count of *bodies* — issue #3 turns on that.
+nothing yet shows it equals a count of *bodies* — [#3](https://github.com/caos-obliquo/tboi-recomp/issues/3) turns on that.
 
 ## 14. The property-accessor ABI is recovered (supersedes "0 of 441 signatures")
 
