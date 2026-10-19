@@ -28,27 +28,6 @@ The version is not written here by hand. `project(... VERSION x.y.z)` in
 - `tools/decompile_corpus.py` — resumable batch decompiler for the 441 recovered
   closure bodies. Flushes per body and resumes from an index, so an abort costs
   one batch rather than the whole run.
-
-### Changed
-
-- `docs/HANDOFF.md` — the opening three sections described a docs-only stub that
-  has not been true for several sessions. Rewritten against what is actually in
-  `main`, including the fact that the windowed renderer counts calls and draws
-  nothing. The reference sections below are unchanged.
-- `README.md` — the AI-assistance warning, a reference comparison led by
-  `repentogxm` (the closest existing port of this same game), hyperlinked issue
-  references throughout, and an open-work table with a current state per issue.
-- Issue references are now hyperlinks in `AGENTS.md`, `HANDOFF.md`,
-  `arch000-format.md`, `binding-surface-findings.md`, `tools/README.md` and this
-  file, so a reader can follow any of them.
-
-### Fixed
-
-- `tools/release.py` — the commit list read a `message` field the GitHub CLI
-  does not return, so every commit rendered as `(no subject)`. It reads
-  `messageHeadline` and `messageBody`.
-- `docs/rea-toolchain.md` — one sentence of throat-clearing removed.
-
 - `docs/arch000-format.md` — the archive container format, measured rather than
   inferred. Header is 14 bytes; a 20-byte-per-entry index sits at the end of the
   file; entries are `{hash_lo, hash_hi, offset, raw_size, crc}`.
@@ -59,13 +38,25 @@ The version is not written here by hand. `project(... VERSION x.y.z)` in
 
 ### Changed
 
+- `docs/HANDOFF.md` — the opening three sections described a docs-only stub that
+  has not been true for several sessions. Rewritten against what is actually in
+  `main`, including the fact that the windowed renderer counts calls and draws
+  nothing. The reference sections below are unchanged.
+- Issue references are now hyperlinks in `AGENTS.md`, `HANDOFF.md`,
+  `arch000-format.md`, `binding-surface-findings.md`, `tools/README.md` and this
+  file, so a reader can follow any of them.
 - `ARCH000` is no longer an opaque blocker. Every remaining unknown is now
   scoped to the codec and the 64-bit name hash.
-- README progress table no longer claims the container format is "not started".
-  A status table that outlives its facts is worse than no status table: it is
-  the part a reader trusts without checking.
+- The README progress table no longer claims the container format is "not
+  started". A status table that outlives its facts is worse than no status
+  table: it is the part a reader trusts without checking.
 
-Nothing yet.
+### Fixed
+
+- `tools/release.py` — the commit list read a `message` field the GitHub CLI
+  does not return, so every commit rendered as `(no subject)`. It reads
+  `messageHeadline` and `messageBody`.
+- `docs/rea-toolchain.md` — one sentence of throat-clearing removed.
 
 ## [v0.1.0] - 2026-10-12
 
