@@ -1,0 +1,58 @@
+name: Release version
+
+# Every merged pull request bumps the patch and records itself in the changelog,
+# so the version number and the record of what changed can never drift apart.
+# The section is composed from the pull request -- its title, body, linked
+# issues, commits, files, discussion and review -- rather than typed by hand.
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: write
+
+# One bump at a time. Two merges landing together would otherwise race on
+# CMakeLists.txt and produce the same version twice.
+concurrency:
+  group: release-version
+  cancel-in-progress: false
+
+jobs:
+  record:
+    name: Bump patch and record the changelog
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
+      - name: Bump and record
+        env:
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          python3 tools/release.py bump-notes --pr "${PR}"
+          python3 tools/release.py check
+
+      - name: Commit
+        run: |
+          set -euo pipefail
+          git add CMakeLists.txt CHANGELOG.md
+          if git diff --cached --quiet; then
+            echo "::notice::nothing to commit; version already recorded"
+            exit 0
+          fi
+          git commit -m "chore(release): record PR #${PR} and bump the patch version"
+
+      - name: Push to main
+        run: |
+          set -euo pipefail
+          git pull --rebase origin main
+          git push origin HEAD:main

@@ -142,8 +142,7 @@ bodies at roughly 73 hours.
 Kuna does the same job in **1.4 seconds per body** — about 430x faster, roughly
 10 minutes for the whole corpus.
 
-The important part is *how* it is reached. REA's Kuna provider refuses this
-file:
+Reaching it is the point. REA's Kuna provider refuses this file:
 
 > REA verified the Kuna provider on ELF and thin Mach-O images; pe is not
 > admitted.

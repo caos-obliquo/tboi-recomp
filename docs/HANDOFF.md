@@ -1,7 +1,4 @@
-# isaec-engine — state of the archive work
-
-Written at the end of a session that took the project from "a docs-only stub" to
-"reads Repentance's packed archives, decodes them, and renders them through SDL2".
+# tboi-recomp — handoff
 
 Everything below was verified by running it. Where something is unknown or known
 broken, it says so explicitly rather than glossing it.
@@ -10,69 +7,65 @@ broken, it says so explicitly rather than glossing it.
 
 ## 1. The project
 
-`isaec-engine` is a clean-room reimplementation of The Binding of Isaac's asset
-pipeline. It reads the `.a` archives the game ships in `resources/packed/`, undoes
-the per-entry obfuscation, decodes the PNG payloads and presents them.
+`tboi-recomp` is a clean-room reimplementation of *The Binding of Isaac:
+Repentance*, built to run on arm64 Android and Linux x86_64 from one source
+tree.
 
-Remote: `https://github.com/caos-obliquo/tboi-recomp.git`
-Game install used for all testing:
-`$HOME/.local/share/Steam/steamapps/common/The Binding of Isaac Rebirth`
+| | |
+|---|---|
+| Reference | the **Windows PC / Steam build** — `isaac-ng.exe`, a 32-bit x86 PE. Not iOS, not Android. |
+| Output | **arm64-android** first, then **linux-x86_64**. |
+| Remote | `https://github.com/caos-obliquo/tboi-recomp.git` |
+| Test install | `$HOME/.local/share/Steam/steamapps/common/The Binding of Isaac Rebirth` |
 
----
-
-## 2. The branch stack
-
-`main` (`b3eb913`) has **no C++ core at all** — no codec, no image, no archive, no
-window. All of that is the work below, split into a **stacked chain**, not siblings:
-
-| # | branch | SHA | tests | contents |
-|---|---|---|---|---|
-| 1 | `feature/archive-codec` | `52a1668` | 35 | `ArchiveCodec` — the three cipher modes + fixtures |
-| 2 | `feature/png-decoder` | `7eb30a9` | 40 | `decode_png` straight out of a buffer |
-| 3 | `feature/archive-reader` | `26999c1` | 55 | `Archive` — ARCH000 container, spans, mode dispatch |
-| 4 | `feature/sdl2-renderer` | `f3e58f7` | 55 | SDL2 backend + `isaec_window` target |
-| 5 | `feature/asset-name-resolution` | `3f276a2` | 62 | djb2-5381 name hash + `filelist.txt` resolution |
-
-Each branch builds clean and tests green **on its own** (verified by fresh
-`cmake -S -B` + build + run per branch, with the build directory deleted each time
-so `CMakeLists.txt` edits are never masked by a stale cache).
-
-Merge in order, or squash the whole range. Do not merge branch 4 without 1–3:
-`sdl_main.cpp` calls both `Archive::decode` and `decode_png`.
-
-**To get the finished state:**
-```
-git checkout feature/asset-name-resolution
-```
-That is the tip and contains everything.
+The reference cannot run on Android and is not being ported or recompiled. What
+is reimplemented is the portable half: data reading, the Lua VM, and the native
+functions the shipped Lua calls into. Why the PC build and not iOS: the only iOS
+copy available was a pirated repack with an injected cheat framework, and a
+clean-room project cannot be built on a tampered artifact.
 
 ---
 
-## 3. What the engine actually does now
+## 2. What has shipped, and what has not
 
-```
-$ build/isaec_window <install>/resources/packed/graphics.a 0 120 640 480
-backend   sdl2
-archive   mode=0x00 codec=xor entries=2300  2060/2300 named  hash=0x503f9b44  resources/font/pftempestasevencondensed_0.png
-image     entry 0 resources/font/pftempestasevencondensed_0.png 512 x 256
-viewport  640 x 480
-frames 120 / elapsed 2.011 s / draws 120 / presented 120 / textures 0 live   exit=0
-```
+| area | state |
+|---|---|
+| Lua binding layer | registry, single-parent inheritance, property model, `ApiSpec` codegen — 16 tests green |
+| `ARCH000` container | solved; the reader asserts index arithmetic instead of trusting it |
+| Payload codec | all three modes: `0x00` XOR keystream, `0x01` plain LZW, `0x02` LCG keystream |
+| PNG decoding | from an in-memory buffer, via libpng |
+| Headless binary | reads an archive, decodes, counts draws, exits |
+| Windowed binary | SDL2 window; the renderer **counts calls and draws nothing** |
+| Native binding surface | **441 bodies located and decompiled; 69 named; 0 implemented** |
 
-Nothing is pre-extracted. Container → span → codec → PNG → texture → present, in one
-process, against a real Steam install.
+The last row is the whole ballgame. The binding surface is the per-frame cost
+centre — `repentogxm` measures its own port and concludes that below 60 FPS the
+cost is *translated code, draws, and Lua* — so until those 441 bodies are
+implemented there is nothing to render. See §13, §14 and §15.
 
-CLI accepts two source forms:
-```
-isaec_window <image.png>                 [frames] [width] [height]
-isaec_window <archive.a> <entry-index>   [frames] [width] [height]
-```
+---
 
-Build and test:
-```
+## 3. Running it
+
+```sh
 cmake -S . -B build -j$(nproc) && cmake --build build -j$(nproc)
-./build/tests/isaec_tests      # expect: 62 cases, 0 failed
+./build/tests/isaec_tests                                       # 62 cases, 0 failed
+./build/isaec_headless <install>/resources/packed/graphics.a 0 120 640 480
 ```
+
+Nothing is pre-extracted. Container → span → codec → PNG → texture → present, in
+one process, against a real Steam install.
+
+Two source forms:
+
+```
+isaec_headless <archive.a> <entry-index>  [frames] [width] [height]
+isaec_headless <image.png>                [frames] [width] [height]
+```
+
+`libpng` is required unless `-DISAEC_WITH_PNG=OFF`, in which case nothing decodes
+images and the five PNG tests are not built. Lua is pinned to 5.3 and vendored.
+
 
 ---
 
