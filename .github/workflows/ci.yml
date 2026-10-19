@@ -31,8 +31,24 @@ jobs:
             os: ubuntu-latest
             cc: clang
             cxx: clang++
-          - name: macos-appleclang
-            os: macos-latest
+          # Native ARM64, so ctest executes real aarch64 binaries instead of
+          # inspecting cross-compiled objects. Cross-compilation is already
+          # covered by the android-arm64 job below.
+          - name: linux-arm64
+            os: ubuntu-24.04-arm
+            cc: gcc
+            cxx: g++
+          # Pinned rather than macos-latest. The default Apple runner is Apple
+          # Silicon, so leaving it unpinned meant this job silently stopped
+          # covering Intel macOS without anyone editing this file. Both
+          # architectures are now named, so a runner default changing cannot
+          # quietly narrow coverage.
+          - name: macos-arm64
+            os: macos-14
+            cc: clang
+            cxx: clang++
+          - name: macos-x86_64
+            os: macos-13
             cc: clang
             cxx: clang++
     steps:
