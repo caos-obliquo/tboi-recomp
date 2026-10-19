@@ -8,6 +8,8 @@ on:
   pull_request:
     types: [closed]
     branches: [main]
+    # NOTE: skip the release-record PR itself to avoid recursive version bumps
+    if: github.event.pull_request.merged == true && !startsWith(github.event.pull_request.title, 'chore(release)')
 
 permissions:
   contents: write
