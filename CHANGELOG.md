@@ -1,20 +1,5 @@
-# Changelog
-
-All notable changes to this project are documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-Entries describe *why* a change exists, not only what changed. Where a fix
-looks arbitrary without its cause, it carries `Why:` and `Effect:` lines.
-
-The version is not written here by hand. `project(... VERSION x.y.z)` in
-`CMakeLists.txt` is the single source of truth; `tools/release.py` reads it and
-`.github/workflows/release.yml` tags from it.
-
-## [Unreleased]
-
 ### Added
+- `tools/kuna_batch.py` — resumable batch decompiler: writes each body immediately and maintains an append-only index for resume safety (issue #15)
 
 - `tools/release.py bump-notes --pr N` — bumps the patch version and writes the
   CHANGELOG section from a merged pull request: its title, body, linked issues
