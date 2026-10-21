@@ -5,6 +5,7 @@ set(ISAEC_TEST_SRC
     test_vector.cpp
     test_color.cpp
     test_posvel.cpp
+    test_field_class.cpp
     test_codec.cpp
     test_archive.cpp
 )

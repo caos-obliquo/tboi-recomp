@@ -97,7 +97,8 @@ int value_index_dispatch(lua_State* L) {
         lua_getfield(L, -1, lua_tostring(L, 2));  // NOLINT(google-runtime-printf)
         if (lua_isfunction(L, -1)) {
             lua_pushvalue(L, 1);
-            lua_call(L, 1, 1);
+            lua_pushvalue(L, 2);  // the name of the property
+            lua_call(L, 2, 1);
             return 1;
         }
         lua_pop(L, 1);
@@ -145,7 +146,8 @@ int value_newindex_dispatch(lua_State* L) {
             if (lua_isfunction(L, -1)) {
                 lua_pushvalue(L, 1);  // the instance
                 lua_pushvalue(L, 3);  // the value
-                lua_call(L, 2, 0);
+                lua_pushvalue(L, 2);  // the name of the property
+                lua_call(L, 3, 0);
                 return 0;
             }
         }
