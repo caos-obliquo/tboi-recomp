@@ -1151,95 +1151,100 @@ Three shapes of registration have to be attributed, and all three are covered:
 | class-registration routines | 66 |
 | distinct classes | **64** |
 | global namespaces (not classes) | **3** |
-| attributed registration records | **2011** |
-| distinct (class, property) pairs | **1537** |
-| distinct bodies attributed to a class | 907 |
+| attributed registration records | **2012** |
+| distinct (class, property) pairs | **1538** |
+| distinct bodies attributed to a class | **911** |
+| method / property / metamethod records | **1026 / 861 / 125** |
 
-The 64 classes and their property counts:
+The 64 classes, their member counts, and how many distinct closure bodies
+implement them. A class can share a body with another class and with its own
+sibling members, so the body count is never a method count:
 
-| class | properties | distinct bodies |
-|---|---:|---:|
-| `EntityPlayer` | 275 | 95 |
-| `Room` | 131 | 57 |
-| `Entity` | 100 | 66 |
-| `Game` | 87 | 47 |
-| `Level` | 65 | 28 |
-| `Sprite` | 46 | 26 |
-| `EntityLaser` | 41 | 32 |
-| `EntityFamiliar` | 39 | 20 |
-| `EntityNPC` | 37 | 30 |
-| `Item` | 36 | 17 |
-| `GridEntityDoor` | 30 | 23 |
-| `GridEntity` | 29 | 34 |
-| `RoomDescriptor` | 29 | 16 |
-| `Seeds` | 28 | 18 |
-| `EntityTear` | 25 | 19 |
-| `ProjectileParams` | 25 | 14 |
-| `Vector` | 24 | 15 |
-| `EntityProjectile` | 20 | 6 |
-| `MusicManager` | 20 | 11 |
-| `EntityEffect` | 18 | 14 |
-| `TemporaryEffects` | 18 | 8 |
-| `EntityPickup` | 17 | 9 |
-| `ItemPool` | 17 | 15 |
-| `Card` | 15 | 10 |
-| `EntityKnife` | 15 | 10 |
-| `PathFinder` | 14 | 11 |
-| `Config` | 13 | 9 |
-| `FontRenderSettings` | 13 | 9 |
-| `HUD` | 13 | 8 |
-| `BitSet128` | 12 | 10 |
-| `PillEffect` | 12 | 11 |
-| `Color` | 11 | 5 |
-| `SFXManager` | 10 | 8 |
-| `Costume` | 9 | 9 |
-| `EntityRef` | 9 | 11 |
-| `Font` | 9 | 8 |
-| `GridEntityDesc` | 9 | 6 |
-| `ActiveItemDesc` | 8 | 5 |
-| `TearParams` | 8 | 9 |
-| `GridEntityRock` | 7 | 8 |
-| `RNG` | 7 | 7 |
-| `Spawn` | 7 | 9 |
-| `EntityBomb` | 5 | 7 |
-| `Entry` | 5 | 7 |
-| `GridEntityPoop` | 5 | 7 |
-| `KColor` | 5 | 3 |
-| `CardConfigList` | 4 | 4 |
-| `CostumeConfigList` | 4 | 4 |
-| `EffectList` | 4 | 4 |
-| `EntityList` | 4 | 3 |
-| `GridEntityPit` | 4 | 5 |
-| `GridEntityPressurePlate` | 4 | 7 |
-| `ItemConfigList` | 4 | 4 |
-| `PillConfigList` | 4 | 4 |
-| `QueueItemData` | 4 | 7 |
-| `RoomConfigEntries` | 4 | 3 |
-| `RoomConfigSpawns` | 4 | 3 |
-| `TemporaryEffect` | 4 | 5 |
-| `VectorList` | 4 | 4 |
-| `intValues` | 4 | 3 |
-| `PosVel` | 3 | 3 |
-| `EntityPtr` | 2 | 2 |
-| `GridEntitySpikes` | 1 | 2 |
-| `GridEntityTNT` | 1 | 2 |
+| class | methods | properties | metamethods | distinct bodies |
+|---|---:|---:|---:|---:|
+| `Entity` | 63 | 37 | 1 | 57 |
+| `Item` | 5 | 30 | 1 | 17 |
+| `EntityLaser` | 15 | 26 | 0 | 30 |
+| `EntityPlayer` | 249 | 26 | 0 | 95 |
+| `RoomDescriptor` | 1 | 26 | 3 | 16 |
+| `ProjectileParams` | 0 | 23 | 2 | 14 |
+| `EntityTear` | 6 | 19 | 0 | 19 |
+| `EntityFamiliar` | 22 | 17 | 0 | 20 |
+| `Room` | 116 | 16 | 2 | 58 |
+| `EntityNPC` | 22 | 15 | 0 | 30 |
+| `EntityProjectile` | 6 | 14 | 0 | 6 |
+| `GridEntityDoor` | 16 | 14 | 0 | 23 |
+| `EntityEffect` | 5 | 13 | 0 | 14 |
+| `Card` | 3 | 11 | 1 | 10 |
+| `PillEffect` | 1 | 10 | 1 | 11 |
+| `EntityPickup` | 8 | 9 | 0 | 9 |
+| `Costume` | 0 | 8 | 1 | 9 |
+| `EntityKnife` | 7 | 8 | 0 | 10 |
+| `EntityRef` | 0 | 8 | 1 | 11 |
+| `GridEntityDesc` | 0 | 8 | 1 | 6 |
+| `ActiveItemDesc` | 0 | 7 | 1 | 5 |
+| `Color` | 4 | 7 | 2 | 7 |
+| `Sprite` | 37 | 7 | 1 | 25 |
+| `TearParams` | 0 | 7 | 1 | 9 |
+| `Game` | 80 | 6 | 1 | 47 |
+| `GridEntity` | 23 | 5 | 1 | 27 |
+| `Level` | 59 | 5 | 1 | 28 |
+| `Spawn` | 1 | 5 | 1 | 9 |
+| `EntityBomb` | 1 | 4 | 0 | 7 |
+| `Entry` | 0 | 4 | 1 | 7 |
+| `KColor` | 0 | 4 | 1 | 3 |
+| `GridEntityPoop` | 2 | 3 | 0 | 7 |
+| `GridEntityPressurePlate` | 1 | 3 | 0 | 7 |
+| `GridEntityRock` | 4 | 3 | 0 | 8 |
+| `QueueItemData` | 0 | 3 | 1 | 7 |
+| `TemporaryEffect` | 0 | 3 | 1 | 5 |
+| `BitSet128` | 2 | 2 | 8 | 10 |
+| `PosVel` | 0 | 2 | 1 | 3 |
+| `Vector` | 15 | 2 | 7 | 15 |
+| `CardConfigList` | 1 | 1 | 2 | 3 |
+| `CostumeConfigList` | 1 | 1 | 2 | 3 |
+| `EffectList` | 1 | 1 | 2 | 3 |
+| `EntityList` | 1 | 1 | 2 | 3 |
+| `EntityPtr` | 1 | 1 | 1 | 3 |
+| `GridEntityPit` | 3 | 1 | 0 | 5 |
+| `GridEntitySpikes` | 0 | 1 | 0 | 2 |
+| `GridEntityTNT` | 0 | 1 | 0 | 2 |
+| `ItemConfigList` | 1 | 1 | 2 | 3 |
+| `PillConfigList` | 1 | 1 | 2 | 3 |
+| `RoomConfigEntries` | 1 | 1 | 2 | 3 |
+| `RoomConfigSpawns` | 1 | 1 | 2 | 3 |
+| `VectorList` | 1 | 1 | 2 | 3 |
+| `intValues` | 1 | 1 | 2 | 3 |
+| `Config` | 12 | 0 | 1 | 9 |
+| `Font` | 9 | 0 | 1 | 9 |
+| `FontRenderSettings` | 12 | 0 | 1 | 9 |
+| `HUD` | 11 | 0 | 1 | 7 |
+| `ItemPool` | 16 | 0 | 1 | 15 |
+| `MusicManager` | 19 | 0 | 1 | 11 |
+| `PathFinder` | 13 | 0 | 1 | 11 |
+| `RNG` | 5 | 0 | 2 | 7 |
+| `SFXManager` | 9 | 0 | 1 | 8 |
+| `Seeds` | 27 | 0 | 1 | 18 |
+| `TemporaryEffects` | 17 | 0 | 1 | 8 |
 
-The global namespaces are not classes -- they are the game's Lua
-globals. They are listed separately so they are never mistaken for
-a class with an unusually large API:
+The three global namespaces are not classes -- they are the game's Lua
+globals. They are listed separately so they are never mistaken for a class
+with an unusually large API:
 
-| namespace | members | distinct bodies |
-|---|---:|---:|
-| `global:Isaac` | 56 | 29 |
-| `global:Options` | 27 | 6 |
-| `global:Input` | 13 | 8 |
-
+| namespace | methods | properties | metamethods | distinct bodies |
+|---|---:|---:|---:|---:|
+| `global:Options` | 0 | 27 | 0 | 6 |
+| `global:Input` | 9 | 0 | 0 | 4 |
+| `global:Isaac` | 56 | 0 | 0 | 29 |
 
 `global:Isaac` is the game's Lua global namespace -- `Isaac.GetPlayer()`,
 `Isaac.CountEntities()`, `Isaac.FindInRadius()` and so on. `global:Input` and
-`global:Options` are the other two. They are not classes, and they are listed
-separately so that they are never mistaken for a class with an unusually
-large API.
+`global:Options` are the other two. They are not classes.
+
+The surface this section produces is written to
+`bindings/code-derived-surface.json` (format 2) and drives
+`bindings/isaac-api-spec.json` and the generated header through
+`tools/gen-api-spec.py`.
 
 ### 16.4 The contamination is gone
 
@@ -1250,40 +1255,77 @@ settles it:
 
 | class | old bucket (§13, adjacency) | code-derived (§16) |
 |---|---:|---:|
-| `HUD` | 42 | **13** |
+| `HUD` | 42 | **12** |
 | `Isaac` | 76 | **0** -- there is no such class; the global namespace is `global:Isaac` |
-| `Entity` | 261 | **100** |
+| `Entity` | 261 | **101** |
 | `KColor` | 18 | **5** |
 | `EntityPlayer` | 77 | **275** |
-| `Sprite` | 33 | **46** |
+| `Sprite` | 33 | **45** |
 | `Vector` | 22 | **24** |
-| `Font` | 8 | **9** |
+| `Font` | 8 | **10** |
 
-`HUD` now carries exactly the methods it should: `Render`, `Update`,
-`ShowItemText`, `ShowFortuneText`, `SetVisible`, `IsVisible`,
-`AssignPlayerHUDs`, `FlashChargeBar`, `InvalidateActiveItem`,
-`InvalidateCraftingItem`, `PostUpdate`, `IsVulnerableEnemy`, `__gc`.
+`HUD` now carries the methods the binary gives it, and no others. `Entity`
+gained `IsVulnerableEnemy`, which the adjacency method had filed under `HUD`;
+the mod-data functions (`HasModData`, `LoadModData`, `RemoveModData`,
+`SaveModData`) are `global:Isaac` functions and not `global:Input` ones; and
+`__mul` belongs to `Color`, not to `Sprite`.
 
 The old surface also had only 9 classes where the code has 64, and it had
 `Input` as a class, which it is not.
 
-### 16.5 What this does not establish
+### 16.5 Method, property or metamethod
+
+Every record is classified by the helper that performs the registration, not
+by the name. The helper is the function containing the `lua_pushcclosure` call
+site, and the classification is read from the metatable key that the helper
+pushes into the class table:
+
+| pushed key | meaning | records |
+|---|---|---:|
+| `__propget` / `__propset` / `__newindex` | **property** | **861** |
+| `__gc`, `__len`, `__call`, `__tostring`, `__add`, ... | **metamethod** | **125** |
+| none of the above | **method** | **1026** |
+
+The role of a property is read per call site, because one helper can install
+both sides. The generic property registrar `0x875230` pushes `__propget`
+(`0xb6e994`) and installs the reader `0x008bb2e0`, then pushes `__propset`
+(`0xb6ea38`) and installs the writer `0x008bb340`; a whole-helper scan reported
+both as getters. Per call site, `Vector.X` carries
+`getter 0x008bb2e0 / setter 0x008bb340 / upvalue 0x00000000` and `Vector.Y` the
+same bodies with `upvalue 0x00000004` -- the field offset travels as the
+upvalue, so a body address is not an identity.
+
+The classification was itself a regression check: switching from a
+frame-pointer-only function extent to a leaf-aware extent moved 273 records to
+a different `func` and, with a recursive class resolution, kept every class
+count (64 classes + 3 namespaces, 2012 records, 1538 pairs, 911
+bodies).
+
+### 16.6 What this does not establish
 
 - **No body is implemented.** This is a table, not code. 0 of 911 bodies run.
 - **Inheritance is not modelled.** A property that a class inherits is
   registered on its parent's table, so it is attributed to the parent. The
-  `__parent` link lives in the class-registration routine and is read from
-  there.
+  `__parent` link is a Lua table taken from the stack in the registration
+  routine, not a name literal, so the parent *name* is not recoverable from
+  the binary; the eight known `Entity` subclasses are curated in
+  `tools/gen-api-spec.py`.
 - **A property is not a signature.** `TearFlags` is on `Entity`; what it
   returns is still unknown.
-- **The counts are per registration, not per method.** 1537 (class, property)
-  pairs over 64 classes, from 2011 records; the same body appears in several
+- **Metamethods are recorded but not wired.** `apply()` registers methods and
+  properties; the 125 metamethods in the spec have no runtime registration
+  path yet.
+- **The counts are per registration, not per method.** 1538 (class, property)
+  pairs over 64 classes, from 2012 records; the same body appears in several
   classes, and the same name appears in many. A property with a getter and a
   setter is counted twice, which is correct for a registration table and
   wrong for a method count.
-- **Function extents are frame-pointer based.** A helper that does not push
-  `ebp` is attributed to the function that encloses it, so the `func` field
-  of a record can name the caller rather than the helper. The class
-  attribution does not depend on it, because it is resolved from the call
-  site.
+- **Function extents are heuristic.** A function starts at a `push ebp`
+  prologue, or at the first instruction after an `int3` run that follows a
+  terminator. Helpers that neither push `ebp` nor follow padding are folded
+  into the function that encloses them; `jmp` is deliberately not treated as a
+  function start, because a loop back-edge is not one. The class attribution
+  resolves a helper through its call sites instead, so it does not depend on
+  the extent rule.
 - **One binary.** No independent cross-check yet.
+

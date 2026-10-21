@@ -1,0 +1,8715 @@
+{
+ "classes": {
+  "ActiveItemDesc": {
+   "metamethods": [
+    {
+     "body": "0x008c2fd0",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008bdf80",
+     "name": "BatteryCharge",
+     "setter": "0x008bdfe0",
+     "upvalue": "0x0000000c"
+    },
+    {
+     "getter": "0x008bdf80",
+     "name": "Charge",
+     "setter": "0x008bdfe0",
+     "upvalue": "0x00000008"
+    },
+    {
+     "getter": "0x008bdf80",
+     "name": "Item",
+     "setter": "0x008bdfe0",
+     "upvalue": "0x00000000"
+    },
+    {
+     "getter": "0x008be040",
+     "name": "PartialCharge",
+     "setter": "0x008be0a0",
+     "upvalue": "0x00000018"
+    },
+    {
+     "getter": "0x008bdf80",
+     "name": "SubCharge",
+     "setter": "0x008bdfe0",
+     "upvalue": "0x00000010"
+    },
+    {
+     "getter": "0x008bdf80",
+     "name": "TimedRechargeCooldown",
+     "setter": "0x008bdfe0",
+     "upvalue": "0x00000014"
+    },
+    {
+     "getter": "0x008bdf80",
+     "name": "VarData",
+     "setter": "0x008bdfe0",
+     "upvalue": "0x0000001c"
+    }
+   ]
+  },
+  "BitSet128": {
+   "metamethods": [
+    {
+     "body": "0x008aa300",
+     "name": "__band",
+     "upvalue": "0x0085e4d0"
+    },
+    {
+     "body": "0x008aa3e0",
+     "name": "__bnot",
+     "upvalue": "0x00592200"
+    },
+    {
+     "body": "0x008aa300",
+     "name": "__bor",
+     "upvalue": "0x0085e4f0"
+    },
+    {
+     "body": "0x008aa300",
+     "name": "__bxor",
+     "upvalue": "0x0085e510"
+    },
+    {
+     "body": "0x008bc330",
+     "name": "__call",
+     "upvalue": null
+    },
+    {
+     "body": "0x008aa480",
+     "name": "__eq",
+     "upvalue": "0x0085e530"
+    },
+    {
+     "body": "0x008c3170",
+     "name": "__gc",
+     "upvalue": null
+    },
+    {
+     "body": "0x008aa530",
+     "name": "__tostring",
+     "upvalue": "0x0085e490"
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008aa5b0",
+     "name": "Get",
+     "upvalue": "0x0085e560"
+    },
+    {
+     "body": "0x008aa640",
+     "name": "Set",
+     "upvalue": "0x0085e5c0"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008bc3c0",
+     "name": "h",
+     "setter": "0x008bc420",
+     "upvalue": "0x00000008"
+    },
+    {
+     "getter": "0x008bc3c0",
+     "name": "l",
+     "setter": "0x008bc420",
+     "upvalue": "0x00000000"
+    }
+   ]
+  },
+  "Card": {
+   "metamethods": [
+    {
+     "body": "0x008c3130",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008aac20",
+     "name": "IsAvailable",
+     "upvalue": "0x00730aa0"
+    },
+    {
+     "body": "0x008aac20",
+     "name": "IsCard",
+     "upvalue": "0x005b1530"
+    },
+    {
+     "body": "0x008aac20",
+     "name": "IsRune",
+     "upvalue": "0x005b1550"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008bc480",
+     "name": "AchievementID",
+     "setter": "0x008bc4e0",
+     "upvalue": "0x00000004"
+    },
+    {
+     "getter": "0x008bc480",
+     "name": "AnnouncerDelay",
+     "setter": "0x008bc4e0",
+     "upvalue": "0x00000060"
+    },
+    {
+     "getter": "0x008bc7f0",
+     "name": "AnnouncerVoice",
+     "setter": "0x008bc4e0",
+     "upvalue": "0x0000005c"
+    },
+    {
+     "getter": "0x008bc7f0",
+     "name": "CardType",
+     "setter": "0x008bc4e0",
+     "upvalue": "0x00000058"
+    },
+    {
+     "getter": "0x008bc540",
+     "name": "Description",
+     "setter": "0x008bc5b0",
+     "upvalue": "0x00000020"
+    },
+    {
+     "getter": "0x008bc6c0",
+     "name": "GreedModeAllowed",
+     "setter": "0x008bc720",
+     "upvalue": "0x00000050"
+    },
+    {
+     "getter": "0x008bc540",
+     "name": "HudAnim",
+     "setter": "0x008bc5b0",
+     "upvalue": "0x00000038"
+    },
+    {
+     "getter": "0x008bc480",
+     "name": "ID",
+     "setter": "0x008bc4e0",
+     "upvalue": "0x00000000"
+    },
+    {
+     "getter": "0x008bc480",
+     "name": "MimicCharge",
+     "setter": "0x008bc4e0",
+     "upvalue": "0x00000064"
+    },
+    {
+     "getter": "0x008bc540",
+     "name": "Name",
+     "setter": "0x008bc5b0",
+     "upvalue": "0x00000008"
+    },
+    {
+     "getter": "0x008bc790",
+     "name": "PickupSubtype",
+     "setter": "0x008bc4e0",
+     "upvalue": "0x00000054"
+    }
+   ]
+  },
+  "CardConfigList": {
+   "metamethods": [
+    {
+     "body": "0x008c5cb0",
+     "name": "__gc",
+     "upvalue": null
+    },
+    {
+     "body": "0x008c3630",
+     "name": "__len",
+     "upvalue": "0x00417840"
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008c4e90",
+     "name": "Get",
+     "upvalue": "0x008a8080"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008c3630",
+     "name": "Size",
+     "setter": null,
+     "upvalue": "0x00417840"
+    }
+   ]
+  },
+  "Color": {
+   "metamethods": [
+    {
+     "body": "0x008c3210",
+     "name": "__gc",
+     "upvalue": null
+    },
+    {
+     "body": "0x008a9360",
+     "name": "__mul",
+     "upvalue": "0x006831c0"
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008a91f0",
+     "name": "Reset",
+     "upvalue": "0x00682ed0"
+    },
+    {
+     "body": "0x008a9240",
+     "name": "SetColorize",
+     "upvalue": "0x00682fb0"
+    },
+    {
+     "body": "0x008a92b0",
+     "name": "SetOffset",
+     "upvalue": "0x00682fe0"
+    },
+    {
+     "body": "0x008a9240",
+     "name": "SetTint",
+     "upvalue": "0x00682f20"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x0089f590",
+     "name": "A",
+     "setter": "0x0089f500",
+     "upvalue": "0x00407270"
+    },
+    {
+     "getter": "0x0089f590",
+     "name": "B",
+     "setter": "0x0089f500",
+     "upvalue": "0x00407260"
+    },
+    {
+     "getter": "0x0089f590",
+     "name": "BO",
+     "setter": "0x0089f500",
+     "upvalue": "0x004072d0"
+    },
+    {
+     "getter": "0x0089f590",
+     "name": "G",
+     "setter": "0x0089f500",
+     "upvalue": "0x00407250"
+    },
+    {
+     "getter": "0x0089f590",
+     "name": "GO",
+     "setter": "0x0089f500",
+     "upvalue": "0x004072c0"
+    },
+    {
+     "getter": "0x0089f590",
+     "name": "R",
+     "setter": "0x0089f500",
+     "upvalue": "0x00407240"
+    },
+    {
+     "getter": "0x0089f590",
+     "name": "RO",
+     "setter": "0x0089f500",
+     "upvalue": "0x004072b0"
+    }
+   ]
+  },
+  "Config": {
+   "metamethods": [
+    {
+     "body": "0x008c30b0",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008aaf40",
+     "name": "GetCard",
+     "upvalue": "0x0072fe00"
+    },
+    {
+     "body": "0x008ab160",
+     "name": "GetCards",
+     "upvalue": "0x00685d40"
+    },
+    {
+     "body": "0x008aae80",
+     "name": "GetCollectible",
+     "upvalue": "0x0072fd10"
+    },
+    {
+     "body": "0x008ab0c0",
+     "name": "GetCollectibles",
+     "upvalue": "0x00424530"
+    },
+    {
+     "body": "0x008aae80",
+     "name": "GetNullItem",
+     "upvalue": "0x0072fda0"
+    },
+    {
+     "body": "0x008ab0c0",
+     "name": "GetNullItems",
+     "upvalue": "0x004a5cf0"
+    },
+    {
+     "body": "0x008ab000",
+     "name": "GetPillEffect",
+     "upvalue": "0x0072fdd0"
+    },
+    {
+     "body": "0x008ab200",
+     "name": "GetPillEffects",
+     "upvalue": "0x0041e460"
+    },
+    {
+     "body": "0x008aae80",
+     "name": "GetTrinket",
+     "upvalue": "0x0072fd70"
+    },
+    {
+     "body": "0x008ab0c0",
+     "name": "GetTrinkets",
+     "upvalue": "0x00685d30"
+    },
+    {
+     "body": "0x0089e300",
+     "name": "IsValidCollectible",
+     "upvalue": "0x0072fe30"
+    },
+    {
+     "body": "0x0089e290",
+     "name": "ShouldAddCostumeOnPickup",
+     "upvalue": "0x0085dbd0"
+    }
+   ],
+   "parent": ""
+  },
+  "Costume": {
+   "metamethods": [
+    {
+     "body": "0x008c30d0",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008bd310",
+     "name": "Anm2Path",
+     "setter": "0x008bd380",
+     "upvalue": "0x00000004"
+    },
+    {
+     "getter": "0x008bd490",
+     "name": "HasOverlay",
+     "setter": "0x008bd4f0",
+     "upvalue": "0x00000020"
+    },
+    {
+     "getter": "0x008bd490",
+     "name": "HasSkinAlt",
+     "setter": "0x008bd4f0",
+     "upvalue": "0x00000022"
+    },
+    {
+     "getter": "0x008bd250",
+     "name": "ID",
+     "setter": "0x008bd2b0",
+     "upvalue": "0x00000000"
+    },
+    {
+     "getter": "0x008bd490",
+     "name": "IsFlying",
+     "setter": "0x008bd4f0",
+     "upvalue": "0x00000021"
+    },
+    {
+     "getter": "0x008bd490",
+     "name": "OverwriteColor",
+     "setter": "0x008bd4f0",
+     "upvalue": "0x00000028"
+    },
+    {
+     "getter": "0x008bd250",
+     "name": "Priority",
+     "setter": "0x008bd2b0",
+     "upvalue": "0x0000001c"
+    },
+    {
+     "getter": "0x008bd560",
+     "name": "SkinColor",
+     "setter": "0x008bd5f0",
+     "upvalue": "0x00000024"
+    }
+   ]
+  },
+  "CostumeConfigList": {
+   "metamethods": [
+    {
+     "body": "0x008c5c50",
+     "name": "__gc",
+     "upvalue": null
+    },
+    {
+     "body": "0x008c3510",
+     "name": "__len",
+     "upvalue": "0x0089e390"
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008c5310",
+     "name": "Get",
+     "upvalue": "0x0089e350"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008c3510",
+     "name": "Size",
+     "setter": null,
+     "upvalue": "0x0089e390"
+    }
+   ]
+  },
+  "EffectList": {
+   "metamethods": [
+    {
+     "body": "0x008c5c10",
+     "name": "__gc",
+     "upvalue": null
+    },
+    {
+     "body": "0x008c3450",
+     "name": "__len",
+     "upvalue": "0x007dca60"
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008c5610",
+     "name": "Get",
+     "upvalue": "0x008a8020"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008c3450",
+     "name": "Size",
+     "setter": null,
+     "upvalue": "0x007dca60"
+    }
+   ]
+  },
+  "Entity": {
+   "metamethods": [
+    {
+     "body": "0x008c2fb0",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008ac140",
+     "name": "AddBurn",
+     "upvalue": "0x006ae280"
+    },
+    {
+     "body": "0x008ac4d0",
+     "name": "AddCharmed",
+     "upvalue": "0x006ad870"
+    },
+    {
+     "body": "0x008ac240",
+     "name": "AddConfusion",
+     "upvalue": "0x006add70"
+    },
+    {
+     "body": "0x008abfe0",
+     "name": "AddEntityFlags",
+     "upvalue": "0x004173e0"
+    },
+    {
+     "body": "0x008ac240",
+     "name": "AddFear",
+     "upvalue": "0x006ae0a0"
+    },
+    {
+     "body": "0x008ac240",
+     "name": "AddFreeze",
+     "upvalue": "0x006ad3c0"
+    },
+    {
+     "body": "0x0089d9b0",
+     "name": "AddHealth",
+     "upvalue": "0x006a9c50"
+    },
+    {
+     "body": "0x008ac240",
+     "name": "AddMidasFreeze",
+     "upvalue": "0x006adf40"
+    },
+    {
+     "body": "0x008ac140",
+     "name": "AddPoison",
+     "upvalue": "0x006ad500"
+    },
+    {
+     "body": "0x008ac4d0",
+     "name": "AddShrink",
+     "upvalue": "0x006b5c10"
+    },
+    {
+     "body": "0x008ac310",
+     "name": "AddSlowing",
+     "upvalue": "0x006ad750"
+    },
+    {
+     "body": "0x008abbe0",
+     "name": "AddVelocity",
+     "upvalue": "0x004314b0"
+    },
+    {
+     "body": "0x008ab830",
+     "name": "BloodExplode",
+     "upvalue": "0x006b45c0"
+    },
+    {
+     "body": "0x0089dc90",
+     "name": "CanShutDoors",
+     "upvalue": "0x008c5d0b"
+    },
+    {
+     "body": "0x008abfe0",
+     "name": "ClearEntityFlags",
+     "upvalue": "0x00417400"
+    },
+    {
+     "body": "0x0089dc90",
+     "name": "CollidesWithGrid",
+     "upvalue": "0x00665a80"
+    },
+    {
+     "body": "0x008ab830",
+     "name": "Die",
+     "upvalue": "0x00444c60"
+    },
+    {
+     "body": "0x0089dc90",
+     "name": "Exists",
+     "upvalue": "0x00417460"
+    },
+    {
+     "body": "0x0089de90",
+     "name": "GetBossID",
+     "upvalue": "0x007e9130"
+    },
+    {
+     "body": "0x0089dd90",
+     "name": "GetColor",
+     "upvalue": "0x00505b60"
+    },
+    {
+     "body": "0x008ab750",
+     "name": "GetData",
+     "upvalue": "0x006b5e60"
+    },
+    {
+     "body": "0x008ac7b0",
+     "name": "GetDropRNG",
+     "upvalue": "0x004174b0"
+    },
+    {
+     "body": "0x008ac050",
+     "name": "GetEntityFlags",
+     "upvalue": "0x00417420"
+    },
+    {
+     "body": "0x008ac5d0",
+     "name": "GetLastChild",
+     "upvalue": "0x006a89b0"
+    },
+    {
+     "body": "0x008ac5d0",
+     "name": "GetLastParent",
+     "upvalue": "0x006a8990"
+    },
+    {
+     "body": "0x008ac850",
+     "name": "GetSprite",
+     "upvalue": "0x00435dd0"
+    },
+    {
+     "body": "0x008ac670",
+     "name": "HasCommonParentWithEntity",
+     "upvalue": "0x006a8c00"
+    },
+    {
+     "body": "0x008ac0b0",
+     "name": "HasEntityFlags",
+     "upvalue": "0x00417430"
+    },
+    {
+     "body": "0x008abac0",
+     "name": "HasFullHealth",
+     "upvalue": "0x006a9c30"
+    },
+    {
+     "body": "0x008abac0",
+     "name": "HasMortalDamage",
+     "upvalue": "0x006ad340"
+    },
+    {
+     "body": "0x008abf60",
+     "name": "IsActiveEnemy",
+     "upvalue": "0x006b5b90"
+    },
+    {
+     "body": "0x0089dc90",
+     "name": "IsBoss",
+     "upvalue": "0x008c5cd4"
+    },
+    {
+     "body": "0x0089dc90",
+     "name": "IsDead",
+     "upvalue": "0x00417470"
+    },
+    {
+     "body": "0x0089dc90",
+     "name": "IsEnemy",
+     "upvalue": "0x006ac530"
+    },
+    {
+     "body": "0x0089dc90",
+     "name": "IsFlying",
+     "upvalue": "0x006ac6c0"
+    },
+    {
+     "body": "0x008ac720",
+     "name": "IsFrame",
+     "upvalue": "0x006ac710"
+    },
+    {
+     "body": "0x0089dc90",
+     "name": "IsInvincible",
+     "upvalue": "0x005b1580"
+    },
+    {
+     "body": "0x0089dc90",
+     "name": "IsVisible",
+     "upvalue": "0x00417480"
+    },
+    {
+     "body": "0x00872730",
+     "name": "IsVulnerableEnemy",
+     "upvalue": "0x0085e680"
+    },
+    {
+     "body": "0x008ab830",
+     "name": "Kill",
+     "upvalue": "0x0085dc30"
+    },
+    {
+     "body": "0x008abb30",
+     "name": "KillWithSource",
+     "upvalue": "0x008c5cf2"
+    },
+    {
+     "body": "0x0089d9b0",
+     "name": "MultiplyFriction",
+     "upvalue": "0x005a6ff0"
+    },
+    {
+     "body": "0x008ab830",
+     "name": "PostRender",
+     "upvalue": "0x008c5d15"
+    },
+    {
+     "body": "0x008ab830",
+     "name": "Remove",
+     "upvalue": "0x008c5d06"
+    },
+    {
+     "body": "0x008ab830",
+     "name": "RemoveStatusEffects",
+     "upvalue": "0x006ae630"
+    },
+    {
+     "body": "0x0089e020",
+     "name": "Render",
+     "upvalue": "0x008c5ced"
+    },
+    {
+     "body": "0x008ab880",
+     "name": "RenderShadowLayer",
+     "upvalue": "0x008c5d01"
+    },
+    {
+     "body": "0x008abc80",
+     "name": "SetColor",
+     "upvalue": "0x008c5ccf"
+    },
+    {
+     "body": "0x008abe80",
+     "name": "SetSize",
+     "upvalue": "0x006ac2a0"
+    },
+    {
+     "body": "0x008abda0",
+     "name": "SetSpriteFrame",
+     "upvalue": "0x0085dcb0"
+    },
+    {
+     "body": "0x008abda0",
+     "name": "SetSpriteOverlayFrame",
+     "upvalue": "0x0085dd00"
+    },
+    {
+     "body": "0x008ab920",
+     "name": "TakeDamage",
+     "upvalue": "0x008c5cde"
+    },
+    {
+     "body": "0x0089cfd0",
+     "name": "ToBomb",
+     "upvalue": null
+    },
+    {
+     "body": "0x0089d4d0",
+     "name": "ToEffect",
+     "upvalue": null
+    },
+    {
+     "body": "0x0089d110",
+     "name": "ToFamiliar",
+     "upvalue": null
+    },
+    {
+     "body": "0x0089ce90",
+     "name": "ToKnife",
+     "upvalue": null
+    },
+    {
+     "body": "0x0089cd50",
+     "name": "ToLaser",
+     "upvalue": null
+    },
+    {
+     "body": "0x0089d390",
+     "name": "ToNPC",
+     "upvalue": null
+    },
+    {
+     "body": "0x0089d250",
+     "name": "ToPickup",
+     "upvalue": null
+    },
+    {
+     "body": "0x0089d610",
+     "name": "ToPlayer",
+     "upvalue": null
+    },
+    {
+     "body": "0x0089cad0",
+     "name": "ToProjectile",
+     "upvalue": null
+    },
+    {
+     "body": "0x0089cc10",
+     "name": "ToTear",
+     "upvalue": null
+    },
+    {
+     "body": "0x008ab830",
+     "name": "Update",
+     "upvalue": "0x008c5d10"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x0089d760",
+     "name": "Child",
+     "setter": "0x0089d6b0",
+     "upvalue": "0x00431560"
+    },
+    {
+     "getter": "0x0089da40",
+     "name": "CollisionDamage",
+     "setter": "0x0089d9b0",
+     "upvalue": "0x005b1570"
+    },
+    {
+     "getter": "0x0089df90",
+     "name": "Color",
+     "setter": "0x0089def0",
+     "upvalue": "0x00871ed0"
+    },
+    {
+     "getter": "0x0089da40",
+     "name": "DepthOffset",
+     "setter": "0x0089d9b0",
+     "upvalue": "0x00435d10"
+    },
+    {
+     "getter": "0x0089de30",
+     "name": "DropSeed",
+     "setter": null,
+     "upvalue": "0x005b1590"
+    },
+    {
+     "getter": "0x0089de90",
+     "name": "EntityCollisionClass",
+     "setter": "0x0089dab0",
+     "upvalue": "0x00417380"
+    },
+    {
+     "getter": "0x0089dc90",
+     "name": "FlipX",
+     "setter": "0x0089dc20",
+     "upvalue": "0x0085dca0"
+    },
+    {
+     "getter": "0x0089de90",
+     "name": "FrameCount",
+     "setter": null,
+     "upvalue": "0x006a9c10"
+    },
+    {
+     "getter": "0x008be110",
+     "name": "Friction",
+     "setter": "0x008be170",
+     "upvalue": "0x0000036c"
+    },
+    {
+     "getter": "0x0089de90",
+     "name": "GridCollisionClass",
+     "setter": "0x0089dab0",
+     "upvalue": "0x00440eb0"
+    },
+    {
+     "getter": "0x0089da40",
+     "name": "HitPoints",
+     "setter": "0x0089d9b0",
+     "upvalue": "0x00417370"
+    },
+    {
+     "getter": "0x0089de30",
+     "name": "Index",
+     "setter": null,
+     "upvalue": "0x00456370"
+    },
+    {
+     "getter": "0x0089de30",
+     "name": "InitSeed",
+     "setter": null,
+     "upvalue": "0x00505b70"
+    },
+    {
+     "getter": "0x0089da40",
+     "name": "Mass",
+     "setter": "0x0089d9b0",
+     "upvalue": "0x00431520"
+    },
+    {
+     "getter": "0x0089da40",
+     "name": "MaxHitPoints",
+     "setter": "0x0089d9b0",
+     "upvalue": "0x00417360"
+    },
+    {
+     "getter": "0x0089d760",
+     "name": "Parent",
+     "setter": "0x0089d6b0",
+     "upvalue": "0x0042a260"
+    },
+    {
+     "getter": "0x0089e0b0",
+     "name": "Position",
+     "setter": "0x0089e020",
+     "upvalue": "0x00417290"
+    },
+    {
+     "getter": "0x0089db80",
+     "name": "PositionOffset",
+     "setter": "0x0089e020",
+     "upvalue": "0x00417310"
+    },
+    {
+     "getter": "0x0089de90",
+     "name": "RenderZOffset",
+     "setter": "0x0089dab0",
+     "upvalue": "0x007536f0"
+    },
+    {
+     "getter": "0x0089d930",
+     "name": "Size",
+     "setter": "0x0089d8b0",
+     "upvalue": "0x00871f90"
+    },
+    {
+     "getter": "0x0089e0b0",
+     "name": "SizeMulti",
+     "setter": "0x0089e020",
+     "upvalue": "0x0085dd40"
+    },
+    {
+     "getter": "0x0089db20",
+     "name": "SortingLayer",
+     "setter": "0x0089dab0",
+     "upvalue": "0x00592250"
+    },
+    {
+     "getter": "0x0089de90",
+     "name": "SpawnGridIndex",
+     "setter": null,
+     "upvalue": "0x006ef400"
+    },
+    {
+     "getter": "0x0089d760",
+     "name": "SpawnerEntity",
+     "setter": "0x0089d6b0",
+     "upvalue": "0x004174a0"
+    },
+    {
+     "getter": "0x0089de90",
+     "name": "SpawnerType",
+     "setter": "0x0089dab0",
+     "upvalue": "0x00431430"
+    },
+    {
+     "getter": "0x0089de30",
+     "name": "SpawnerVariant",
+     "setter": "0x0089dab0",
+     "upvalue": "0x00431440"
+    },
+    {
+     "getter": "0x0089dd90",
+     "name": "SplatColor",
+     "setter": "0x0089dd00",
+     "upvalue": "0x004e47a0"
+    },
+    {
+     "getter": "0x0089db80",
+     "name": "SpriteOffset",
+     "setter": "0x0089e020",
+     "upvalue": "0x0049cb50"
+    },
+    {
+     "getter": "0x0089da40",
+     "name": "SpriteRotation",
+     "setter": "0x0089d9b0",
+     "upvalue": "0x00417330"
+    },
+    {
+     "getter": "0x0089db80",
+     "name": "SpriteScale",
+     "setter": "0x0089e020",
+     "upvalue": "0x00417320"
+    },
+    {
+     "getter": "0x0089de30",
+     "name": "SubType",
+     "setter": "0x0089dab0",
+     "upvalue": "0x00417280"
+    },
+    {
+     "getter": "0x0089d760",
+     "name": "Target",
+     "setter": "0x0089d6b0",
+     "upvalue": "0x004b7080"
+    },
+    {
+     "getter": "0x0089db80",
+     "name": "TargetPosition",
+     "setter": "0x0089d800",
+     "upvalue": "0x004aad30"
+    },
+    {
+     "getter": "0x0089de90",
+     "name": "Type",
+     "setter": null,
+     "upvalue": "0x00417260"
+    },
+    {
+     "getter": "0x0089de30",
+     "name": "Variant",
+     "setter": "0x0089dab0",
+     "upvalue": "0x00417270"
+    },
+    {
+     "getter": "0x0089e0b0",
+     "name": "Velocity",
+     "setter": "0x0089e020",
+     "upvalue": "0x004172d0"
+    },
+    {
+     "getter": "0x0089dc90",
+     "name": "Visible",
+     "setter": "0x0089dc20",
+     "upvalue": "0x00417480"
+    }
+   ]
+  },
+  "EntityBomb": {
+   "metamethods": [],
+   "methods": [
+    {
+     "body": "0x008b1c10",
+     "name": "SetExplosionCountdown",
+     "upvalue": "0x00452c40"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x0089ae00",
+     "name": "ExplosionDamage",
+     "setter": "0x0089ad70",
+     "upvalue": "0x00435e50"
+    },
+    {
+     "getter": "0x0089aff0",
+     "name": "Flags",
+     "setter": "0x0089af50",
+     "upvalue": "0x005cd560"
+    },
+    {
+     "getter": "0x0089aee0",
+     "name": "IsFetus",
+     "setter": "0x0089ae70",
+     "upvalue": "0x004316a0"
+    },
+    {
+     "getter": "0x0089ae00",
+     "name": "RadiusMultiplier",
+     "setter": "0x0089ad70",
+     "upvalue": "0x0060cdc0"
+    }
+   ]
+  },
+  "EntityEffect": {
+   "metamethods": [],
+   "methods": [
+    {
+     "body": "0x008b0850",
+     "name": "FollowParent",
+     "upvalue": "0x004564b0"
+    },
+    {
+     "body": "0x0089e300",
+     "name": "IsPlayerCreep",
+     "upvalue": "0x0060ac20"
+    },
+    {
+     "body": "0x008b07e0",
+     "name": "SetDamageSource",
+     "upvalue": "0x0060ce20"
+    },
+    {
+     "body": "0x008b0900",
+     "name": "SetRadii",
+     "upvalue": "0x00435ef0"
+    },
+    {
+     "body": "0x008b07e0",
+     "name": "SetTimeout",
+     "upvalue": "0x00435e90"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008bef40",
+     "name": "DamageSource",
+     "setter": "0x008befa0",
+     "upvalue": "0x00000470"
+    },
+    {
+     "getter": "0x0089bbf0",
+     "name": "FallingAcceleration",
+     "setter": "0x0089bb60",
+     "upvalue": "0x00435e50"
+    },
+    {
+     "getter": "0x0089bbf0",
+     "name": "FallingSpeed",
+     "setter": "0x0089bb60",
+     "upvalue": "0x00456440"
+    },
+    {
+     "getter": "0x008bf000",
+     "name": "IsFollowing",
+     "setter": "0x008bf060",
+     "upvalue": "0x00000464"
+    },
+    {
+     "getter": "0x008bef40",
+     "name": "LifeSpan",
+     "setter": "0x008befa0",
+     "upvalue": "0x00000460"
+    },
+    {
+     "getter": "0x008bee70",
+     "name": "MaxRadius",
+     "setter": "0x008beed0",
+     "upvalue": "0x00000458"
+    },
+    {
+     "getter": "0x008bee70",
+     "name": "MinRadius",
+     "setter": "0x008beed0",
+     "upvalue": "0x00000454"
+    },
+    {
+     "getter": "0x008bf0d0",
+     "name": "ParentOffset",
+     "setter": "0x008bf170",
+     "upvalue": "0x00000468"
+    },
+    {
+     "getter": "0x0089bbf0",
+     "name": "Rotation",
+     "setter": "0x0089bb60",
+     "upvalue": "0x005784c0"
+    },
+    {
+     "getter": "0x0089bbf0",
+     "name": "Scale",
+     "setter": "0x0089bb60",
+     "upvalue": "0x004d7770"
+    },
+    {
+     "getter": "0x008bef40",
+     "name": "State",
+     "setter": "0x008befa0",
+     "upvalue": "0x00000450"
+    },
+    {
+     "getter": "0x008bef40",
+     "name": "Timeout",
+     "setter": "0x008befa0",
+     "upvalue": "0x0000045c"
+    },
+    {
+     "getter": "0x008bee70",
+     "name": "m_Height",
+     "setter": "0x008beed0",
+     "upvalue": "0x00000410"
+    }
+   ]
+  },
+  "EntityFamiliar": {
+   "metamethods": [],
+   "methods": [
+    {
+     "body": "0x0089b940",
+     "name": "AddCoins",
+     "upvalue": "0x0062a930"
+    },
+    {
+     "body": "0x0089b940",
+     "name": "AddHearts",
+     "upvalue": "0x0062aaa0"
+    },
+    {
+     "body": "0x0089b940",
+     "name": "AddKeys",
+     "upvalue": "0x00630440"
+    },
+    {
+     "body": "0x008b0ad0",
+     "name": "AddToDelayed",
+     "upvalue": "0x00613fe0"
+    },
+    {
+     "body": "0x008b0ad0",
+     "name": "AddToFollowers",
+     "upvalue": "0x0062db20"
+    },
+    {
+     "body": "0x0089b940",
+     "name": "AddToOrbit",
+     "upvalue": "0x006127b0"
+    },
+    {
+     "body": "0x008b0c80",
+     "name": "FireProjectile",
+     "upvalue": "0x00639750"
+    },
+    {
+     "body": "0x008b0ad0",
+     "name": "FollowParent",
+     "upvalue": "0x00612bb0"
+    },
+    {
+     "body": "0x008b0b20",
+     "name": "FollowPosition",
+     "upvalue": "0x00613910"
+    },
+    {
+     "body": "0x0089b8c0",
+     "name": "GetOrbitDistance",
+     "upvalue": "0x00612850"
+    },
+    {
+     "body": "0x008b0bb0",
+     "name": "GetOrbitPosition",
+     "upvalue": "0x006139b0"
+    },
+    {
+     "body": "0x0089b940",
+     "name": "MoveDelayed",
+     "upvalue": "0x00631050"
+    },
+    {
+     "body": "0x008b0d70",
+     "name": "MoveDiagonally",
+     "upvalue": "0x006312f0"
+    },
+    {
+     "body": "0x008b0990",
+     "name": "PickEnemyTarget",
+     "upvalue": "0x00615030"
+    },
+    {
+     "body": "0x0089b940",
+     "name": "PlayChargeAnim",
+     "upvalue": "0x006142e0"
+    },
+    {
+     "body": "0x0089b940",
+     "name": "PlayFloatAnim",
+     "upvalue": "0x00613df0"
+    },
+    {
+     "body": "0x0089b940",
+     "name": "PlayShootAnim",
+     "upvalue": "0x00614500"
+    },
+    {
+     "body": "0x008b0e00",
+     "name": "RecalculateOrbitOffset",
+     "upvalue": "0x00612440"
+    },
+    {
+     "body": "0x008b0ad0",
+     "name": "RemoveFromDelayed",
+     "upvalue": "0x006141e0"
+    },
+    {
+     "body": "0x008b0ad0",
+     "name": "RemoveFromFollowers",
+     "upvalue": "0x0062d7e0"
+    },
+    {
+     "body": "0x008b0ad0",
+     "name": "RemoveFromOrbit",
+     "upvalue": "0x00612820"
+    },
+    {
+     "body": "0x008b0ad0",
+     "name": "Shoot",
+     "upvalue": "0x00614b10"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x0089b9b0",
+     "name": "Coins",
+     "setter": "0x0089b940",
+     "upvalue": "0x00505cf0"
+    },
+    {
+     "getter": "0x008bf210",
+     "name": "FireCooldown",
+     "setter": "0x008bf270",
+     "upvalue": "0x00000d4c"
+    },
+    {
+     "getter": "0x008bf210",
+     "name": "HeadFrameDelay",
+     "setter": "0x008bf270",
+     "upvalue": "0x00000d50"
+    },
+    {
+     "getter": "0x0089b9b0",
+     "name": "Hearts",
+     "setter": "0x0089b940",
+     "upvalue": "0x0060d0e0"
+    },
+    {
+     "getter": "0x008bf4e0",
+     "name": "IsDelayed",
+     "setter": "0x008bf540",
+     "upvalue": "0x00000d75"
+    },
+    {
+     "getter": "0x008bf4e0",
+     "name": "IsFollower",
+     "setter": "0x008bf540",
+     "upvalue": "0x00000d74"
+    },
+    {
+     "getter": "0x0089b9b0",
+     "name": "Keys",
+     "setter": "0x0089b940",
+     "upvalue": "0x0060d100"
+    },
+    {
+     "getter": "0x008bf210",
+     "name": "LastDirection",
+     "setter": "0x008bf270",
+     "upvalue": "0x00000d5c"
+    },
+    {
+     "getter": "0x008bf210",
+     "name": "MoveDirection",
+     "setter": "0x008bf270",
+     "upvalue": "0x00000d54"
+    },
+    {
+     "getter": "0x008bf2d0",
+     "name": "OrbitAngleOffset",
+     "setter": "0x008bf330",
+     "upvalue": "0x00000d60"
+    },
+    {
+     "getter": "0x008bf3a0",
+     "name": "OrbitDistance",
+     "setter": "0x008bf440",
+     "upvalue": "0x00000d64"
+    },
+    {
+     "getter": "0x008bf210",
+     "name": "OrbitLayer",
+     "setter": "0x008bf270",
+     "upvalue": "0x00000d70"
+    },
+    {
+     "getter": "0x008bf2d0",
+     "name": "OrbitSpeed",
+     "setter": "0x008bf330",
+     "upvalue": "0x00000d6c"
+    },
+    {
+     "getter": "0x0089bac0",
+     "name": "Player",
+     "setter": "0x0089ba10",
+     "upvalue": "0x004361f0"
+    },
+    {
+     "getter": "0x008bf210",
+     "name": "RoomClearCount",
+     "setter": "0x008bf270",
+     "upvalue": "0x00000d8c"
+    },
+    {
+     "getter": "0x008bf210",
+     "name": "ShootDirection",
+     "setter": "0x008bf270",
+     "upvalue": "0x00000d58"
+    },
+    {
+     "getter": "0x008bf210",
+     "name": "State",
+     "setter": "0x008bf270",
+     "upvalue": "0x00000d88"
+    }
+   ]
+  },
+  "EntityKnife": {
+   "metamethods": [],
+   "methods": [
+    {
+     "body": "0x0089a700",
+     "name": "GetKnifeDistance",
+     "upvalue": "0x0085deb0"
+    },
+    {
+     "body": "0x0089a700",
+     "name": "GetKnifeVelocity",
+     "upvalue": "0x004d77a0"
+    },
+    {
+     "body": "0x008b2180",
+     "name": "GetRenderZ",
+     "upvalue": "0x008c5cf7"
+    },
+    {
+     "body": "0x008b2270",
+     "name": "IsFlying",
+     "upvalue": "0x0060cf10"
+    },
+    {
+     "body": "0x008b22e0",
+     "name": "Reset",
+     "upvalue": "0x00967fc0"
+    },
+    {
+     "body": "0x0089a670",
+     "name": "SetPathFollowSpeed",
+     "upvalue": "0x0060cfb0"
+    },
+    {
+     "body": "0x008b21e0",
+     "name": "Shoot",
+     "upvalue": "0x00966ef0"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008c04f0",
+     "name": "Charge",
+     "setter": "0x008c0550",
+     "upvalue": "0x00000460"
+    },
+    {
+     "getter": "0x008c04f0",
+     "name": "MaxDistance",
+     "setter": "0x008c0550",
+     "upvalue": "0x0000045c"
+    },
+    {
+     "getter": "0x008c04f0",
+     "name": "PathFollowSpeed",
+     "setter": "0x008c0550",
+     "upvalue": "0x000004c8"
+    },
+    {
+     "getter": "0x008c04f0",
+     "name": "PathOffset",
+     "setter": "0x008c0550",
+     "upvalue": "0x000004c4"
+    },
+    {
+     "getter": "0x0089a700",
+     "name": "Rotation",
+     "setter": "0x0089a670",
+     "upvalue": "0x004d7790"
+    },
+    {
+     "getter": "0x0089a700",
+     "name": "RotationOffset",
+     "setter": "0x0089a670",
+     "upvalue": "0x0085dec0"
+    },
+    {
+     "getter": "0x008c04f0",
+     "name": "Scale",
+     "setter": "0x008c0550",
+     "upvalue": "0x00000430"
+    },
+    {
+     "getter": "0x0089a810",
+     "name": "TearFlags",
+     "setter": "0x0089a770",
+     "upvalue": "0x0085de90"
+    }
+   ]
+  },
+  "EntityLaser": {
+   "metamethods": [],
+   "methods": [
+    {
+     "body": "0x0089a8b0",
+     "name": "CalculateEndPoint",
+     "upvalue": "0x0096fd60"
+    },
+    {
+     "body": "0x008b1f50",
+     "name": "GetEndPoint",
+     "upvalue": "0x007e9230"
+    },
+    {
+     "body": "0x008b2070",
+     "name": "GetNonOptimizedSamples",
+     "upvalue": "0x0097e6e0"
+    },
+    {
+     "body": "0x008b1ef0",
+     "name": "GetRenderZ",
+     "upvalue": "0x008c5cf7"
+    },
+    {
+     "body": "0x008b2070",
+     "name": "GetSamples",
+     "upvalue": "0x0097e3b0"
+    },
+    {
+     "body": "0x008b2000",
+     "name": "IsCircleLaser",
+     "upvalue": "0x00435f50"
+    },
+    {
+     "body": "0x008b2000",
+     "name": "IsSampleLaser",
+     "upvalue": "0x007e9240"
+    },
+    {
+     "body": "0x008b1e20",
+     "name": "SetActiveRotation",
+     "upvalue": "0x0096f420"
+    },
+    {
+     "body": "0x0089aa50",
+     "name": "SetBlackHpDropChance",
+     "upvalue": "0x0060ceb0"
+    },
+    {
+     "body": "0x008b1db0",
+     "name": "SetHomingType",
+     "upvalue": "0x00456850"
+    },
+    {
+     "body": "0x0089aa50",
+     "name": "SetMaxDistance",
+     "upvalue": "0x00435f30"
+    },
+    {
+     "body": "0x008b2110",
+     "name": "SetMultidimensionalTouched",
+     "upvalue": "0x005cd590"
+    },
+    {
+     "body": "0x008b2110",
+     "name": "SetOneHit",
+     "upvalue": "0x005cd580"
+    },
+    {
+     "body": "0x008b1db0",
+     "name": "SetTimeout",
+     "upvalue": "0x00435f20"
+    },
+    {
+     "body": "0x0089ac90",
+     "name": "ShootAngle",
+     "upvalue": "0x0096f310"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x0089aae0",
+     "name": "Angle",
+     "setter": "0x0089aa50",
+     "upvalue": "0x0085e360"
+    },
+    {
+     "getter": "0x008bfc00",
+     "name": "AngleDegrees",
+     "setter": "0x008bfc60",
+     "upvalue": "0x0000041c"
+    },
+    {
+     "getter": "0x008bfc00",
+     "name": "BlackHpDropChance",
+     "setter": "0x008bfc60",
+     "upvalue": "0x000004f4"
+    },
+    {
+     "getter": "0x008c03c0",
+     "name": "BounceLaser",
+     "setter": "0x008c0460",
+     "upvalue": "0x000004e8"
+    },
+    {
+     "getter": "0x008bfc00",
+     "name": "CurveStrength",
+     "setter": "0x008bfc60",
+     "upvalue": "0x000004b8"
+    },
+    {
+     "getter": "0x008bfeb0",
+     "name": "DisableFollowParent",
+     "setter": "0x008bff10",
+     "upvalue": "0x000004e4"
+    },
+    {
+     "getter": "0x008bfac0",
+     "name": "EndPoint",
+     "setter": "0x008bfb60",
+     "upvalue": "0x000004d8"
+    },
+    {
+     "getter": "0x008bfeb0",
+     "name": "FirstUpdate",
+     "setter": "0x008bff10",
+     "upvalue": "0x0000045c"
+    },
+    {
+     "getter": "0x008bfeb0",
+     "name": "GridHit",
+     "setter": "0x008bff10",
+     "upvalue": "0x00000516"
+    },
+    {
+     "getter": "0x008c00b0",
+     "name": "HomingLaser",
+     "setter": "0x008c0140",
+     "upvalue": "0x00000464"
+    },
+    {
+     "getter": "0x008c0290",
+     "name": "HomingType",
+     "setter": "0x008c0320",
+     "upvalue": "0x000004d4"
+    },
+    {
+     "getter": "0x008bfeb0",
+     "name": "IsActiveRotating",
+     "setter": "0x008bff10",
+     "upvalue": "0x000004c0"
+    },
+    {
+     "getter": "0x008bfc00",
+     "name": "LaserLength",
+     "setter": "0x008bfc60",
+     "upvalue": "0x00000460"
+    },
+    {
+     "getter": "0x008bfc00",
+     "name": "LastAngleDegrees",
+     "setter": "0x008bfc60",
+     "upvalue": "0x00000420"
+    },
+    {
+     "getter": "0x008bfc00",
+     "name": "MaxDistance",
+     "setter": "0x008bfc60",
+     "upvalue": "0x000004d0"
+    },
+    {
+     "getter": "0x008bfeb0",
+     "name": "OneHit",
+     "setter": "0x008bff10",
+     "upvalue": "0x00000515"
+    },
+    {
+     "getter": "0x008bfac0",
+     "name": "ParentOffset",
+     "setter": "0x008bfb60",
+     "upvalue": "0x00000410"
+    },
+    {
+     "getter": "0x0089aae0",
+     "name": "Radius",
+     "setter": "0x0089aa50",
+     "upvalue": "0x0060cea0"
+    },
+    {
+     "getter": "0x008bfc00",
+     "name": "RotationDegrees",
+     "setter": "0x008bfc60",
+     "upvalue": "0x000004c8"
+    },
+    {
+     "getter": "0x008c0230",
+     "name": "RotationDelay",
+     "setter": "0x008bfe50",
+     "upvalue": "0x000004c4"
+    },
+    {
+     "getter": "0x008bfc00",
+     "name": "RotationSpd",
+     "setter": "0x008bfc60",
+     "upvalue": "0x000004cc"
+    },
+    {
+     "getter": "0x008bff80",
+     "name": "SampleLaser",
+     "setter": "0x008c0010",
+     "upvalue": "0x0000045d"
+    },
+    {
+     "getter": "0x008bfeb0",
+     "name": "Shrink",
+     "setter": "0x008bff10",
+     "upvalue": "0x0000045e"
+    },
+    {
+     "getter": "0x008bfc00",
+     "name": "StartAngleDegrees",
+     "setter": "0x008bfc60",
+     "upvalue": "0x00000418"
+    },
+    {
+     "getter": "0x0089abf0",
+     "name": "TearFlags",
+     "setter": "0x0089ab50",
+     "upvalue": "0x004177c0"
+    },
+    {
+     "getter": "0x008bfdf0",
+     "name": "Timeout",
+     "setter": "0x008bfe50",
+     "upvalue": "0x00000458"
+    }
+   ]
+  },
+  "EntityList": {
+   "metamethods": [
+    {
+     "body": "0x008c3010",
+     "name": "__gc",
+     "upvalue": null
+    },
+    {
+     "body": "0x0089e150",
+     "name": "__len",
+     "upvalue": "0x004176f0"
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008ab690",
+     "name": "Get",
+     "upvalue": "0x0085e0c0"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x0089e150",
+     "name": "Size",
+     "setter": null,
+     "upvalue": "0x004176f0"
+    }
+   ]
+  },
+  "EntityNPC": {
+   "metamethods": [],
+   "methods": [
+    {
+     "body": "0x008b1810",
+     "name": "AnimWalkFrame",
+     "upvalue": "0x006c1330"
+    },
+    {
+     "body": "0x008b1020",
+     "name": "CalcTargetPosition",
+     "upvalue": "0x006bec40"
+    },
+    {
+     "body": "0x008b1160",
+     "name": "CanBeDamagedFromVelocity",
+     "upvalue": "0x006d4a00"
+    },
+    {
+     "body": "0x0089b5b0",
+     "name": "CanReroll",
+     "upvalue": "0x006d4db0"
+    },
+    {
+     "body": "0x008b1630",
+     "name": "FireBossProjectiles",
+     "upvalue": "0x006ccdd0"
+    },
+    {
+     "body": "0x008b1480",
+     "name": "FireProjectiles",
+     "upvalue": "0x006cb2e0"
+    },
+    {
+     "body": "0x008b1100",
+     "name": "GetAliveEnemyCount",
+     "upvalue": "0x006d6c20"
+    },
+    {
+     "body": "0x008b1100",
+     "name": "GetBossColorIdx",
+     "upvalue": "0x007e92b0"
+    },
+    {
+     "body": "0x008b1100",
+     "name": "GetChampionColorIdx",
+     "upvalue": "0x006a8230"
+    },
+    {
+     "body": "0x008b0f80",
+     "name": "GetPlayerTarget",
+     "upvalue": "0x006be840"
+    },
+    {
+     "body": "0x0089b5b0",
+     "name": "IsBoss",
+     "upvalue": "0x008c5cd4"
+    },
+    {
+     "body": "0x0089b5b0",
+     "name": "IsChampion",
+     "upvalue": "0x006b8480"
+    },
+    {
+     "body": "0x008b0f30",
+     "name": "KillUnique",
+     "upvalue": "0x006be760"
+    },
+    {
+     "body": "0x008b1220",
+     "name": "MakeChampion",
+     "upvalue": "0x006d03e0"
+    },
+    {
+     "body": "0x008b13b0",
+     "name": "MakeSplat",
+     "upvalue": "0x006b64d0"
+    },
+    {
+     "body": "0x008b0e90",
+     "name": "Morph",
+     "upvalue": "0x006c0f30"
+    },
+    {
+     "body": "0x008b12b0",
+     "name": "PlaySound",
+     "upvalue": "0x006d6ba0"
+    },
+    {
+     "body": "0x008b1b30",
+     "name": "QueryNPCsGroup",
+     "upvalue": "0x006d0dd0"
+    },
+    {
+     "body": "0x008b1a20",
+     "name": "QueryNPCsSpawnerType",
+     "upvalue": "0x006d0ca0"
+    },
+    {
+     "body": "0x008b1930",
+     "name": "QueryNPCsType",
+     "upvalue": "0x006d0c60"
+    },
+    {
+     "body": "0x008b0f30",
+     "name": "ResetPathFinderTarget",
+     "upvalue": "0x006a8240"
+    },
+    {
+     "body": "0x0089b380",
+     "name": "ThrowSpider",
+     "upvalue": "0x006c2750"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x0089b5b0",
+     "name": "CanShutDoors",
+     "setter": "0x0089b540",
+     "upvalue": "0x008c5d0b"
+    },
+    {
+     "getter": "0x0089b1e0",
+     "name": "ChildNPC",
+     "setter": null,
+     "upvalue": "0x004567e0"
+    },
+    {
+     "getter": "0x0089b140",
+     "name": "EntityRef",
+     "setter": "0x0089b090",
+     "upvalue": "0x004e4850"
+    },
+    {
+     "getter": "0x008bf5b0",
+     "name": "GroupIdx",
+     "setter": "0x008bf610",
+     "upvalue": "0x00000c7c"
+    },
+    {
+     "getter": "0x008bf5b0",
+     "name": "I1",
+     "setter": "0x008bf610",
+     "upvalue": "0x00000bc0"
+    },
+    {
+     "getter": "0x008bf5b0",
+     "name": "I2",
+     "setter": "0x008bf610",
+     "upvalue": "0x00000bc4"
+    },
+    {
+     "getter": "0x0089b1e0",
+     "name": "ParentNPC",
+     "setter": null,
+     "upvalue": "0x00447770"
+    },
+    {
+     "getter": "0x008bf670",
+     "name": "Pathfinder",
+     "setter": "0x008bf700",
+     "upvalue": "0x00000414"
+    },
+    {
+     "getter": "0x008bf5b0",
+     "name": "ProjectileCooldown",
+     "setter": "0x008bf610",
+     "upvalue": "0x00000ba0"
+    },
+    {
+     "getter": "0x008bf5b0",
+     "name": "ProjectileDelay",
+     "setter": "0x008bf610",
+     "upvalue": "0x00000ba4"
+    },
+    {
+     "getter": "0x0089b310",
+     "name": "Scale",
+     "setter": "0x0089b280",
+     "upvalue": "0x004567a0"
+    },
+    {
+     "getter": "0x008bf920",
+     "name": "State",
+     "setter": "0x008bf610",
+     "upvalue": "0x00000b64"
+    },
+    {
+     "getter": "0x008bf5b0",
+     "name": "StateFrame",
+     "setter": "0x008bf610",
+     "upvalue": "0x00000410"
+    },
+    {
+     "getter": "0x008bf980",
+     "name": "V1",
+     "setter": "0x008bfa20",
+     "upvalue": "0x00000bb0"
+    },
+    {
+     "getter": "0x008bf980",
+     "name": "V2",
+     "setter": "0x008bfa20",
+     "upvalue": "0x00000bb8"
+    }
+   ]
+  },
+  "EntityPickup": {
+   "metamethods": [],
+   "methods": [
+    {
+     "body": "0x008b06e0",
+     "name": "AppearFast",
+     "upvalue": "0x006e3020"
+    },
+    {
+     "body": "0x0089bcd0",
+     "name": "CanReroll",
+     "upvalue": "0x006ee200"
+    },
+    {
+     "body": "0x0089bdb0",
+     "name": "GetCoinValue",
+     "upvalue": "0x006e8380"
+    },
+    {
+     "body": "0x0089bcd0",
+     "name": "IsShopItem",
+     "upvalue": "0x005b1930"
+    },
+    {
+     "body": "0x008b0610",
+     "name": "Morph",
+     "upvalue": "0x006e30a0"
+    },
+    {
+     "body": "0x008b06e0",
+     "name": "PlayDropSound",
+     "upvalue": "0x006e7be0"
+    },
+    {
+     "body": "0x008b06e0",
+     "name": "PlayPickupSound",
+     "upvalue": "0x006e7dc0"
+    },
+    {
+     "body": "0x008b0730",
+     "name": "TryOpenChest",
+     "upvalue": "0x006e6e40"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x0089bcd0",
+     "name": "AutoUpdatePrice",
+     "setter": "0x0089bc60",
+     "upvalue": "0x007e93a0"
+    },
+    {
+     "getter": "0x0089bdb0",
+     "name": "Charge",
+     "setter": "0x0089bd40",
+     "upvalue": "0x007e9390"
+    },
+    {
+     "getter": "0x0089bdb0",
+     "name": "OptionsPickupIndex",
+     "setter": "0x0089bd40",
+     "upvalue": "0x005b1980"
+    },
+    {
+     "getter": "0x0089bdb0",
+     "name": "Price",
+     "setter": "0x0089bd40",
+     "upvalue": "0x00431740"
+    },
+    {
+     "getter": "0x0089bdb0",
+     "name": "ShopItemId",
+     "setter": "0x0089bd40",
+     "upvalue": "0x007e93c0"
+    },
+    {
+     "getter": "0x008bedb0",
+     "name": "State",
+     "setter": "0x008bee10",
+     "upvalue": "0x00000584"
+    },
+    {
+     "getter": "0x0089bdb0",
+     "name": "Timeout",
+     "setter": "0x0089bd40",
+     "upvalue": "0x005b1940"
+    },
+    {
+     "getter": "0x0089bcd0",
+     "name": "Touched",
+     "setter": "0x0089bc60",
+     "upvalue": "0x007e93b0"
+    },
+    {
+     "getter": "0x0089bdb0",
+     "name": "Wait",
+     "setter": "0x0089bd40",
+     "upvalue": "0x0085e440"
+    }
+   ]
+  },
+  "EntityPlayer": {
+   "metamethods": [],
+   "methods": [
+    {
+     "body": "0x0089c3f0",
+     "name": "AddBlackHearts",
+     "upvalue": "0x00758f90"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "AddBloodCharge",
+     "upvalue": "0x007d2d40"
+    },
+    {
+     "body": "0x008acfb0",
+     "name": "AddBlueFlies",
+     "upvalue": "0x007599d0"
+    },
+    {
+     "body": "0x008acdb0",
+     "name": "AddBlueSpider",
+     "upvalue": "0x007bf5f0"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "AddBombs",
+     "upvalue": "0x00759500"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "AddBoneHearts",
+     "upvalue": "0x007ca840"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "AddBrokenHearts",
+     "upvalue": "0x007d2a40"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "AddCacheFlags",
+     "upvalue": "0x00436160"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "AddCard",
+     "upvalue": "0x007a3c10"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "AddCoins",
+     "upvalue": "0x00759400"
+    },
+    {
+     "body": "0x008ad2e0",
+     "name": "AddCollectible",
+     "upvalue": "0x0075f0e0"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "AddControlsCooldown",
+     "upvalue": "0x0085e260"
+    },
+    {
+     "body": "0x008ad0c0",
+     "name": "AddCostume",
+     "upvalue": "0x0075d1d0"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "AddCurseMistEffect",
+     "upvalue": "0x007d8980"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "AddDeadEyeCharge",
+     "upvalue": "0x007c78b0"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "AddDollarBillEffect",
+     "upvalue": "0x007c9000"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "AddEternalHearts",
+     "upvalue": "0x00758c20"
+    },
+    {
+     "body": "0x008affb0",
+     "name": "AddFriendlyDip",
+     "upvalue": "0x007d2a00"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "AddGigaBombs",
+     "upvalue": "0x007d34f0"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "AddGoldenBomb",
+     "upvalue": "0x007c8f80"
+    },
+    {
+     "body": "0x008acac0",
+     "name": "AddGoldenHearts",
+     "upvalue": "0x007c9d10"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "AddGoldenKey",
+     "upvalue": "0x00759620"
+    },
+    {
+     "body": "0x008acbb0",
+     "name": "AddHearts",
+     "upvalue": "0x00758a70"
+    },
+    {
+     "body": "0x008b0380",
+     "name": "AddItemWisp",
+     "upvalue": "0x005c96f0"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "AddJarFlies",
+     "upvalue": "0x007c9bb0"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "AddJarHearts",
+     "upvalue": "0x00759390"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "AddKeys",
+     "upvalue": "0x007595b0"
+    },
+    {
+     "body": "0x008acac0",
+     "name": "AddMaxHearts",
+     "upvalue": "0x007588a0"
+    },
+    {
+     "body": "0x008afec0",
+     "name": "AddMinisaac",
+     "upvalue": "0x007d1860"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "AddNullCostume",
+     "upvalue": "0x0075d800"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "AddPill",
+     "upvalue": "0x007a3c30"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "AddPlayerFormCostume",
+     "upvalue": "0x0075e9a0"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "AddPoopMana",
+     "upvalue": "0x007d65e0"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "AddPrettyFly",
+     "upvalue": "0x007abdf0"
+    },
+    {
+     "body": "0x008acac0",
+     "name": "AddRottenHearts",
+     "upvalue": "0x007d2fc0"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "AddSoulCharge",
+     "upvalue": "0x007d2ad0"
+    },
+    {
+     "body": "0x008acac0",
+     "name": "AddSoulHearts",
+     "upvalue": "0x00758d00"
+    },
+    {
+     "body": "0x008b04b0",
+     "name": "AddSwarmFlyOrbital",
+     "upvalue": "0x00759bf0"
+    },
+    {
+     "body": "0x008acac0",
+     "name": "AddTrinket",
+     "upvalue": "0x00771d30"
+    },
+    {
+     "body": "0x008b0220",
+     "name": "AddWisp",
+     "upvalue": "0x005c93b0"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "AnimateAppear",
+     "upvalue": "0x007abcb0"
+    },
+    {
+     "body": "0x008ae240",
+     "name": "AnimateCard",
+     "upvalue": "0x007ab6b0"
+    },
+    {
+     "body": "0x008ae180",
+     "name": "AnimateCollectible",
+     "upvalue": "0x007ab380"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "AnimateHappy",
+     "upvalue": "0x007abd30"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "AnimateLightTravel",
+     "upvalue": "0x007abc10"
+    },
+    {
+     "body": "0x008ae2d0",
+     "name": "AnimatePickup",
+     "upvalue": "0x007ab130"
+    },
+    {
+     "body": "0x008ae240",
+     "name": "AnimatePill",
+     "upvalue": "0x007abb00"
+    },
+    {
+     "body": "0x0089c4c0",
+     "name": "AnimatePitfallIn",
+     "upvalue": "0x007abc20"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "AnimatePitfallOut",
+     "upvalue": "0x007abc90"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "AnimateSad",
+     "upvalue": "0x007abd90"
+    },
+    {
+     "body": "0x0089c4c0",
+     "name": "AnimateTeleport",
+     "upvalue": "0x007abcc0"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "AnimateTrapdoor",
+     "upvalue": "0x007abc00"
+    },
+    {
+     "body": "0x008ae180",
+     "name": "AnimateTrinket",
+     "upvalue": "0x007ab550"
+    },
+    {
+     "body": "0x008acb40",
+     "name": "AreControlsEnabled",
+     "upvalue": "0x00505cc0"
+    },
+    {
+     "body": "0x0089c530",
+     "name": "AreOpposingShootDirectionsPressed",
+     "upvalue": "0x00436180"
+    },
+    {
+     "body": "0x008ad760",
+     "name": "CanAddCollectible",
+     "upvalue": "0x007aa800"
+    },
+    {
+     "body": "0x008acb40",
+     "name": "CanPickBlackHearts",
+     "upvalue": "0x007c3550"
+    },
+    {
+     "body": "0x008acb40",
+     "name": "CanPickBoneHearts",
+     "upvalue": "0x007caa00"
+    },
+    {
+     "body": "0x008acb40",
+     "name": "CanPickGoldenHearts",
+     "upvalue": "0x007c9e30"
+    },
+    {
+     "body": "0x008acb40",
+     "name": "CanPickRedHearts",
+     "upvalue": "0x007c3410"
+    },
+    {
+     "body": "0x008acb40",
+     "name": "CanPickRottenHearts",
+     "upvalue": "0x007d3180"
+    },
+    {
+     "body": "0x008acb40",
+     "name": "CanPickSoulHearts",
+     "upvalue": "0x007c3460"
+    },
+    {
+     "body": "0x0089c530",
+     "name": "CanPickupItem",
+     "upvalue": "0x007bf3d0"
+    },
+    {
+     "body": "0x0089c530",
+     "name": "CanShoot",
+     "upvalue": "0x007539f0"
+    },
+    {
+     "body": "0x008acb40",
+     "name": "CanTurnHead",
+     "upvalue": "0x00782a60"
+    },
+    {
+     "body": "0x008acac0",
+     "name": "ChangePlayerType",
+     "upvalue": "0x007ce6e0"
+    },
+    {
+     "body": "0x008af4a0",
+     "name": "CheckFamiliar",
+     "upvalue": "0x00763370"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "ClearCostumes",
+     "upvalue": "0x0075dfe0"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "ClearDeadEyeCharge",
+     "upvalue": "0x007c78e0"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "ClearTemporaryEffects",
+     "upvalue": "0x007907a0"
+    },
+    {
+     "body": "0x008acac0",
+     "name": "DischargeActiveItem",
+     "upvalue": "0x007ac7e0"
+    },
+    {
+     "body": "0x0089bf70",
+     "name": "DoZitEffect",
+     "upvalue": "0x007c9590"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "DonateLuck",
+     "upvalue": "0x007b2200"
+    },
+    {
+     "body": "0x008ad4f0",
+     "name": "DropPocketItem",
+     "upvalue": "0x007a48f0"
+    },
+    {
+     "body": "0x008ad400",
+     "name": "DropTrinket",
+     "upvalue": "0x00771800"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "EvaluateItems",
+     "upvalue": "0x00763570"
+    },
+    {
+     "body": "0x008aeaa0",
+     "name": "FireBomb",
+     "upvalue": "0x007a0970"
+    },
+    {
+     "body": "0x008aebc0",
+     "name": "FireBrimstone",
+     "upvalue": "0x007a0f50"
+    },
+    {
+     "body": "0x008ae6c0",
+     "name": "FireDelayedBrimstone",
+     "upvalue": "0x007bf1a0"
+    },
+    {
+     "body": "0x008af110",
+     "name": "FireKnife",
+     "upvalue": "0x007aded0"
+    },
+    {
+     "body": "0x008ae8b0",
+     "name": "FireTear",
+     "upvalue": "0x00790af0"
+    },
+    {
+     "body": "0x008aed10",
+     "name": "FireTechLaser",
+     "upvalue": "0x007aab70"
+    },
+    {
+     "body": "0x008aef50",
+     "name": "FireTechXLaser",
+     "upvalue": "0x007cb230"
+    },
+    {
+     "body": "0x008acb40",
+     "name": "FlushQueueItem",
+     "upvalue": "0x0075e1d0"
+    },
+    {
+     "body": "0x008ad7f0",
+     "name": "FullCharge",
+     "upvalue": "0x007c38c0"
+    },
+    {
+     "body": "0x008ad660",
+     "name": "GetActiveCharge",
+     "upvalue": "0x00505c80"
+    },
+    {
+     "body": "0x008ad660",
+     "name": "GetActiveItem",
+     "upvalue": "0x0042a2f0"
+    },
+    {
+     "body": "0x008ad660",
+     "name": "GetActiveSubCharge",
+     "upvalue": "0x00841cb0"
+    },
+    {
+     "body": "0x008adab0",
+     "name": "GetActiveWeaponEntity",
+     "upvalue": "0x00782a40"
+    },
+    {
+     "body": "0x0089c650",
+     "name": "GetAimDirection",
+     "upvalue": "0x004316e0"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetBabySkin",
+     "upvalue": "0x006dae00"
+    },
+    {
+     "body": "0x008ad660",
+     "name": "GetBatteryCharge",
+     "upvalue": "0x006dad40"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetBlackHearts",
+     "upvalue": "0x005b1750"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetBloodCharge",
+     "upvalue": "0x006dad30"
+    },
+    {
+     "body": "0x008acd00",
+     "name": "GetBodyColor",
+     "upvalue": "0x0085e2d0"
+    },
+    {
+     "body": "0x008adbf0",
+     "name": "GetBombFlags",
+     "upvalue": "0x00780560"
+    },
+    {
+     "body": "0x008adca0",
+     "name": "GetBombVariant",
+     "upvalue": "0x00780eb0"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetBoneHearts",
+     "upvalue": "0x005b1700"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetBrokenHearts",
+     "upvalue": "0x0065cf20"
+    },
+    {
+     "body": "0x008ad660",
+     "name": "GetCard",
+     "upvalue": "0x007a3c50"
+    },
+    {
+     "body": "0x008af270",
+     "name": "GetCardRNG",
+     "upvalue": "0x00753a60"
+    },
+    {
+     "body": "0x0089bf10",
+     "name": "GetCollectibleCount",
+     "upvalue": "0x0075eff0"
+    },
+    {
+     "body": "0x008ada20",
+     "name": "GetCollectibleNum",
+     "upvalue": "0x00770ca0"
+    },
+    {
+     "body": "0x008af270",
+     "name": "GetCollectibleRNG",
+     "upvalue": "0x005b17c0"
+    },
+    {
+     "body": "0x008af760",
+     "name": "GetCostumeNullPos",
+     "upvalue": "0x0075af10"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetDamageCooldown",
+     "upvalue": "0x0060d080"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetEffectiveBloodCharge",
+     "upvalue": "0x007d2dd0"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetEffectiveMaxHearts",
+     "upvalue": "0x007cb060"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetEffectiveSoulCharge",
+     "upvalue": "0x007d2b50"
+    },
+    {
+     "body": "0x008ae040",
+     "name": "GetEffects",
+     "upvalue": "0x004361c0"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetEternalHearts",
+     "upvalue": "0x006dad70"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetExtraLives",
+     "upvalue": "0x007bf670"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetFireDirection",
+     "upvalue": "0x004316d0"
+    },
+    {
+     "body": "0x0089c000",
+     "name": "GetFlyingOffset",
+     "upvalue": "0x00782630"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetGoldenHearts",
+     "upvalue": "0x005b1770"
+    },
+    {
+     "body": "0x0089bea0",
+     "name": "GetGreedDonationBreakChance",
+     "upvalue": "0x007cbb70"
+    },
+    {
+     "body": "0x008acd00",
+     "name": "GetHeadColor",
+     "upvalue": "0x0085e2e0"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetHeadDirection",
+     "upvalue": "0x00436170"
+    },
+    {
+     "body": "0x008afcf0",
+     "name": "GetHeartLimit",
+     "upvalue": "0x007cae60"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetHearts",
+     "upvalue": "0x00428b10"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetItemState",
+     "upvalue": "0x004361b0"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetJarFlies",
+     "upvalue": "0x00841ca0"
+    },
+    {
+     "body": "0x008acd00",
+     "name": "GetJarHearts",
+     "upvalue": "0x006dad10"
+    },
+    {
+     "body": "0x008af560",
+     "name": "GetLaserOffset",
+     "upvalue": "0x007aa850"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetLastActionTriggers",
+     "upvalue": "0x0085e2c0"
+    },
+    {
+     "body": "0x008ae850",
+     "name": "GetLastDamageFlags",
+     "upvalue": "0x0085e280"
+    },
+    {
+     "body": "0x008ae7b0",
+     "name": "GetLastDamageSource",
+     "upvalue": "0x0085e270"
+    },
+    {
+     "body": "0x0089c650",
+     "name": "GetLastDirection",
+     "upvalue": "0x005cd740"
+    },
+    {
+     "body": "0x008afd70",
+     "name": "GetMainTwin",
+     "upvalue": "0x00417800"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetMaxHearts",
+     "upvalue": "0x0042a310"
+    },
+    {
+     "body": "0x0089bf10",
+     "name": "GetMaxPocketItems",
+     "upvalue": "0x007ad440"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetMaxPoopMana",
+     "upvalue": "0x007d65c0"
+    },
+    {
+     "body": "0x0089bf10",
+     "name": "GetMaxTrinkets",
+     "upvalue": "0x007717c0"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetModelingClayEffect",
+     "upvalue": "0x0083ab80"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetMovementDirection",
+     "upvalue": "0x004e4860"
+    },
+    {
+     "body": "0x008adb50",
+     "name": "GetMovementInput",
+     "upvalue": "0x00779360"
+    },
+    {
+     "body": "0x008adb50",
+     "name": "GetMovementJoystick",
+     "upvalue": "0x00779360"
+    },
+    {
+     "body": "0x0089c650",
+     "name": "GetMovementVector",
+     "upvalue": "0x0085e220"
+    },
+    {
+     "body": "0x008af3d0",
+     "name": "GetMultiShotParams",
+     "upvalue": "0x00781b90"
+    },
+    {
+     "body": "0x0089c0a0",
+     "name": "GetMultiShotPositionVelocity",
+     "upvalue": "0x00782160"
+    },
+    {
+     "body": "0x008adab0",
+     "name": "GetNPCTarget",
+     "upvalue": "0x00770610"
+    },
+    {
+     "body": "0x008aca40",
+     "name": "GetName",
+     "upvalue": "0x007e9280"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetNumBlueFlies",
+     "upvalue": "0x004316f0"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetNumBlueSpiders",
+     "upvalue": "0x0060d050"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetNumBombs",
+     "upvalue": "0x0065cf30"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetNumCoins",
+     "upvalue": "0x00499dd0"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetNumGigaBombs",
+     "upvalue": "0x0085e2f0"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetNumKeys",
+     "upvalue": "0x005b1760"
+    },
+    {
+     "body": "0x008afd70",
+     "name": "GetOtherTwin",
+     "upvalue": "0x00417820"
+    },
+    {
+     "body": "0x008ad660",
+     "name": "GetPill",
+     "upvalue": "0x007a3c80"
+    },
+    {
+     "body": "0x008af270",
+     "name": "GetPillRNG",
+     "upvalue": "0x00753a00"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetPlayerType",
+     "upvalue": "0x004253b0"
+    },
+    {
+     "body": "0x008ad8c0",
+     "name": "GetPocketItem",
+     "upvalue": "0x00753900"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetPoopMana",
+     "upvalue": "0x00753c20"
+    },
+    {
+     "body": "0x008ad660",
+     "name": "GetPoopSpell",
+     "upvalue": "0x00841cd0"
+    },
+    {
+     "body": "0x0089c650",
+     "name": "GetRecentMovementVector",
+     "upvalue": "0x0085e230"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetRottenHearts",
+     "upvalue": "0x005b1710"
+    },
+    {
+     "body": "0x008adb50",
+     "name": "GetShootingInput",
+     "upvalue": "0x00779620"
+    },
+    {
+     "body": "0x008adb50",
+     "name": "GetShootingJoystick",
+     "upvalue": "0x00779620"
+    },
+    {
+     "body": "0x0089bea0",
+     "name": "GetSmoothBodyRotation",
+     "upvalue": "0x007e92a0"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetSoulCharge",
+     "upvalue": "0x006dad20"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetSoulHearts",
+     "upvalue": "0x005b1740"
+    },
+    {
+     "body": "0x008afd70",
+     "name": "GetSubPlayer",
+     "upvalue": "0x006dae10"
+    },
+    {
+     "body": "0x008add60",
+     "name": "GetTearHitParams",
+     "upvalue": "0x007bf6c0"
+    },
+    {
+     "body": "0x008af670",
+     "name": "GetTearMovementInheritance",
+     "upvalue": "0x007aaea0"
+    },
+    {
+     "body": "0x0089bea0",
+     "name": "GetTearPoisonDamage",
+     "upvalue": "0x004361a0"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetTearRangeModifier",
+     "upvalue": "0x0085e240"
+    },
+    {
+     "body": "0x0089bf10",
+     "name": "GetTotalDamageTaken",
+     "upvalue": "0x0085e290"
+    },
+    {
+     "body": "0x008ae0e0",
+     "name": "GetTractorBeam",
+     "upvalue": "0x00665c10"
+    },
+    {
+     "body": "0x008ad660",
+     "name": "GetTrinket",
+     "upvalue": "0x007a6430"
+    },
+    {
+     "body": "0x008ad660",
+     "name": "GetTrinketMultiplier",
+     "upvalue": "0x007cb6e0"
+    },
+    {
+     "body": "0x008af270",
+     "name": "GetTrinketRNG",
+     "upvalue": "0x0065cf80"
+    },
+    {
+     "body": "0x0089c650",
+     "name": "GetVelocityBeforeUpdate",
+     "upvalue": "0x006dad60"
+    },
+    {
+     "body": "0x0089c460",
+     "name": "GetZodiacEffect",
+     "upvalue": "0x007c7960"
+    },
+    {
+     "body": "0x008ad980",
+     "name": "HasCollectible",
+     "upvalue": "0x007706e0"
+    },
+    {
+     "body": "0x0089c530",
+     "name": "HasCurseMistEffect",
+     "upvalue": "0x00753c30"
+    },
+    {
+     "body": "0x008acb40",
+     "name": "HasFullHearts",
+     "upvalue": "0x006dacd0"
+    },
+    {
+     "body": "0x008acb40",
+     "name": "HasFullHeartsAndSoulHearts",
+     "upvalue": "0x0085e200"
+    },
+    {
+     "body": "0x0089c530",
+     "name": "HasGoldenBomb",
+     "upvalue": "0x0065cf50"
+    },
+    {
+     "body": "0x0089c530",
+     "name": "HasGoldenKey",
+     "upvalue": "0x0065cf40"
+    },
+    {
+     "body": "0x008ae600",
+     "name": "HasInvincibility",
+     "upvalue": "0x007c3100"
+    },
+    {
+     "body": "0x008ad760",
+     "name": "HasPlayerForm",
+     "upvalue": "0x007aa7c0"
+    },
+    {
+     "body": "0x008acb40",
+     "name": "HasTimedItem",
+     "upvalue": "0x00793940"
+    },
+    {
+     "body": "0x008ad980",
+     "name": "HasTrinket",
+     "upvalue": "0x00771550"
+    },
+    {
+     "body": "0x008ad760",
+     "name": "HasWeaponType",
+     "upvalue": "0x005b1780"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "InitBabySkin",
+     "upvalue": "0x007bf040"
+    },
+    {
+     "body": "0x008acc70",
+     "name": "IsBlackHeart",
+     "upvalue": "0x00759220"
+    },
+    {
+     "body": "0x008ad760",
+     "name": "IsBoneHeart",
+     "upvalue": "0x007caaa0"
+    },
+    {
+     "body": "0x0089c530",
+     "name": "IsCoopGhost",
+     "upvalue": "0x0042a320"
+    },
+    {
+     "body": "0x0089c530",
+     "name": "IsExtraAnimationFinished",
+     "upvalue": "0x007ab110"
+    },
+    {
+     "body": "0x008acb40",
+     "name": "IsFullSpriteRendering",
+     "upvalue": "0x007cb580"
+    },
+    {
+     "body": "0x0089c530",
+     "name": "IsHeldItemVisible",
+     "upvalue": "0x007bf5c0"
+    },
+    {
+     "body": "0x0089c530",
+     "name": "IsHoldingItem",
+     "upvalue": "0x007bf490"
+    },
+    {
+     "body": "0x008acb40",
+     "name": "IsItemQueueEmpty",
+     "upvalue": "0x0056ff90"
+    },
+    {
+     "body": "0x0089c530",
+     "name": "IsP2Appearing",
+     "upvalue": "0x0065cf60"
+    },
+    {
+     "body": "0x008af330",
+     "name": "IsPosInSpotLight",
+     "upvalue": "0x007c9c00"
+    },
+    {
+     "body": "0x0089c530",
+     "name": "IsSubPlayer",
+     "upvalue": "0x00753ac0"
+    },
+    {
+     "body": "0x008ad760",
+     "name": "NeedsCharge",
+     "upvalue": "0x007c3810"
+    },
+    {
+     "body": "0x008ae4d0",
+     "name": "PlayExtraAnimation",
+     "upvalue": "0x007abe20"
+    },
+    {
+     "body": "0x008ae4d0",
+     "name": "QueueExtraAnimation",
+     "upvalue": "0x007539c0"
+    },
+    {
+     "body": "0x008ad220",
+     "name": "QueueItem",
+     "upvalue": "0x0075e160"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "RemoveBlackHeart",
+     "upvalue": "0x007591e0"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "RemoveBlueFly",
+     "upvalue": "0x00759b80"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "RemoveBlueSpider",
+     "upvalue": "0x007bf660"
+    },
+    {
+     "body": "0x008ad5b0",
+     "name": "RemoveCollectible",
+     "upvalue": "0x0078f840"
+    },
+    {
+     "body": "0x008ad170",
+     "name": "RemoveCostume",
+     "upvalue": "0x0075d850"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "RemoveCurseMistEffect",
+     "upvalue": "0x007d8d20"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "RemoveGoldenBomb",
+     "upvalue": "0x007c8fc0"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "RemoveGoldenKey",
+     "upvalue": "0x00759660"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "RemoveSkinCostume",
+     "upvalue": "0x007c3620"
+    },
+    {
+     "body": "0x0089bf70",
+     "name": "RenderBody",
+     "upvalue": "0x0078dde0"
+    },
+    {
+     "body": "0x0089bf70",
+     "name": "RenderGlow",
+     "upvalue": "0x0078dc60"
+    },
+    {
+     "body": "0x0089bf70",
+     "name": "RenderHead",
+     "upvalue": "0x0078dff0"
+    },
+    {
+     "body": "0x0089bf70",
+     "name": "RenderTop",
+     "upvalue": "0x0078e190"
+    },
+    {
+     "body": "0x008af990",
+     "name": "ReplaceCostumeSprite",
+     "upvalue": "0x007c7a20"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "ResetDamageCooldown",
+     "upvalue": "0x0060d090"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "ResetItemState",
+     "upvalue": "0x007c36b0"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "RespawnFamiliars",
+     "upvalue": "0x00770600"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "Revive",
+     "upvalue": "0x007a2220"
+    },
+    {
+     "body": "0x008ad6e0",
+     "name": "SetActiveCharge",
+     "upvalue": "0x00791420"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "SetBloodCharge",
+     "upvalue": "0x006f0030"
+    },
+    {
+     "body": "0x008ad6e0",
+     "name": "SetCard",
+     "upvalue": "0x007a3cb0"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "SetFullHearts",
+     "upvalue": "0x007791f0"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "SetMinDamageCooldown",
+     "upvalue": "0x004361d0"
+    },
+    {
+     "body": "0x008ad6e0",
+     "name": "SetPill",
+     "upvalue": "0x007a3cf0"
+    },
+    {
+     "body": "0x008b0580",
+     "name": "SetPocketActiveItem",
+     "upvalue": "0x007d41d0"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "SetShootingCooldown",
+     "upvalue": "0x007c37f0"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "SetSoulCharge",
+     "upvalue": "0x006f0020"
+    },
+    {
+     "body": "0x008afc20",
+     "name": "ShootRedCandle",
+     "upvalue": "0x007c9130"
+    },
+    {
+     "body": "0x008afb60",
+     "name": "SpawnMawOfVoid",
+     "upvalue": "0x007c8dc0"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "StopExtraAnimation",
+     "upvalue": "0x0058e230"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "SwapActiveItems",
+     "upvalue": "0x007a4760"
+    },
+    {
+     "body": "0x008ace80",
+     "name": "ThrowBlueSpider",
+     "upvalue": "0x007bf640"
+    },
+    {
+     "body": "0x008b00d0",
+     "name": "ThrowFriendlyDip",
+     "upvalue": "0x007d2a20"
+    },
+    {
+     "body": "0x008acdb0",
+     "name": "ThrowHeldEntity",
+     "upvalue": "0x007d2470"
+    },
+    {
+     "body": "0x008ad6e0",
+     "name": "TriggerBookOfVirtues",
+     "upvalue": "0x005ca470"
+    },
+    {
+     "body": "0x008afe10",
+     "name": "TryHoldEntity",
+     "upvalue": "0x007d2170"
+    },
+    {
+     "body": "0x008acc70",
+     "name": "TryHoldTrinket",
+     "upvalue": "0x007716f0"
+    },
+    {
+     "body": "0x008acac0",
+     "name": "TryRemoveCollectibleCostume",
+     "upvalue": "0x007ad330"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "TryRemoveNullCostume",
+     "upvalue": "0x007ad400"
+    },
+    {
+     "body": "0x008acc70",
+     "name": "TryRemoveTrinket",
+     "upvalue": "0x00771f60"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "TryRemoveTrinketCostume",
+     "upvalue": "0x007ad3a0"
+    },
+    {
+     "body": "0x008acb40",
+     "name": "TryUseKey",
+     "upvalue": "0x00759e20"
+    },
+    {
+     "body": "0x008acd60",
+     "name": "UpdateCanShoot",
+     "upvalue": "0x007cba30"
+    },
+    {
+     "body": "0x008adf50",
+     "name": "UseActiveItem",
+     "upvalue": "0x005b39d0"
+    },
+    {
+     "body": "0x008ad6e0",
+     "name": "UseCard",
+     "upvalue": "0x007b2230"
+    },
+    {
+     "body": "0x008ae570",
+     "name": "UsePill",
+     "upvalue": "0x007c4180"
+    },
+    {
+     "body": "0x0089c3f0",
+     "name": "UsePoopSpell",
+     "upvalue": "0x007d7290"
+    },
+    {
+     "body": "0x008acb40",
+     "name": "WillPlayerRevive",
+     "upvalue": "0x007cbb60"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008bea90",
+     "name": "BabySkin",
+     "setter": "0x008beb20",
+     "upvalue": "0x00001aec"
+    },
+    {
+     "getter": "0x008be9c0",
+     "name": "CanFly",
+     "setter": "0x008bea20",
+     "upvalue": "0x00001570"
+    },
+    {
+     "getter": "0x0089bf10",
+     "name": "ControllerIndex",
+     "setter": null,
+     "upvalue": "0x00423950"
+    },
+    {
+     "getter": "0x0089c460",
+     "name": "ControlsCooldown",
+     "setter": "0x0089c3f0",
+     "upvalue": "0x0085e250"
+    },
+    {
+     "getter": "0x0089c530",
+     "name": "ControlsEnabled",
+     "setter": "0x0089c4c0",
+     "upvalue": "0x006b84a0"
+    },
+    {
+     "getter": "0x008be6b0",
+     "name": "Damage",
+     "setter": "0x008be710",
+     "upvalue": "0x00001470"
+    },
+    {
+     "getter": "0x0089bea0",
+     "name": "FireDelay",
+     "setter": "0x0089be10",
+     "upvalue": "0x00782a70"
+    },
+    {
+     "getter": "0x0089c350",
+     "name": "FriendBallEnemy",
+     "setter": "0x0089c2b0",
+     "upvalue": "0x005cd7d0"
+    },
+    {
+     "getter": "0x008becf0",
+     "name": "HeadFrameDelay",
+     "setter": "0x008bed50",
+     "upvalue": "0x00001338"
+    },
+    {
+     "getter": "0x008be6b0",
+     "name": "IBSCharge",
+     "setter": "0x008be710",
+     "upvalue": "0x000020a0"
+    },
+    {
+     "getter": "0x008becf0",
+     "name": "ItemHoldCooldown",
+     "setter": "0x008bed50",
+     "upvalue": "0x00001884"
+    },
+    {
+     "getter": "0x008be8a0",
+     "name": "LaserColor",
+     "setter": "0x008be900",
+     "upvalue": "0x000014c4"
+    },
+    {
+     "getter": "0x008be6b0",
+     "name": "Luck",
+     "setter": "0x008be710",
+     "upvalue": "0x0000156c"
+    },
+    {
+     "getter": "0x008be6b0",
+     "name": "MaxFireDelay",
+     "setter": "0x008be710",
+     "upvalue": "0x00001460"
+    },
+    {
+     "getter": "0x008be6b0",
+     "name": "MoveSpeed",
+     "setter": "0x008be710",
+     "upvalue": "0x00001568"
+    },
+    {
+     "getter": "0x008bebc0",
+     "name": "QueuedItem",
+     "setter": "0x008bec60",
+     "upvalue": "0x000017c4"
+    },
+    {
+     "getter": "0x008becf0",
+     "name": "SamsonBerserkCharge",
+     "setter": "0x008bed50",
+     "upvalue": "0x0000209c"
+    },
+    {
+     "getter": "0x008be6b0",
+     "name": "ShotSpeed",
+     "setter": "0x008be710",
+     "upvalue": "0x00001464"
+    },
+    {
+     "getter": "0x0089c000",
+     "name": "SpriteScale",
+     "setter": "0x0089bf70",
+     "upvalue": "0x0060d0a0"
+    },
+    {
+     "getter": "0x008be8a0",
+     "name": "TearColor",
+     "setter": "0x008be900",
+     "upvalue": "0x00001498"
+    },
+    {
+     "getter": "0x008be6b0",
+     "name": "TearFallingAcceleration",
+     "setter": "0x008be710",
+     "upvalue": "0x0000147c"
+    },
+    {
+     "getter": "0x008be6b0",
+     "name": "TearFallingSpeed",
+     "setter": "0x008be710",
+     "upvalue": "0x00001478"
+    },
+    {
+     "getter": "0x008be780",
+     "name": "TearFlags",
+     "setter": "0x008be810",
+     "upvalue": "0x00001488"
+    },
+    {
+     "getter": "0x008be6b0",
+     "name": "TearHeight",
+     "setter": "0x008be710",
+     "upvalue": "0x00001474"
+    },
+    {
+     "getter": "0x008be6b0",
+     "name": "TearRange",
+     "setter": "0x008be710",
+     "upvalue": "0x00001480"
+    },
+    {
+     "getter": "0x0089c650",
+     "name": "TearsOffset",
+     "setter": "0x0089c5a0",
+     "upvalue": "0x00753930"
+    }
+   ]
+  },
+  "EntityProjectile": {
+   "metamethods": [],
+   "methods": [
+    {
+     "body": "0x0089b620",
+     "name": "AddChangeFlags",
+     "upvalue": "0x006b82f0"
+    },
+    {
+     "body": "0x0089b7c0",
+     "name": "AddFallingAccel",
+     "upvalue": "0x00456470"
+    },
+    {
+     "body": "0x0089b7c0",
+     "name": "AddFallingSpeed",
+     "upvalue": "0x00456450"
+    },
+    {
+     "body": "0x0089b7c0",
+     "name": "AddHeight",
+     "upvalue": "0x00456420"
+    },
+    {
+     "body": "0x0089b620",
+     "name": "AddProjectileFlags",
+     "upvalue": "0x00456490"
+    },
+    {
+     "body": "0x0089b7c0",
+     "name": "AddScale",
+     "upvalue": "0x0085e320"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x0089b850",
+     "name": "Acceleration",
+     "setter": "0x0089b7c0",
+     "upvalue": "0x0085e300"
+    },
+    {
+     "getter": "0x0089b690",
+     "name": "ChangeFlags",
+     "setter": "0x0089b620",
+     "upvalue": "0x0085e310"
+    },
+    {
+     "getter": "0x0089b760",
+     "name": "ChangeTimeout",
+     "setter": "0x0089b6f0",
+     "upvalue": "0x004b70a0"
+    },
+    {
+     "getter": "0x0089b850",
+     "name": "ChangeVelocity",
+     "setter": "0x0089b7c0",
+     "upvalue": "0x0060ccc0"
+    },
+    {
+     "getter": "0x0089b850",
+     "name": "CurvingStrength",
+     "setter": "0x0089b7c0",
+     "upvalue": "0x004d3060"
+    },
+    {
+     "getter": "0x0089b850",
+     "name": "Damage",
+     "setter": "0x0089b7c0",
+     "upvalue": "0x0085e360"
+    },
+    {
+     "getter": "0x0089b850",
+     "name": "DepthOffset",
+     "setter": "0x0089b7c0",
+     "upvalue": "0x00435d10"
+    },
+    {
+     "getter": "0x0089b850",
+     "name": "FallingAccel",
+     "setter": "0x0089b7c0",
+     "upvalue": "0x00435e50"
+    },
+    {
+     "getter": "0x0089b850",
+     "name": "FallingSpeed",
+     "setter": "0x0089b7c0",
+     "upvalue": "0x00456440"
+    },
+    {
+     "getter": "0x0089b850",
+     "name": "Height",
+     "setter": "0x0089b7c0",
+     "upvalue": "0x00431750"
+    },
+    {
+     "getter": "0x0089b850",
+     "name": "HomingStrength",
+     "setter": "0x0089b7c0",
+     "upvalue": "0x0060ccb0"
+    },
+    {
+     "getter": "0x0089b690",
+     "name": "ProjectileFlags",
+     "setter": "0x0089b620",
+     "upvalue": "0x00417830"
+    },
+    {
+     "getter": "0x0089b850",
+     "name": "Scale",
+     "setter": "0x0089b7c0",
+     "upvalue": "0x00557cd0"
+    },
+    {
+     "getter": "0x0089b760",
+     "name": "WiggleFrameOffset",
+     "setter": "0x0089b6f0",
+     "upvalue": "0x004d3070"
+    }
+   ]
+  },
+  "EntityPtr": {
+   "metamethods": [
+    {
+     "body": "0x008c32b0",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008a80d0",
+     "name": "SetReference",
+     "upvalue": "0x00872050"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008a0600",
+     "name": "Ref",
+     "setter": null,
+     "upvalue": "0x0040c3a0"
+    }
+   ]
+  },
+  "EntityRef": {
+   "metamethods": [
+    {
+     "body": "0x008c31d0",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008bbbc0",
+     "name": "Entity",
+     "setter": "0x008bbc60",
+     "upvalue": "0x00000024"
+    },
+    {
+     "getter": "0x0089e4c0",
+     "name": "IsCharmed",
+     "setter": "0x0089e450",
+     "upvalue": "0x004bc670"
+    },
+    {
+     "getter": "0x0089e4c0",
+     "name": "IsFriendly",
+     "setter": "0x0089e450",
+     "upvalue": "0x004a2910"
+    },
+    {
+     "getter": "0x008bba80",
+     "name": "Position",
+     "setter": "0x008bbb20",
+     "upvalue": "0x00000010"
+    },
+    {
+     "getter": "0x008bba20",
+     "name": "SpawnerType",
+     "setter": "0x008bb960",
+     "upvalue": "0x00000008"
+    },
+    {
+     "getter": "0x008bb9c0",
+     "name": "SpawnerVariant",
+     "setter": "0x008bb960",
+     "upvalue": "0x0000000c"
+    },
+    {
+     "getter": "0x008bb900",
+     "name": "Type",
+     "setter": "0x008bb960",
+     "upvalue": "0x00000000"
+    },
+    {
+     "getter": "0x008bb9c0",
+     "name": "Variant",
+     "setter": "0x008bb960",
+     "upvalue": "0x00000004"
+    }
+   ]
+  },
+  "EntityTear": {
+   "metamethods": [],
+   "methods": [
+    {
+     "body": "0x008ac8f0",
+     "name": "ChangeVariant",
+     "upvalue": "0x0067a400"
+    },
+    {
+     "body": "0x008ac9f0",
+     "name": "ResetSpriteScale",
+     "upvalue": "0x00677780"
+    },
+    {
+     "body": "0x0089c930",
+     "name": "SetDeadEyeIntensity",
+     "upvalue": "0x00679e80"
+    },
+    {
+     "body": "0x0089c930",
+     "name": "SetKnockbackMultiplier",
+     "upvalue": "0x0060ccd0"
+    },
+    {
+     "body": "0x008ac960",
+     "name": "SetParentOffset",
+     "upvalue": "0x0085dd70"
+    },
+    {
+     "body": "0x008ac8f0",
+     "name": "SetWaitFrames",
+     "upvalue": "0x0060cd00"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x0089c9c0",
+     "name": "BaseDamage",
+     "setter": null,
+     "upvalue": "0x0085dd60"
+    },
+    {
+     "getter": "0x0089c9c0",
+     "name": "BaseScale",
+     "setter": null,
+     "upvalue": "0x0060ccb0"
+    },
+    {
+     "getter": "0x008be5e0",
+     "name": "CanTriggerStreakEnd",
+     "setter": "0x008be640",
+     "upvalue": "0x000007e8"
+    },
+    {
+     "getter": "0x008be370",
+     "name": "ContinueVelocity",
+     "setter": "0x008be410",
+     "upvalue": "0x0000043c"
+    },
+    {
+     "getter": "0x0089c9c0",
+     "name": "FallingAcceleration",
+     "setter": "0x0089c930",
+     "upvalue": "0x00435e50"
+    },
+    {
+     "getter": "0x0089c9c0",
+     "name": "FallingSpeed",
+     "setter": "0x0089c930",
+     "upvalue": "0x00456440"
+    },
+    {
+     "getter": "0x0089c9c0",
+     "name": "Height",
+     "setter": "0x0089c930",
+     "upvalue": "0x00431750"
+    },
+    {
+     "getter": "0x008be1e0",
+     "name": "HomingFriction",
+     "setter": "0x008be240",
+     "upvalue": "0x0000041c"
+    },
+    {
+     "getter": "0x008be1e0",
+     "name": "KnockbackMultiplier",
+     "setter": "0x008be240",
+     "upvalue": "0x00000460"
+    },
+    {
+     "getter": "0x008be370",
+     "name": "ParentOffset",
+     "setter": "0x008be410",
+     "upvalue": "0x000007f4"
+    },
+    {
+     "getter": "0x0089c6f0",
+     "name": "PosDisplacement",
+     "setter": null,
+     "upvalue": "0x0085dd90"
+    },
+    {
+     "getter": "0x0089c9c0",
+     "name": "Rotation",
+     "setter": "0x0089c930",
+     "upvalue": "0x0060ccc0"
+    },
+    {
+     "getter": "0x0089c9c0",
+     "name": "Scale",
+     "setter": "0x0089c930",
+     "upvalue": "0x00557cd0"
+    },
+    {
+     "getter": "0x008be370",
+     "name": "StickDiff",
+     "setter": "0x008be410",
+     "upvalue": "0x0000047c"
+    },
+    {
+     "getter": "0x008be4b0",
+     "name": "StickTarget",
+     "setter": "0x008be550",
+     "upvalue": "0x00000478"
+    },
+    {
+     "getter": "0x008be2b0",
+     "name": "StickTimer",
+     "setter": "0x008be310",
+     "upvalue": "0x00000484"
+    },
+    {
+     "getter": "0x0089c890",
+     "name": "TearFlags",
+     "setter": "0x0089c7f0",
+     "upvalue": "0x004177c0"
+    },
+    {
+     "getter": "0x0089c790",
+     "name": "TearIndex",
+     "setter": null,
+     "upvalue": "0x004aade0"
+    },
+    {
+     "getter": "0x008be2b0",
+     "name": "WaitFrames",
+     "setter": "0x008be310",
+     "upvalue": "0x00000438"
+    }
+   ]
+  },
+  "Entry": {
+   "metamethods": [
+    {
+     "body": "0x008c2d30",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008c1cf0",
+     "name": "Subtype",
+     "setter": "0x008c1d50",
+     "upvalue": "0x00000006"
+    },
+    {
+     "getter": "0x008c1c30",
+     "name": "Type",
+     "setter": "0x008c1c90",
+     "upvalue": "0x00000000"
+    },
+    {
+     "getter": "0x008c1cf0",
+     "name": "Variant",
+     "setter": "0x008c1d50",
+     "upvalue": "0x00000004"
+    },
+    {
+     "getter": "0x008c1db0",
+     "name": "Weight",
+     "setter": "0x008c1e10",
+     "upvalue": "0x00000008"
+    }
+   ]
+  },
+  "Font": {
+   "metamethods": [
+    {
+     "body": "0x008c3230",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008a8fc0",
+     "name": "DrawString",
+     "upvalue": "0x00a1b140"
+    },
+    {
+     "body": "0x008a8f60",
+     "name": "GetBaselineHeight",
+     "upvalue": "0x00a1aeb0"
+    },
+    {
+     "body": "0x008a8e40",
+     "name": "GetCharacterWidth",
+     "upvalue": "0x00a1ae70"
+    },
+    {
+     "body": "0x008a8f60",
+     "name": "GetLineHeight",
+     "upvalue": "0x00a1aea0"
+    },
+    {
+     "body": "0x008a8ec0",
+     "name": "GetStringWidth",
+     "upvalue": "0x00a1ae80"
+    },
+    {
+     "body": "0x008a8dd0",
+     "name": "IsLoaded",
+     "upvalue": "0x006b83d0"
+    },
+    {
+     "body": "0x008a8ce0",
+     "name": "Load",
+     "upvalue": "0x0085e470"
+    },
+    {
+     "body": "0x008a9180",
+     "name": "SetMissingCharacter",
+     "upvalue": "0x00a1b3b0"
+    },
+    {
+     "body": "0x008a8d80",
+     "name": "Unload",
+     "upvalue": "0x00a1ad90"
+    }
+   ],
+   "parent": ""
+  },
+  "FontRenderSettings": {
+   "metamethods": [
+    {
+     "body": "0x008c3250",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008a8a40",
+     "name": "EnableAutoWrap",
+     "upvalue": "0x0085e450"
+    },
+    {
+     "body": "0x008a8a40",
+     "name": "EnableTruncation",
+     "upvalue": "0x00a1a600"
+    },
+    {
+     "body": "0x008a89e0",
+     "name": "GetAlignment",
+     "upvalue": "0x0040c3a0"
+    },
+    {
+     "body": "0x008a8c10",
+     "name": "GetLineHeightModifier",
+     "upvalue": "0x00407270"
+    },
+    {
+     "body": "0x008a8ab0",
+     "name": "GetMaxCharacters",
+     "upvalue": "0x00a1a5e0"
+    },
+    {
+     "body": "0x008a8c80",
+     "name": "GetMissingCharacterOverride",
+     "upvalue": "0x0040c2e0"
+    },
+    {
+     "body": "0x008a8b10",
+     "name": "IsAutoWrapEnabled",
+     "upvalue": "0x00a1a5f0"
+    },
+    {
+     "body": "0x008a8b10",
+     "name": "IsTruncationEnabled",
+     "upvalue": "0x00a1a620"
+    },
+    {
+     "body": "0x008a8970",
+     "name": "SetAlignment",
+     "upvalue": "0x00a1a5c0"
+    },
+    {
+     "body": "0x008a8b80",
+     "name": "SetLineHeightModifier",
+     "upvalue": "0x00407280"
+    },
+    {
+     "body": "0x008a8a40",
+     "name": "SetMaxCharacters",
+     "upvalue": "0x00a1a5d0"
+    },
+    {
+     "body": "0x008a8970",
+     "name": "SetMissingCharacterOverride",
+     "upvalue": "0x00a1a630"
+    }
+   ],
+   "parent": ""
+  },
+  "Game": {
+   "metamethods": [
+    {
+     "body": "0x008c2c10",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008b71f0",
+     "name": "AddDevilRoomDeal",
+     "upvalue": "0x00704b10"
+    },
+    {
+     "body": "0x008b8b30",
+     "name": "AddEncounteredBoss",
+     "upvalue": "0x00703470"
+    },
+    {
+     "body": "0x008990d0",
+     "name": "AddPixelation",
+     "upvalue": "0x00753cc0"
+    },
+    {
+     "body": "0x008b71f0",
+     "name": "AddStageWithoutDamage",
+     "upvalue": "0x0085e3f0"
+    },
+    {
+     "body": "0x008b71f0",
+     "name": "AddStageWithoutHeartsPicked",
+     "upvalue": "0x0085e3c0"
+    },
+    {
+     "body": "0x008b71f0",
+     "name": "AddTreasureRoomsVisited",
+     "upvalue": "0x007e9370"
+    },
+    {
+     "body": "0x008b7630",
+     "name": "BombDamage",
+     "upvalue": "0x006ff2a0"
+    },
+    {
+     "body": "0x008b78f0",
+     "name": "BombExplosionEffects",
+     "upvalue": "0x00700060"
+    },
+    {
+     "body": "0x008b7b70",
+     "name": "BombTearflagEffects",
+     "upvalue": "0x007009a0"
+    },
+    {
+     "body": "0x008b7fb0",
+     "name": "ButterBeanFart",
+     "upvalue": "0x00704360"
+    },
+    {
+     "body": "0x008b8b30",
+     "name": "ChangeRoom",
+     "upvalue": "0x006fe2f0"
+    },
+    {
+     "body": "0x008b7eb0",
+     "name": "CharmFart",
+     "upvalue": "0x00703f90"
+    },
+    {
+     "body": "0x008b71f0",
+     "name": "ClearDonationModAngel",
+     "upvalue": "0x00738320"
+    },
+    {
+     "body": "0x008b71f0",
+     "name": "ClearDonationModGreed",
+     "upvalue": "0x00738310"
+    },
+    {
+     "body": "0x008b71f0",
+     "name": "ClearStagesWithoutDamage",
+     "upvalue": "0x0085e400"
+    },
+    {
+     "body": "0x008b71f0",
+     "name": "ClearStagesWithoutHeartsPicked",
+     "upvalue": "0x0085e3d0"
+    },
+    {
+     "body": "0x008b8fe0",
+     "name": "Darken",
+     "upvalue": "0x00440ee0"
+    },
+    {
+     "body": "0x008990d0",
+     "name": "DonateAngel",
+     "upvalue": "0x00704b40"
+    },
+    {
+     "body": "0x008990d0",
+     "name": "DonateGreed",
+     "upvalue": "0x00704b30"
+    },
+    {
+     "body": "0x008990d0",
+     "name": "End",
+     "upvalue": "0x006f9770"
+    },
+    {
+     "body": "0x008b9270",
+     "name": "Fadein",
+     "upvalue": "0x006f5210"
+    },
+    {
+     "body": "0x008b9380",
+     "name": "Fadeout",
+     "upvalue": "0x006f5290"
+    },
+    {
+     "body": "0x008b7d30",
+     "name": "Fart",
+     "upvalue": "0x00703be0"
+    },
+    {
+     "body": "0x008b71f0",
+     "name": "FinishChallenge",
+     "upvalue": "0x00704f20"
+    },
+    {
+     "body": "0x008b91d0",
+     "name": "GetAmbush",
+     "upvalue": "0x005b1860"
+    },
+    {
+     "body": "0x008b9070",
+     "name": "GetDarknessModifier",
+     "upvalue": "0x00440610"
+    },
+    {
+     "body": "0x00899140",
+     "name": "GetDevilRoomDeals",
+     "upvalue": "0x005b1850"
+    },
+    {
+     "body": "0x00899140",
+     "name": "GetDonationModAngel",
+     "upvalue": "0x007e92c0"
+    },
+    {
+     "body": "0x00899140",
+     "name": "GetDonationModGreed",
+     "upvalue": "0x0065d000"
+    },
+    {
+     "body": "0x008b82d0",
+     "name": "GetFont",
+     "upvalue": "0x00703460"
+    },
+    {
+     "body": "0x00899140",
+     "name": "GetFrameCount",
+     "upvalue": "0x004074b0"
+    },
+    {
+     "body": "0x008b8740",
+     "name": "GetGreedBossWaveNum",
+     "upvalue": "0x00703570"
+    },
+    {
+     "body": "0x008b8740",
+     "name": "GetGreedWavesNum",
+     "upvalue": "0x00703560"
+    },
+    {
+     "body": "0x008b88e0",
+     "name": "GetHUD",
+     "upvalue": "0x004178e0"
+    },
+    {
+     "body": "0x008b8840",
+     "name": "GetItemOverlay",
+     "upvalue": "0x00456860"
+    },
+    {
+     "body": "0x008b87a0",
+     "name": "GetItemPool",
+     "upvalue": "0x0042a330"
+    },
+    {
+     "body": "0x008b8df0",
+     "name": "GetLastDevilRoomStage",
+     "upvalue": "0x007e9360"
+    },
+    {
+     "body": "0x008b8df0",
+     "name": "GetLastLevelWithDamage",
+     "upvalue": "0x007e92d0"
+    },
+    {
+     "body": "0x008b8df0",
+     "name": "GetLastLevelWithoutHalfHp",
+     "upvalue": "0x00753cb0"
+    },
+    {
+     "body": "0x008b8370",
+     "name": "GetLevel",
+     "upvalue": "0x00424530"
+    },
+    {
+     "body": "0x008b8570",
+     "name": "GetNearestPlayer",
+     "upvalue": "0x00703950"
+    },
+    {
+     "body": "0x008b8e80",
+     "name": "GetNumEncounteredBosses",
+     "upvalue": "0x0085e370"
+    },
+    {
+     "body": "0x008b8740",
+     "name": "GetNumPlayers",
+     "upvalue": "0x004178d0"
+    },
+    {
+     "body": "0x008b84b0",
+     "name": "GetPlayer",
+     "upvalue": "0x00417870"
+    },
+    {
+     "body": "0x008b8640",
+     "name": "GetRandomPlayer",
+     "upvalue": "0x00703850"
+    },
+    {
+     "body": "0x008b8410",
+     "name": "GetRoom",
+     "upvalue": "0x00407480"
+    },
+    {
+     "body": "0x008b8f70",
+     "name": "GetScreenShakeCountdown",
+     "upvalue": "0x0085e380"
+    },
+    {
+     "body": "0x008b8980",
+     "name": "GetSeeds",
+     "upvalue": "0x0042a340"
+    },
+    {
+     "body": "0x00899140",
+     "name": "GetStagesWithoutDamage",
+     "upvalue": "0x007e9380"
+    },
+    {
+     "body": "0x00899140",
+     "name": "GetStagesWithoutHeartsPicked",
+     "upvalue": "0x0085e3e0"
+    },
+    {
+     "body": "0x008b8ce0",
+     "name": "GetStateFlag",
+     "upvalue": "0x004217a0"
+    },
+    {
+     "body": "0x008b9070",
+     "name": "GetTargetDarkness",
+     "upvalue": "0x00440620"
+    },
+    {
+     "body": "0x00899140",
+     "name": "GetTreasureRoomVisitCount",
+     "upvalue": "0x007383a0"
+    },
+    {
+     "body": "0x00899140",
+     "name": "GetVictoryLap",
+     "upvalue": "0x006b84b0"
+    },
+    {
+     "body": "0x008b8ee0",
+     "name": "HasEncounteredBoss",
+     "upvalue": "0x00703510"
+    },
+    {
+     "body": "0x008b7240",
+     "name": "HasHallucination",
+     "upvalue": "0x004a5d00"
+    },
+    {
+     "body": "0x008b7240",
+     "name": "IsGreedMode",
+     "upvalue": "0x006f8120"
+    },
+    {
+     "body": "0x008b7240",
+     "name": "IsPaused",
+     "upvalue": "0x006fd350"
+    },
+    {
+     "body": "0x008b9490",
+     "name": "MakeShockwave",
+     "upvalue": "0x00703770"
+    },
+    {
+     "body": "0x008b8c30",
+     "name": "MoveToRandomRoom",
+     "upvalue": "0x006fe3d0"
+    },
+    {
+     "body": "0x008b71f0",
+     "name": "NextVictoryLap",
+     "upvalue": "0x006f7ac0"
+    },
+    {
+     "body": "0x008b71f0",
+     "name": "Render",
+     "upvalue": "0x006fbc10"
+    },
+    {
+     "body": "0x008b80f0",
+     "name": "RerollEnemy",
+     "upvalue": "0x007050c0"
+    },
+    {
+     "body": "0x008b71f0",
+     "name": "RerollLevelCollectibles",
+     "upvalue": "0x00704b70"
+    },
+    {
+     "body": "0x008990d0",
+     "name": "RerollLevelPickups",
+     "upvalue": "0x00704c50"
+    },
+    {
+     "body": "0x008990d0",
+     "name": "SetLastDevilRoomStage",
+     "upvalue": "0x007e9330"
+    },
+    {
+     "body": "0x008990d0",
+     "name": "SetLastLevelWithDamage",
+     "upvalue": "0x00753c50"
+    },
+    {
+     "body": "0x008990d0",
+     "name": "SetLastLevelWithoutHalfHp",
+     "upvalue": "0x00753c80"
+    },
+    {
+     "body": "0x008b8d70",
+     "name": "SetStateFlag",
+     "upvalue": "0x004d3390"
+    },
+    {
+     "body": "0x008990d0",
+     "name": "ShakeScreen",
+     "upvalue": "0x00703670"
+    },
+    {
+     "body": "0x008b71f0",
+     "name": "ShowFortune",
+     "upvalue": "0x005b1870"
+    },
+    {
+     "body": "0x008b8b30",
+     "name": "ShowHallucination",
+     "upvalue": "0x007059f0"
+    },
+    {
+     "body": "0x008b71f0",
+     "name": "ShowRule",
+     "upvalue": "0x00753d00"
+    },
+    {
+     "body": "0x008b72b0",
+     "name": "Spawn",
+     "upvalue": "0x00428b20"
+    },
+    {
+     "body": "0x008b7500",
+     "name": "SpawnEntityDesc",
+     "upvalue": "0x006fece0"
+    },
+    {
+     "body": "0x008b81b0",
+     "name": "SpawnParticles",
+     "upvalue": "0x00703330"
+    },
+    {
+     "body": "0x008b8a20",
+     "name": "StartRoomTransition",
+     "upvalue": "0x006fd7c0"
+    },
+    {
+     "body": "0x008b8bb0",
+     "name": "StartStageTransition",
+     "upvalue": "0x006fdc10"
+    },
+    {
+     "body": "0x008b71f0",
+     "name": "Update",
+     "upvalue": "0x006fadc0"
+    },
+    {
+     "body": "0x008b90e0",
+     "name": "UpdateStrangeAttractor",
+     "upvalue": "0x0085e390"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x00899140",
+     "name": "BlueWombParTime",
+     "setter": "0x008990d0",
+     "upvalue": "0x007e9320"
+    },
+    {
+     "getter": "0x00899140",
+     "name": "BossRushParTime",
+     "setter": "0x008990d0",
+     "upvalue": "0x007e9310"
+    },
+    {
+     "getter": "0x00899140",
+     "name": "Challenge",
+     "setter": "0x008990d0",
+     "upvalue": "0x00421770"
+    },
+    {
+     "getter": "0x00899140",
+     "name": "Difficulty",
+     "setter": null,
+     "upvalue": "0x0059e290"
+    },
+    {
+     "getter": "0x00899030",
+     "name": "ScreenShakeOffset",
+     "setter": "0x00898f80",
+     "upvalue": "0x00407490"
+    },
+    {
+     "getter": "0x008c2850",
+     "name": "TimeCounter",
+     "setter": "0x008c28b0",
+     "upvalue": "0x000264fc"
+    }
+   ]
+  },
+  "GridEntity": {
+   "metamethods": [
+    {
+     "body": "0x008c2e30",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008b25b0",
+     "name": "Destroy",
+     "upvalue": "0x0085de20"
+    },
+    {
+     "body": "0x008b2630",
+     "name": "DestroyWithSource",
+     "upvalue": "0x008c5ced"
+    },
+    {
+     "body": "0x008b27a0",
+     "name": "GetGridIndex",
+     "upvalue": "0x004e4830"
+    },
+    {
+     "body": "0x008b28a0",
+     "name": "GetRNG",
+     "upvalue": "0x0085dda0"
+    },
+    {
+     "body": "0x008b2800",
+     "name": "GetSaveState",
+     "upvalue": "0x007537a0"
+    },
+    {
+     "body": "0x008b2940",
+     "name": "GetSprite",
+     "upvalue": "0x00428930"
+    },
+    {
+     "body": "0x008b2740",
+     "name": "GetType",
+     "upvalue": "0x004073c0"
+    },
+    {
+     "body": "0x008b27a0",
+     "name": "GetVariant",
+     "upvalue": "0x0043eec0"
+    },
+    {
+     "body": "0x008b2410",
+     "name": "Hurt",
+     "upvalue": "0x0085ddb0"
+    },
+    {
+     "body": "0x008b24a0",
+     "name": "HurtWithSource",
+     "upvalue": "0x008c5cd9"
+    },
+    {
+     "body": "0x0089a4a0",
+     "name": "Init",
+     "upvalue": "0x00709db0"
+    },
+    {
+     "body": "0x008b2330",
+     "name": "PostInit",
+     "upvalue": "0x008c5ce8"
+    },
+    {
+     "body": "0x008b2380",
+     "name": "Render",
+     "upvalue": "0x008c5d10"
+    },
+    {
+     "body": "0x0089a4a0",
+     "name": "SetType",
+     "upvalue": "0x00709c00"
+    },
+    {
+     "body": "0x0089a4a0",
+     "name": "SetVariant",
+     "upvalue": "0x00738140"
+    },
+    {
+     "body": "0x0089a400",
+     "name": "ToDoor",
+     "upvalue": null
+    },
+    {
+     "body": "0x0089a2c0",
+     "name": "ToPit",
+     "upvalue": null
+    },
+    {
+     "body": "0x0089a180",
+     "name": "ToPoop",
+     "upvalue": null
+    },
+    {
+     "body": "0x00899ef0",
+     "name": "ToPressurePlate",
+     "upvalue": null
+    },
+    {
+     "body": "0x0089a040",
+     "name": "ToRock",
+     "upvalue": null
+    },
+    {
+     "body": "0x00899db0",
+     "name": "ToSpikes",
+     "upvalue": null
+    },
+    {
+     "body": "0x00899c70",
+     "name": "ToTNT",
+     "upvalue": null
+    },
+    {
+     "body": "0x008b2330",
+     "name": "Update",
+     "upvalue": "0x008c5cfc"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008c08f0",
+     "name": "CollisionClass",
+     "setter": "0x008c0950",
+     "upvalue": "0x0000003c"
+    },
+    {
+     "getter": "0x008c07b0",
+     "name": "Desc",
+     "setter": "0x008c0850",
+     "upvalue": "0x00000004"
+    },
+    {
+     "getter": "0x0089a5d0",
+     "name": "Position",
+     "setter": null,
+     "upvalue": "0x00709df0"
+    },
+    {
+     "getter": "0x0089a570",
+     "name": "State",
+     "setter": "0x0089a4a0",
+     "upvalue": "0x004176f0"
+    },
+    {
+     "getter": "0x0089a510",
+     "name": "VarData",
+     "setter": "0x0089a4a0",
+     "upvalue": "0x0067efc0"
+    }
+   ]
+  },
+  "GridEntityDesc": {
+   "metamethods": [
+    {
+     "body": "0x008c2e50",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008c06e0",
+     "name": "Initialized",
+     "setter": "0x008c0740",
+     "upvalue": "0x00000018"
+    },
+    {
+     "getter": "0x008c05c0",
+     "name": "SpawnCount",
+     "setter": "0x008c0620",
+     "upvalue": "0x0000000c"
+    },
+    {
+     "getter": "0x008c0680",
+     "name": "SpawnSeed",
+     "setter": "0x008c0620",
+     "upvalue": "0x00000010"
+    },
+    {
+     "getter": "0x008c05c0",
+     "name": "State",
+     "setter": "0x008c0620",
+     "upvalue": "0x00000008"
+    },
+    {
+     "getter": "0x008c05c0",
+     "name": "Type",
+     "setter": "0x008c0620",
+     "upvalue": "0x00000000"
+    },
+    {
+     "getter": "0x008c05c0",
+     "name": "VarData",
+     "setter": "0x008c0620",
+     "upvalue": "0x00000014"
+    },
+    {
+     "getter": "0x008c0680",
+     "name": "VariableSeed",
+     "setter": "0x008c0620",
+     "upvalue": "0x0000001c"
+    },
+    {
+     "getter": "0x008c0680",
+     "name": "Variant",
+     "setter": "0x008c0620",
+     "upvalue": "0x00000004"
+    }
+   ]
+  },
+  "GridEntityDoor": {
+   "metamethods": [],
+   "methods": [
+    {
+     "body": "0x008b2a60",
+     "name": "Bar",
+     "upvalue": "0x00710d90"
+    },
+    {
+     "body": "0x008b2b20",
+     "name": "CanBlowOpen",
+     "upvalue": "0x0070f680"
+    },
+    {
+     "body": "0x008b2ab0",
+     "name": "Close",
+     "upvalue": "0x00710d30"
+    },
+    {
+     "body": "0x008b2e10",
+     "name": "GetSpriteOffset",
+     "upvalue": "0x0085e0b0"
+    },
+    {
+     "body": "0x008b2d10",
+     "name": "IsBusted",
+     "upvalue": "0x00738170"
+    },
+    {
+     "body": "0x008b2d10",
+     "name": "IsKeyFamiliarTarget",
+     "upvalue": "0x0060cff0"
+    },
+    {
+     "body": "0x008b2d10",
+     "name": "IsLocked",
+     "upvalue": "0x00435fd0"
+    },
+    {
+     "body": "0x008b2d10",
+     "name": "IsOpen",
+     "upvalue": "0x00435fc0"
+    },
+    {
+     "body": "0x008b2d80",
+     "name": "IsRoomType",
+     "upvalue": "0x005cd5f0"
+    },
+    {
+     "body": "0x008b2d10",
+     "name": "IsTargetRoomArcade",
+     "upvalue": "0x00711690"
+    },
+    {
+     "body": "0x008b2a60",
+     "name": "Open",
+     "upvalue": "0x00710dd0"
+    },
+    {
+     "body": "0x008b2ab0",
+     "name": "SetLocked",
+     "upvalue": "0x00711630"
+    },
+    {
+     "body": "0x008b29e0",
+     "name": "SetRoomTypes",
+     "upvalue": "0x00710fa0"
+    },
+    {
+     "body": "0x008b2a60",
+     "name": "SpawnDust",
+     "upvalue": "0x0070f810"
+    },
+    {
+     "body": "0x008b2b90",
+     "name": "TryBlowOpen",
+     "upvalue": "0x0070fb60"
+    },
+    {
+     "body": "0x008b2c50",
+     "name": "TryUnlock",
+     "upvalue": "0x00710480"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008c0c10",
+     "name": "Busted",
+     "setter": "0x008c0c70",
+     "upvalue": "0x00000391"
+    },
+    {
+     "getter": "0x008c0f40",
+     "name": "CloseAnimation",
+     "setter": "0x008c0fb0",
+     "upvalue": "0x000003bc"
+    },
+    {
+     "getter": "0x008c09b0",
+     "name": "CurrentRoomType",
+     "setter": "0x008c0a10",
+     "upvalue": "0x0000015c"
+    },
+    {
+     "getter": "0x00899b70",
+     "name": "Direction",
+     "setter": "0x00899b00",
+     "upvalue": "0x005cd5e0"
+    },
+    {
+     "getter": "0x008c0a70",
+     "name": "ExtraSprite",
+     "setter": "0x008c0b00",
+     "upvalue": "0x0000027c"
+    },
+    {
+     "getter": "0x008c0c10",
+     "name": "ExtraVisible",
+     "setter": "0x008c0c70",
+     "upvalue": "0x00000390"
+    },
+    {
+     "getter": "0x008c0f40",
+     "name": "LockedAnimation",
+     "setter": "0x008c0fb0",
+     "upvalue": "0x000003d4"
+    },
+    {
+     "getter": "0x008c0f40",
+     "name": "OpenAnimation",
+     "setter": "0x008c0fb0",
+     "upvalue": "0x000003a4"
+    },
+    {
+     "getter": "0x008c0f40",
+     "name": "OpenLockedAnimation",
+     "setter": "0x008c0fb0",
+     "upvalue": "0x000003ec"
+    },
+    {
+     "getter": "0x008c0ce0",
+     "name": "PreviousState",
+     "setter": "0x008c0d70",
+     "upvalue": "0x00000398"
+    },
+    {
+     "getter": "0x008c0e10",
+     "name": "PreviousVariant",
+     "setter": "0x008c0ea0",
+     "upvalue": "0x0000039c"
+    },
+    {
+     "getter": "0x00899b70",
+     "name": "Slot",
+     "setter": "0x00899b00",
+     "upvalue": "0x00833290"
+    },
+    {
+     "getter": "0x00899b70",
+     "name": "TargetRoomIndex",
+     "setter": "0x00899b00",
+     "upvalue": "0x0060cfe0"
+    },
+    {
+     "getter": "0x008c09b0",
+     "name": "TargetRoomType",
+     "setter": "0x008c0a10",
+     "upvalue": "0x00000160"
+    }
+   ]
+  },
+  "GridEntityPit": {
+   "metamethods": [],
+   "methods": [
+    {
+     "body": "0x008b2f00",
+     "name": "MakeBridge",
+     "upvalue": "0x00714700"
+    },
+    {
+     "body": "0x008b2fa0",
+     "name": "SetLadder",
+     "upvalue": "0x007146e0"
+    },
+    {
+     "body": "0x008b3010",
+     "name": "UpdateCollision",
+     "upvalue": "0x00714610"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008c13d0",
+     "name": "HasLadder",
+     "setter": "0x008c1430",
+     "upvalue": "0x00000154"
+    }
+   ]
+  },
+  "GridEntityPoop": {
+   "metamethods": [],
+   "methods": [
+    {
+     "body": "0x008b2eb0",
+     "name": "ReduceSpawnRate",
+     "upvalue": "0x00456870"
+    },
+    {
+     "body": "0x008b2eb0",
+     "name": "RespawnRedPoop",
+     "upvalue": "0x007166f0"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008c10c0",
+     "name": "ReviveTimer",
+     "setter": "0x008c1120",
+     "upvalue": "0x00000154"
+    },
+    {
+     "getter": "0x008c1180",
+     "name": "StateAnimation",
+     "setter": "0x008c11f0",
+     "upvalue": "0x00000158"
+    },
+    {
+     "getter": "0x008c1300",
+     "name": "UnderPlayer",
+     "setter": "0x008c1360",
+     "upvalue": "0x00000170"
+    }
+   ]
+  },
+  "GridEntityPressurePlate": {
+   "metamethods": [],
+   "methods": [
+    {
+     "body": "0x008b3200",
+     "name": "Reward",
+     "upvalue": "0x00984550"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008c1a50",
+     "name": "GreedModeRNG",
+     "setter": "0x008c1ae0",
+     "upvalue": "0x0000026c"
+    },
+    {
+     "getter": "0x008c1940",
+     "name": "NextGreedAnimation",
+     "setter": "0x008c19c0",
+     "upvalue": "0x00000268"
+    },
+    {
+     "getter": "0x008c17a0",
+     "name": "TimerPlate",
+     "setter": "0x008c1830",
+     "upvalue": "0x00000154"
+    }
+   ]
+  },
+  "GridEntityRock": {
+   "metamethods": [],
+   "methods": [
+    {
+     "body": "0x008b3150",
+     "name": "GetBigRockFrame",
+     "upvalue": "0x0071aa70"
+    },
+    {
+     "body": "0x008b3060",
+     "name": "GetRubbleAnim",
+     "upvalue": "0x005cd820"
+    },
+    {
+     "body": "0x008b30e0",
+     "name": "SetBigRockFrame",
+     "upvalue": "0x0071a940"
+    },
+    {
+     "body": "0x008b31b0",
+     "name": "UpdateAnimFrame",
+     "upvalue": "0x0071aa90"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008c14a0",
+     "name": "Anim",
+     "setter": "0x008c1510",
+     "upvalue": "0x00000154"
+    },
+    {
+     "getter": "0x008c1620",
+     "name": "FrameCnt",
+     "setter": "0x008c1680",
+     "upvalue": "0x00000190"
+    },
+    {
+     "getter": "0x008c14a0",
+     "name": "RubbleAnim",
+     "setter": "0x008c1510",
+     "upvalue": "0x0000016c"
+    }
+   ]
+  },
+  "GridEntitySpikes": {
+   "metamethods": [],
+   "methods": [],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008c1b70",
+     "name": "Timeout",
+     "setter": "0x008c1bd0",
+     "upvalue": "0x00000154"
+    }
+   ]
+  },
+  "GridEntityTNT": {
+   "metamethods": [],
+   "methods": [],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008c16e0",
+     "name": "FrameCnt",
+     "setter": "0x008c1740",
+     "upvalue": "0x00000154"
+    }
+   ]
+  },
+  "HUD": {
+   "metamethods": [
+    {
+     "body": "0x008c2c30",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008b71a0",
+     "name": "AssignPlayerHUDs",
+     "upvalue": "0x009a8620"
+    },
+    {
+     "body": "0x008b6f70",
+     "name": "FlashChargeBar",
+     "upvalue": "0x009a2bc0"
+    },
+    {
+     "body": "0x008b6f70",
+     "name": "InvalidateActiveItem",
+     "upvalue": "0x009a2c00"
+    },
+    {
+     "body": "0x008b7010",
+     "name": "InvalidateCraftingItem",
+     "upvalue": "0x009a2c70"
+    },
+    {
+     "body": "0x008b70c0",
+     "name": "IsVisible",
+     "upvalue": "0x0085e1c0"
+    },
+    {
+     "body": "0x008b71a0",
+     "name": "PostUpdate",
+     "upvalue": "0x009a2b30"
+    },
+    {
+     "body": "0x008b71a0",
+     "name": "Render",
+     "upvalue": "0x009a3eb0"
+    },
+    {
+     "body": "0x008b7130",
+     "name": "SetVisible",
+     "upvalue": "0x004aaee0"
+    },
+    {
+     "body": "0x00872780",
+     "name": "ShowFortuneText",
+     "upvalue": "0x0085eca0"
+    },
+    {
+     "body": "0x00872780",
+     "name": "ShowItemText",
+     "upvalue": "0x0085e750"
+    },
+    {
+     "body": "0x008b71a0",
+     "name": "Update",
+     "upvalue": "0x009a2990"
+    }
+   ],
+   "parent": ""
+  },
+  "Item": {
+   "metamethods": [
+    {
+     "body": "0x008c30f0",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008aad70",
+     "name": "HasTags",
+     "upvalue": "0x005b1500"
+    },
+    {
+     "body": "0x008aae00",
+     "name": "IsAvailable",
+     "upvalue": "0x006ef3c0"
+    },
+    {
+     "body": "0x008aad00",
+     "name": "IsCollectible",
+     "upvalue": "0x005b14e0"
+    },
+    {
+     "body": "0x008aad00",
+     "name": "IsNull",
+     "upvalue": "0x00722c80"
+    },
+    {
+     "body": "0x008aad00",
+     "name": "IsTrinket",
+     "upvalue": "0x0060cc80"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008bccf0",
+     "name": "AchievementID",
+     "setter": "0x008bcd50",
+     "upvalue": "0x00000050"
+    },
+    {
+     "getter": "0x008bccf0",
+     "name": "AddBlackHearts",
+     "setter": "0x008bcd50",
+     "upvalue": "0x00000064"
+    },
+    {
+     "getter": "0x008bccf0",
+     "name": "AddBombs",
+     "setter": "0x008bcd50",
+     "upvalue": "0x00000068"
+    },
+    {
+     "getter": "0x008bccf0",
+     "name": "AddCoins",
+     "setter": "0x008bcd50",
+     "upvalue": "0x00000070"
+    },
+    {
+     "getter": "0x008bcf90",
+     "name": "AddCostumeOnPickup",
+     "setter": "0x008bd000",
+     "upvalue": "0x000000b2"
+    },
+    {
+     "getter": "0x008bccf0",
+     "name": "AddHearts",
+     "setter": "0x008bcd50",
+     "upvalue": "0x0000005c"
+    },
+    {
+     "getter": "0x008bccf0",
+     "name": "AddKeys",
+     "setter": "0x008bcd50",
+     "upvalue": "0x0000006c"
+    },
+    {
+     "getter": "0x008bccf0",
+     "name": "AddMaxHearts",
+     "setter": "0x008bcd50",
+     "upvalue": "0x00000058"
+    },
+    {
+     "getter": "0x008bccf0",
+     "name": "AddSoulHearts",
+     "setter": "0x008bcd50",
+     "upvalue": "0x00000060"
+    },
+    {
+     "getter": "0x008bcf30",
+     "name": "CacheFlags",
+     "setter": "0x008bcd50",
+     "upvalue": "0x00000054"
+    },
+    {
+     "getter": "0x008bd130",
+     "name": "ChargeType",
+     "setter": "0x008bcd50",
+     "upvalue": "0x000000ac"
+    },
+    {
+     "getter": "0x008bcf90",
+     "name": "ClearEffectsOnRemove",
+     "setter": "0x008bd000",
+     "upvalue": "0x000000b5"
+    },
+    {
+     "getter": "0x0089e3b0",
+     "name": "Costume",
+     "setter": null,
+     "upvalue": "0x0085dbc0"
+    },
+    {
+     "getter": "0x008bccf0",
+     "name": "CraftingQuality",
+     "setter": "0x008bcd50",
+     "upvalue": "0x000000c4"
+    },
+    {
+     "getter": "0x008bcdb0",
+     "name": "Description",
+     "setter": "0x008bce20",
+     "upvalue": "0x00000020"
+    },
+    {
+     "getter": "0x008bd070",
+     "name": "DevilPrice",
+     "setter": "0x008bd0d0",
+     "upvalue": "0x0000007c"
+    },
+    {
+     "getter": "0x008bcdb0",
+     "name": "GfxFileName",
+     "setter": "0x008bce20",
+     "upvalue": "0x00000038"
+    },
+    {
+     "getter": "0x008bcf90",
+     "name": "Hidden",
+     "setter": "0x008bd000",
+     "upvalue": "0x000000b3"
+    },
+    {
+     "getter": "0x008bccf0",
+     "name": "ID",
+     "setter": "0x008bcd50",
+     "upvalue": "0x00000004"
+    },
+    {
+     "getter": "0x008bccf0",
+     "name": "InitCharge",
+     "setter": "0x008bcd50",
+     "upvalue": "0x000000c8"
+    },
+    {
+     "getter": "0x008bccf0",
+     "name": "MaxCharges",
+     "setter": "0x008bcd50",
+     "upvalue": "0x00000074"
+    },
+    {
+     "getter": "0x008bccf0",
+     "name": "MaxCooldown",
+     "setter": "0x008bcd50",
+     "upvalue": "0x00000078"
+    },
+    {
+     "getter": "0x008bcdb0",
+     "name": "Name",
+     "setter": "0x008bce20",
+     "upvalue": "0x00000008"
+    },
+    {
+     "getter": "0x008bcf90",
+     "name": "PassiveCache",
+     "setter": "0x008bd000",
+     "upvalue": "0x000000b1"
+    },
+    {
+     "getter": "0x008bcf90",
+     "name": "PersistentEffect",
+     "setter": "0x008bd000",
+     "upvalue": "0x000000b4"
+    },
+    {
+     "getter": "0x008bccf0",
+     "name": "Quality",
+     "setter": "0x008bcd50",
+     "upvalue": "0x000000c0"
+    },
+    {
+     "getter": "0x008bd070",
+     "name": "ShopPrice",
+     "setter": "0x008bd0d0",
+     "upvalue": "0x0000007e"
+    },
+    {
+     "getter": "0x008bcf90",
+     "name": "Special",
+     "setter": "0x008bd000",
+     "upvalue": "0x000000b0"
+    },
+    {
+     "getter": "0x008bd190",
+     "name": "Tags",
+     "setter": "0x008bd1f0",
+     "upvalue": "0x000000b8"
+    },
+    {
+     "getter": "0x008bccf0",
+     "name": "Type",
+     "setter": "0x008bcd50",
+     "upvalue": "0x00000000"
+    }
+   ]
+  },
+  "ItemConfigList": {
+   "metamethods": [
+    {
+     "body": "0x008c5c70",
+     "name": "__gc",
+     "upvalue": null
+    },
+    {
+     "body": "0x008c3570",
+     "name": "__len",
+     "upvalue": "0x00417840"
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008c5190",
+     "name": "Get",
+     "upvalue": "0x008a8080"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008c3570",
+     "name": "Size",
+     "setter": null,
+     "upvalue": "0x00417840"
+    }
+   ]
+  },
+  "ItemPool": {
+   "metamethods": [
+    {
+     "body": "0x008c2c50",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008b6ef0",
+     "name": "AddBibleUpgrade",
+     "upvalue": "0x00736fd0"
+    },
+    {
+     "body": "0x008b6c80",
+     "name": "AddRoomBlacklist",
+     "upvalue": "0x005b14b0"
+    },
+    {
+     "body": "0x008b6d80",
+     "name": "ForceAddPillEffect",
+     "upvalue": "0x00736ba0"
+    },
+    {
+     "body": "0x008b6a70",
+     "name": "GetCard",
+     "upvalue": "0x00734870"
+    },
+    {
+     "body": "0x008b6740",
+     "name": "GetCollectible",
+     "upvalue": "0x00733610"
+    },
+    {
+     "body": "0x008b6e00",
+     "name": "GetLastPool",
+     "upvalue": "0x006dac50"
+    },
+    {
+     "body": "0x008b6b50",
+     "name": "GetPill",
+     "upvalue": "0x00734900"
+    },
+    {
+     "body": "0x008b6bd0",
+     "name": "GetPillEffect",
+     "upvalue": "0x00734a80"
+    },
+    {
+     "body": "0x008b6e60",
+     "name": "GetPoolForRoom",
+     "upvalue": "0x00732dc0"
+    },
+    {
+     "body": "0x008b69f0",
+     "name": "GetTrinket",
+     "upvalue": "0x00733ca0"
+    },
+    {
+     "body": "0x008b6c80",
+     "name": "IdentifyPill",
+     "upvalue": "0x00718ea0"
+    },
+    {
+     "body": "0x008b6cf0",
+     "name": "IsPillIdentified",
+     "upvalue": "0x0083c490"
+    },
+    {
+     "body": "0x008b6840",
+     "name": "RemoveCollectible",
+     "upvalue": "0x00733ff0"
+    },
+    {
+     "body": "0x008b6910",
+     "name": "RemoveTrinket",
+     "upvalue": "0x00734130"
+    },
+    {
+     "body": "0x008b69a0",
+     "name": "ResetRoomBlacklist",
+     "upvalue": "0x00736f90"
+    },
+    {
+     "body": "0x008b69a0",
+     "name": "ResetTrinkets",
+     "upvalue": "0x00736a90"
+    }
+   ],
+   "parent": ""
+  },
+  "KColor": {
+   "metamethods": [
+    {
+     "body": "0x008c3270",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008bb420",
+     "name": "Alpha",
+     "setter": "0x008bb480",
+     "upvalue": "0x0000000c"
+    },
+    {
+     "getter": "0x008bb420",
+     "name": "Blue",
+     "setter": "0x008bb480",
+     "upvalue": "0x00000008"
+    },
+    {
+     "getter": "0x008bb420",
+     "name": "Green",
+     "setter": "0x008bb480",
+     "upvalue": "0x00000004"
+    },
+    {
+     "getter": "0x008bb420",
+     "name": "Red",
+     "setter": "0x008bb480",
+     "upvalue": "0x00000000"
+    }
+   ]
+  },
+  "Level": {
+   "metamethods": [
+    {
+     "body": "0x008c2c90",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008b5f50",
+     "name": "AddAngelRoomChance",
+     "upvalue": "0x0065cf00"
+    },
+    {
+     "body": "0x008b5820",
+     "name": "AddCurse",
+     "upvalue": "0x0074a2d0"
+    },
+    {
+     "body": "0x008b5500",
+     "name": "ApplyBlueMapEffect",
+     "upvalue": "0x007488d0"
+    },
+    {
+     "body": "0x008b5720",
+     "name": "ApplyCompassEffect",
+     "upvalue": "0x00748940"
+    },
+    {
+     "body": "0x008b5500",
+     "name": "ApplyMapEffect",
+     "upvalue": "0x00748860"
+    },
+    {
+     "body": "0x008b5790",
+     "name": "CanOpenChallengeRoom",
+     "upvalue": "0x00748760"
+    },
+    {
+     "body": "0x008b5e60",
+     "name": "CanSpawnDevilRoom",
+     "upvalue": "0x00749830"
+    },
+    {
+     "body": "0x008b5690",
+     "name": "CanStageHaveCurseOfLabyrinth",
+     "upvalue": "0x007385c0"
+    },
+    {
+     "body": "0x008b5550",
+     "name": "ChangeRoom",
+     "upvalue": "0x0073fc80"
+    },
+    {
+     "body": "0x008b5500",
+     "name": "DisableDevilRoom",
+     "upvalue": "0x007e9260"
+    },
+    {
+     "body": "0x008b5690",
+     "name": "ForceHorsemanBoss",
+     "upvalue": "0x007481d0"
+    },
+    {
+     "body": "0x00899710",
+     "name": "GetAbsoluteStage",
+     "upvalue": "0x0074b960"
+    },
+    {
+     "body": "0x008b5fe0",
+     "name": "GetAngelRoomChance",
+     "upvalue": "0x007e9270"
+    },
+    {
+     "body": "0x008b5d50",
+     "name": "GetCanSeeEverything",
+     "upvalue": "0x0085e170"
+    },
+    {
+     "body": "0x008b58a0",
+     "name": "GetCurrentRoom",
+     "upvalue": "0x00407480"
+    },
+    {
+     "body": "0x008b5aa0",
+     "name": "GetCurrentRoomDesc",
+     "upvalue": "0x00740db0"
+    },
+    {
+     "body": "0x00899710",
+     "name": "GetCurrentRoomIndex",
+     "upvalue": "0x004360e0"
+    },
+    {
+     "body": "0x008b55d0",
+     "name": "GetCurseName",
+     "upvalue": "0x00746260"
+    },
+    {
+     "body": "0x00899710",
+     "name": "GetCurses",
+     "upvalue": "0x00748490"
+    },
+    {
+     "body": "0x008b5dc0",
+     "name": "GetDevilAngelRoomRNG",
+     "upvalue": "0x007537f0"
+    },
+    {
+     "body": "0x00899560",
+     "name": "GetDungeonPlacementSeed",
+     "upvalue": "0x0060d000"
+    },
+    {
+     "body": "0x00899670",
+     "name": "GetEnterPosition",
+     "upvalue": "0x0074a090"
+    },
+    {
+     "body": "0x008b5d50",
+     "name": "GetHeartPicked",
+     "upvalue": "0x00753780"
+    },
+    {
+     "body": "0x00899710",
+     "name": "GetLastBossRoomListIndex",
+     "upvalue": "0x004d3380"
+    },
+    {
+     "body": "0x008b5aa0",
+     "name": "GetLastRoomDesc",
+     "upvalue": "0x00740dd0"
+    },
+    {
+     "body": "0x008b55d0",
+     "name": "GetName",
+     "upvalue": "0x007460b0"
+    },
+    {
+     "body": "0x00899710",
+     "name": "GetNonCompleteRoomIndex",
+     "upvalue": "0x00740a60"
+    },
+    {
+     "body": "0x008b60e0",
+     "name": "GetPlanetariumChance",
+     "upvalue": "0x0074dbd0"
+    },
+    {
+     "body": "0x00899710",
+     "name": "GetPreviousRoomIndex",
+     "upvalue": "0x005b16d0"
+    },
+    {
+     "body": "0x008b5940",
+     "name": "GetRandomRoomIndex",
+     "upvalue": "0x00740860"
+    },
+    {
+     "body": "0x008b59d0",
+     "name": "GetRoomByIdx",
+     "upvalue": "0x00740da0"
+    },
+    {
+     "body": "0x00899710",
+     "name": "GetRoomCount",
+     "upvalue": "0x0056ff80"
+    },
+    {
+     "body": "0x008b5b40",
+     "name": "GetRooms",
+     "upvalue": "0x00740df0"
+    },
+    {
+     "body": "0x008b5cf0",
+     "name": "GetStage",
+     "upvalue": "0x0040c3a0"
+    },
+    {
+     "body": "0x00899710",
+     "name": "GetStageType",
+     "upvalue": "0x004073c0"
+    },
+    {
+     "body": "0x00899710",
+     "name": "GetStartingRoomIndex",
+     "upvalue": "0x00505c70"
+    },
+    {
+     "body": "0x008b5790",
+     "name": "GetStateFlag",
+     "upvalue": "0x004f88f0"
+    },
+    {
+     "body": "0x008b5d50",
+     "name": "HasBossChallenge",
+     "upvalue": "0x0085e160"
+    },
+    {
+     "body": "0x008b5ed0",
+     "name": "InitializeDevilAngelRoom",
+     "upvalue": "0x007499a0"
+    },
+    {
+     "body": "0x008b5d50",
+     "name": "IsAltStage",
+     "upvalue": "0x0042a2c0"
+    },
+    {
+     "body": "0x008b5d50",
+     "name": "IsAscent",
+     "upvalue": "0x0074f090"
+    },
+    {
+     "body": "0x008b5d50",
+     "name": "IsDevilRoomDisabled",
+     "upvalue": "0x007e9250"
+    },
+    {
+     "body": "0x008b5d50",
+     "name": "IsNextStageAvailable",
+     "upvalue": "0x0074b710"
+    },
+    {
+     "body": "0x008b5d50",
+     "name": "IsPreAscent",
+     "upvalue": "0x0074ea50"
+    },
+    {
+     "body": "0x008b6050",
+     "name": "MakeRedRoomDoor",
+     "upvalue": "0x0074d010"
+    },
+    {
+     "body": "0x008b5be0",
+     "name": "QueryRoomTypeIndex",
+     "upvalue": "0x007484c0"
+    },
+    {
+     "body": "0x008b5500",
+     "name": "RemoveCompassEffect",
+     "upvalue": "0x00748ae0"
+    },
+    {
+     "body": "0x008994f0",
+     "name": "RemoveCurses",
+     "upvalue": "0x00748bc0"
+    },
+    {
+     "body": "0x008b5720",
+     "name": "SetCanSeeEverything",
+     "upvalue": "0x005b16e0"
+    },
+    {
+     "body": "0x008b5500",
+     "name": "SetHeartPicked",
+     "upvalue": "0x00435fb0"
+    },
+    {
+     "body": "0x008b5500",
+     "name": "SetNextStage",
+     "upvalue": "0x007467c0"
+    },
+    {
+     "body": "0x008b5500",
+     "name": "SetRedHeartDamage",
+     "upvalue": "0x0074b5b0"
+    },
+    {
+     "body": "0x008b5550",
+     "name": "SetStage",
+     "upvalue": "0x007466d0"
+    },
+    {
+     "body": "0x008b5820",
+     "name": "SetStateFlag",
+     "upvalue": "0x00428a80"
+    },
+    {
+     "body": "0x008b5500",
+     "name": "ShowMap",
+     "upvalue": "0x007489c0"
+    },
+    {
+     "body": "0x008b5720",
+     "name": "ShowName",
+     "upvalue": "0x00746560"
+    },
+    {
+     "body": "0x008b5550",
+     "name": "UncoverHiddenDoor",
+     "upvalue": "0x0074a1b0"
+    },
+    {
+     "body": "0x008b5500",
+     "name": "Update",
+     "upvalue": "0x00738610"
+    },
+    {
+     "body": "0x008b5500",
+     "name": "UpdateVisibility",
+     "upvalue": "0x0073f940"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x00899670",
+     "name": "DungeonReturnPosition",
+     "setter": "0x008995c0",
+     "upvalue": "0x0085e140"
+    },
+    {
+     "getter": "0x00899710",
+     "name": "DungeonReturnRoomIndex",
+     "setter": "0x008994f0",
+     "upvalue": "0x005cd680"
+    },
+    {
+     "getter": "0x00899710",
+     "name": "EnterDoor",
+     "setter": "0x008994f0",
+     "upvalue": "0x004b70b0"
+    },
+    {
+     "getter": "0x00899560",
+     "name": "GreedModeWave",
+     "setter": "0x008994f0",
+     "upvalue": "0x0070c5b0"
+    },
+    {
+     "getter": "0x00899710",
+     "name": "LeaveDoor",
+     "setter": "0x008994f0",
+     "upvalue": "0x006ef880"
+    }
+   ]
+  },
+  "MusicManager": {
+   "metamethods": [
+    {
+     "body": "0x008c2bd0",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008b99f0",
+     "name": "Crossfade",
+     "upvalue": "0x007e1e70"
+    },
+    {
+     "body": "0x008b9c20",
+     "name": "Disable",
+     "upvalue": "0x0085e420"
+    },
+    {
+     "body": "0x008b9b20",
+     "name": "DisableLayer",
+     "upvalue": "0x007e2410"
+    },
+    {
+     "body": "0x008b9c20",
+     "name": "Enable",
+     "upvalue": "0x0085e410"
+    },
+    {
+     "body": "0x008b9c70",
+     "name": "EnableLayer",
+     "upvalue": "0x007e2280"
+    },
+    {
+     "body": "0x008b9a80",
+     "name": "Fadein",
+     "upvalue": "0x007e2080"
+    },
+    {
+     "body": "0x008b9b90",
+     "name": "Fadeout",
+     "upvalue": "0x007e2100"
+    },
+    {
+     "body": "0x008b9e80",
+     "name": "GetCurrentMusicID",
+     "upvalue": "0x007e1780"
+    },
+    {
+     "body": "0x008b9e80",
+     "name": "GetQueuedMusicID",
+     "upvalue": "0x007e1790"
+    },
+    {
+     "body": "0x008b9d80",
+     "name": "IsEnabled",
+     "upvalue": "0x0085e430"
+    },
+    {
+     "body": "0x008b9cf0",
+     "name": "IsLayerEnabled",
+     "upvalue": "0x007e2440"
+    },
+    {
+     "body": "0x008b9c20",
+     "name": "Pause",
+     "upvalue": "0x007e2140"
+    },
+    {
+     "body": "0x008b9b90",
+     "name": "PitchSlide",
+     "upvalue": "0x007e24c0"
+    },
+    {
+     "body": "0x008b99f0",
+     "name": "Play",
+     "upvalue": "0x007e1d50"
+    },
+    {
+     "body": "0x008b9b20",
+     "name": "Queue",
+     "upvalue": "0x007e2480"
+    },
+    {
+     "body": "0x008b9c20",
+     "name": "ResetPitch",
+     "upvalue": "0x007e24e0"
+    },
+    {
+     "body": "0x008b9c20",
+     "name": "Resume",
+     "upvalue": "0x007e21f0"
+    },
+    {
+     "body": "0x008b9c20",
+     "name": "UpdateVolume",
+     "upvalue": "0x007e2550"
+    },
+    {
+     "body": "0x008b9df0",
+     "name": "VolumeSlide",
+     "upvalue": "0x007e2510"
+    }
+   ],
+   "parent": ""
+  },
+  "PathFinder": {
+   "metamethods": [
+    {
+     "body": "0x008c3150",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008aaac0",
+     "name": "EvadeTarget",
+     "upvalue": "0x007e4940"
+    },
+    {
+     "body": "0x008aa8a0",
+     "name": "FindGridPath",
+     "upvalue": "0x007e33c0"
+    },
+    {
+     "body": "0x008aab60",
+     "name": "GetEvadeMovementCountdown",
+     "upvalue": "0x00456740"
+    },
+    {
+     "body": "0x008aabc0",
+     "name": "GetGridIndex",
+     "upvalue": "0x00456370"
+    },
+    {
+     "body": "0x008aaa50",
+     "name": "HasDirectPath",
+     "upvalue": "0x004be6e0"
+    },
+    {
+     "body": "0x008aa990",
+     "name": "HasPathToPos",
+     "upvalue": "0x007e7070"
+    },
+    {
+     "body": "0x008aa710",
+     "name": "MoveRandomly",
+     "upvalue": "0x007e6300"
+    },
+    {
+     "body": "0x008aa800",
+     "name": "MoveRandomlyAxisAligned",
+     "upvalue": "0x007e5340"
+    },
+    {
+     "body": "0x008aa790",
+     "name": "MoveRandomlyBoss",
+     "upvalue": "0x007e6650"
+    },
+    {
+     "body": "0x008aa6c0",
+     "name": "Reset",
+     "upvalue": "0x007e3260"
+    },
+    {
+     "body": "0x008aa6c0",
+     "name": "ResetMovementTarget",
+     "upvalue": "0x007e6fa0"
+    },
+    {
+     "body": "0x008aa790",
+     "name": "SetCanCrushRocks",
+     "upvalue": "0x00499dc0"
+    },
+    {
+     "body": "0x008aa6c0",
+     "name": "UpdateGridIndex",
+     "upvalue": "0x007e6ff0"
+    }
+   ],
+   "parent": ""
+  },
+  "PillConfigList": {
+   "metamethods": [
+    {
+     "body": "0x008c5c90",
+     "name": "__gc",
+     "upvalue": null
+    },
+    {
+     "body": "0x008c35d0",
+     "name": "__len",
+     "upvalue": "0x00417840"
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008c5010",
+     "name": "Get",
+     "upvalue": "0x008a8080"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008c35d0",
+     "name": "Size",
+     "setter": null,
+     "upvalue": "0x00417840"
+    }
+   ]
+  },
+  "PillEffect": {
+   "metamethods": [
+    {
+     "body": "0x008c3110",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008aac90",
+     "name": "IsAvailable",
+     "upvalue": "0x00730b20"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008bc850",
+     "name": "AchievementID",
+     "setter": "0x008bc8b0",
+     "upvalue": "0x00000004"
+    },
+    {
+     "getter": "0x008bc850",
+     "name": "AnnouncerDelay",
+     "setter": "0x008bc8b0",
+     "upvalue": "0x00000044"
+    },
+    {
+     "getter": "0x008bcb60",
+     "name": "AnnouncerVoice",
+     "setter": "0x008bc8b0",
+     "upvalue": "0x0000003c"
+    },
+    {
+     "getter": "0x008bcb60",
+     "name": "AnnouncerVoiceSuper",
+     "setter": "0x008bc8b0",
+     "upvalue": "0x00000040"
+    },
+    {
+     "getter": "0x008bcbc0",
+     "name": "EffectClass",
+     "setter": "0x008bcc50",
+     "upvalue": "0x0000004c"
+    },
+    {
+     "getter": "0x008bcbc0",
+     "name": "EffectSubClass",
+     "setter": "0x008bcc50",
+     "upvalue": "0x0000004d"
+    },
+    {
+     "getter": "0x008bca90",
+     "name": "GreedModeAllowed",
+     "setter": "0x008bcaf0",
+     "upvalue": "0x00000038"
+    },
+    {
+     "getter": "0x008bc850",
+     "name": "ID",
+     "setter": "0x008bc8b0",
+     "upvalue": "0x00000000"
+    },
+    {
+     "getter": "0x008bc850",
+     "name": "MimicCharge",
+     "setter": "0x008bc8b0",
+     "upvalue": "0x00000048"
+    },
+    {
+     "getter": "0x008bc910",
+     "name": "Name",
+     "setter": "0x008bc980",
+     "upvalue": "0x00000008"
+    }
+   ]
+  },
+  "PosVel": {
+   "metamethods": [
+    {
+     "body": "0x008c2ff0",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008bde40",
+     "name": "Position",
+     "setter": "0x008bdee0",
+     "upvalue": "0x00000000"
+    },
+    {
+     "getter": "0x008bde40",
+     "name": "Velocity",
+     "setter": "0x008bdee0",
+     "upvalue": "0x00000008"
+    }
+   ]
+  },
+  "ProjectileParams": {
+   "metamethods": [
+    {
+     "body": "0x008bbd60",
+     "name": "__call",
+     "upvalue": null
+    },
+    {
+     "body": "0x008c3190",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008bbe80",
+     "name": "Acceleration",
+     "setter": "0x008bbee0",
+     "upvalue": "0x00000024"
+    },
+    {
+     "getter": "0x008bc070",
+     "name": "BulletFlags",
+     "setter": "0x008bc0d0",
+     "upvalue": "0x00000058"
+    },
+    {
+     "getter": "0x008bc070",
+     "name": "ChangeFlags",
+     "setter": "0x008bc0d0",
+     "upvalue": "0x00000080"
+    },
+    {
+     "getter": "0x008bc270",
+     "name": "ChangeTimeout",
+     "setter": "0x008bc2d0",
+     "upvalue": "0x0000008c"
+    },
+    {
+     "getter": "0x008bbe80",
+     "name": "ChangeVelocity",
+     "setter": "0x008bbee0",
+     "upvalue": "0x00000088"
+    },
+    {
+     "getter": "0x008bbe80",
+     "name": "CircleAngle",
+     "setter": "0x008bbee0",
+     "upvalue": "0x00000018"
+    },
+    {
+     "getter": "0x008bbf50",
+     "name": "Color",
+     "setter": "0x008bbfb0",
+     "upvalue": "0x0000002c"
+    },
+    {
+     "getter": "0x008bbe80",
+     "name": "CurvingStrength",
+     "setter": "0x008bbee0",
+     "upvalue": "0x00000020"
+    },
+    {
+     "getter": "0x008bbe80",
+     "name": "DepthOffset",
+     "setter": "0x008bbee0",
+     "upvalue": "0x00000090"
+    },
+    {
+     "getter": "0x008bbe80",
+     "name": "DotProductLimit",
+     "setter": "0x008bbee0",
+     "upvalue": "0x00000078"
+    },
+    {
+     "getter": "0x008bbe80",
+     "name": "FallingAccelModifier",
+     "setter": "0x008bbee0",
+     "upvalue": "0x0000000c"
+    },
+    {
+     "getter": "0x008bbe80",
+     "name": "FallingSpeedModifier",
+     "setter": "0x008bbee0",
+     "upvalue": "0x00000008"
+    },
+    {
+     "getter": "0x008bc130",
+     "name": "FireDirectionLimit",
+     "setter": "0x008bc1d0",
+     "upvalue": "0x00000070"
+    },
+    {
+     "getter": "0x008bbdb0",
+     "name": "GridCollision",
+     "setter": "0x008bbe10",
+     "upvalue": "0x00000000"
+    },
+    {
+     "getter": "0x008bbe80",
+     "name": "HeightModifier",
+     "setter": "0x008bbee0",
+     "upvalue": "0x00000004"
+    },
+    {
+     "getter": "0x008bbe80",
+     "name": "HomingStrength",
+     "setter": "0x008bbee0",
+     "upvalue": "0x0000001c"
+    },
+    {
+     "getter": "0x008bc130",
+     "name": "PositionOffset",
+     "setter": "0x008bc1d0",
+     "upvalue": "0x00000060"
+    },
+    {
+     "getter": "0x008bbe80",
+     "name": "Scale",
+     "setter": "0x008bbee0",
+     "upvalue": "0x00000014"
+    },
+    {
+     "getter": "0x008bbe80",
+     "name": "Spread",
+     "setter": "0x008bbee0",
+     "upvalue": "0x00000028"
+    },
+    {
+     "getter": "0x008bc130",
+     "name": "TargetPosition",
+     "setter": "0x008bc1d0",
+     "upvalue": "0x00000068"
+    },
+    {
+     "getter": "0x008bc270",
+     "name": "Variant",
+     "setter": "0x008bc2d0",
+     "upvalue": "0x00000094"
+    },
+    {
+     "getter": "0x008bbe80",
+     "name": "VelocityMulti",
+     "setter": "0x008bbee0",
+     "upvalue": "0x00000010"
+    },
+    {
+     "getter": "0x008bc270",
+     "name": "WiggleFrameOffset",
+     "setter": "0x008bc2d0",
+     "upvalue": "0x0000007c"
+    }
+   ]
+  },
+  "QueueItemData": {
+   "metamethods": [
+    {
+     "body": "0x008c3070",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008bdb90",
+     "name": "Charge",
+     "setter": "0x008bdbf0",
+     "upvalue": "0x00000004"
+    },
+    {
+     "getter": "0x008bda60",
+     "name": "Item",
+     "setter": "0x008bdb00",
+     "upvalue": "0x00000000"
+    },
+    {
+     "getter": "0x0089e220",
+     "name": "Touched",
+     "setter": "0x0089e1b0",
+     "upvalue": "0x007538f0"
+    }
+   ]
+  },
+  "RNG": {
+   "metamethods": [
+    {
+     "body": "0x008bbcf0",
+     "name": "__call",
+     "upvalue": null
+    },
+    {
+     "body": "0x008c31b0",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008aa0d0",
+     "name": "GetSeed",
+     "upvalue": "0x0040c3a0"
+    },
+    {
+     "body": "0x008aa2a0",
+     "name": "Next",
+     "upvalue": "0x007e90f0"
+    },
+    {
+     "body": "0x008aa230",
+     "name": "RandomFloat",
+     "upvalue": "0x007e9080"
+    },
+    {
+     "body": "0x008aa1b0",
+     "name": "RandomInt",
+     "upvalue": "0x007e9020"
+    },
+    {
+     "body": "0x008aa130",
+     "name": "SetSeed",
+     "upvalue": "0x007e8fe0"
+    }
+   ],
+   "parent": ""
+  },
+  "Room": {
+   "metamethods": [
+    {
+     "body": "0x008c2cb0",
+     "name": "__gc",
+     "upvalue": null
+    },
+    {
+     "body": "0x008c2cf0",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008b3d60",
+     "name": "CheckLine",
+     "upvalue": "0x007f0df0"
+    },
+    {
+     "body": "0x008b38f0",
+     "name": "DamageGrid",
+     "upvalue": "0x00813b60"
+    },
+    {
+     "body": "0x008b3980",
+     "name": "DamageGridWithSource",
+     "upvalue": "0x00813b30"
+    },
+    {
+     "body": "0x008b3ad0",
+     "name": "DestroyGrid",
+     "upvalue": "0x00813c40"
+    },
+    {
+     "body": "0x008b3ba0",
+     "name": "DestroyGridWithSource",
+     "upvalue": "0x00813bf0"
+    },
+    {
+     "body": "0x008b4ef0",
+     "name": "EmitBloodFromWalls",
+     "upvalue": "0x004566f0"
+    },
+    {
+     "body": "0x008b4310",
+     "name": "FindFreePickupSpawnPosition",
+     "upvalue": "0x00813520"
+    },
+    {
+     "body": "0x008b4470",
+     "name": "FindFreeTilePosition",
+     "upvalue": "0x0081e520"
+    },
+    {
+     "body": "0x008b4a90",
+     "name": "GetAliveBossesCount",
+     "upvalue": "0x004566d0"
+    },
+    {
+     "body": "0x008b4a90",
+     "name": "GetAliveEnemiesCount",
+     "upvalue": "0x004566b0"
+    },
+    {
+     "body": "0x008b3800",
+     "name": "GetAwardSeed",
+     "upvalue": "0x0085e100"
+    },
+    {
+     "body": "0x008b3320",
+     "name": "GetBackdropType",
+     "upvalue": "0x004cdd20"
+    },
+    {
+     "body": "0x008b3320",
+     "name": "GetBossID",
+     "upvalue": "0x0043ef20"
+    },
+    {
+     "body": "0x008b47c0",
+     "name": "GetBottomRightPos",
+     "upvalue": "0x0042cc70"
+    },
+    {
+     "body": "0x008b3320",
+     "name": "GetBrokenWatchState",
+     "upvalue": "0x0081edd0"
+    },
+    {
+     "body": "0x008b4860",
+     "name": "GetCenterPos",
+     "upvalue": "0x00812d00"
+    },
+    {
+     "body": "0x008b3860",
+     "name": "GetClampedGridIndex",
+     "upvalue": "0x00812de0"
+    },
+    {
+     "body": "0x008b4470",
+     "name": "GetClampedPosition",
+     "upvalue": "0x00436090"
+    },
+    {
+     "body": "0x008b3800",
+     "name": "GetDecorationSeed",
+     "upvalue": "0x004aae80"
+    },
+    {
+     "body": "0x008b3320",
+     "name": "GetDeliriumDistance",
+     "upvalue": "0x007537e0"
+    },
+    {
+     "body": "0x008b4cb0",
+     "name": "GetDevilRoomChance",
+     "upvalue": "0x007f92b0"
+    },
+    {
+     "body": "0x008b3580",
+     "name": "GetDoor",
+     "upvalue": "0x00436020"
+    },
+    {
+     "body": "0x008b3640",
+     "name": "GetDoorSlotPosition",
+     "upvalue": "0x007f79d0"
+    },
+    {
+     "body": "0x008b3320",
+     "name": "GetDungeonRockIdx",
+     "upvalue": "0x00820aa0"
+    },
+    {
+     "body": "0x008b5430",
+     "name": "GetEnemyDamageInflicted",
+     "upvalue": "0x0085e130"
+    },
+    {
+     "body": "0x008b4af0",
+     "name": "GetEntities",
+     "upvalue": "0x00428a50"
+    },
+    {
+     "body": "0x008b4a90",
+     "name": "GetFrameCount",
+     "upvalue": "0x00813ce0"
+    },
+    {
+     "body": "0x008b3440",
+     "name": "GetGridCollision",
+     "upvalue": "0x007f0800"
+    },
+    {
+     "body": "0x008b34c0",
+     "name": "GetGridCollisionAtPos",
+     "upvalue": "0x007f0780"
+    },
+    {
+     "body": "0x008b40a0",
+     "name": "GetGridEntity",
+     "upvalue": "0x00436060"
+    },
+    {
+     "body": "0x008b4160",
+     "name": "GetGridEntityFromPos",
+     "upvalue": "0x00456620"
+    },
+    {
+     "body": "0x008b3320",
+     "name": "GetGridHeight",
+     "upvalue": "0x0040c2e0"
+    },
+    {
+     "body": "0x008b3860",
+     "name": "GetGridIndex",
+     "upvalue": "0x00812c90"
+    },
+    {
+     "body": "0x008b3440",
+     "name": "GetGridPath",
+     "upvalue": "0x004565c0"
+    },
+    {
+     "body": "0x008b3860",
+     "name": "GetGridPathFromPos",
+     "upvalue": "0x00812c10"
+    },
+    {
+     "body": "0x008b3640",
+     "name": "GetGridPosition",
+     "upvalue": "0x00812f00"
+    },
+    {
+     "body": "0x008b3320",
+     "name": "GetGridSize",
+     "upvalue": "0x004566a0"
+    },
+    {
+     "body": "0x008b3320",
+     "name": "GetGridWidth",
+     "upvalue": "0x004176f0"
+    },
+    {
+     "body": "0x008b4640",
+     "name": "GetLRoomAreaDesc",
+     "upvalue": "0x0081f8b0"
+    },
+    {
+     "body": "0x008b46f0",
+     "name": "GetLRoomTileDesc",
+     "upvalue": "0x0081fb20"
+    },
+    {
+     "body": "0x008b3f70",
+     "name": "GetLaserTarget",
+     "upvalue": "0x007f0b40"
+    },
+    {
+     "body": "0x008b5430",
+     "name": "GetLavaIntensity",
+     "upvalue": "0x007120c0"
+    },
+    {
+     "body": "0x008b4cb0",
+     "name": "GetLightingAlpha",
+     "upvalue": "0x0081e250"
+    },
+    {
+     "body": "0x008b5040",
+     "name": "GetRandomPosition",
+     "upvalue": "0x0081e9d0"
+    },
+    {
+     "body": "0x008b5120",
+     "name": "GetRandomTileIndex",
+     "upvalue": "0x0081ecc0"
+    },
+    {
+     "body": "0x008b4230",
+     "name": "GetRedHeartDamage",
+     "upvalue": "0x007e91a0"
+    },
+    {
+     "body": "0x008b54a0",
+     "name": "GetRenderMode",
+     "upvalue": "0x0085e120"
+    },
+    {
+     "body": "0x008b47c0",
+     "name": "GetRenderScrollOffset",
+     "upvalue": "0x0042d030"
+    },
+    {
+     "body": "0x008b47c0",
+     "name": "GetRenderSurfaceTopLeft",
+     "upvalue": "0x006b83e0"
+    },
+    {
+     "body": "0x008b3320",
+     "name": "GetRoomConfigStage",
+     "upvalue": "0x007eece0"
+    },
+    {
+     "body": "0x008b3320",
+     "name": "GetRoomShape",
+     "upvalue": "0x0042a270"
+    },
+    {
+     "body": "0x008b3320",
+     "name": "GetSecondBossID",
+     "upvalue": "0x0082eb80"
+    },
+    {
+     "body": "0x008b4e60",
+     "name": "GetSeededCollectible",
+     "upvalue": "0x007ec080"
+    },
+    {
+     "body": "0x008b3320",
+     "name": "GetShopLevel",
+     "upvalue": "0x0085e110"
+    },
+    {
+     "body": "0x008b3800",
+     "name": "GetSpawnSeed",
+     "upvalue": "0x00436050"
+    },
+    {
+     "body": "0x008b3320",
+     "name": "GetTintedRockIdx",
+     "upvalue": "0x004360c0"
+    },
+    {
+     "body": "0x008b47c0",
+     "name": "GetTopLeftPos",
+     "upvalue": "0x00421800"
+    },
+    {
+     "body": "0x008b3320",
+     "name": "GetType",
+     "upvalue": "0x0043eec0"
+    },
+    {
+     "body": "0x008b4860",
+     "name": "GetWaterCurrent",
+     "upvalue": "0x00505c50"
+    },
+    {
+     "body": "0x008b4230",
+     "name": "HasCurseMist",
+     "upvalue": "0x00827bb0"
+    },
+    {
+     "body": "0x008b4230",
+     "name": "HasLava",
+     "upvalue": "0x008242d0"
+    },
+    {
+     "body": "0x008b33d0",
+     "name": "HasSlowDown",
+     "upvalue": "0x00456710"
+    },
+    {
+     "body": "0x008b4230",
+     "name": "HasTriggerPressurePlates",
+     "upvalue": "0x004d7780"
+    },
+    {
+     "body": "0x008b33d0",
+     "name": "HasWater",
+     "upvalue": "0x008208c0"
+    },
+    {
+     "body": "0x008b4230",
+     "name": "HasWaterPits",
+     "upvalue": "0x00505c40"
+    },
+    {
+     "body": "0x008b3380",
+     "name": "InvalidatePickupVision",
+     "upvalue": "0x005b16c0"
+    },
+    {
+     "body": "0x008b4230",
+     "name": "IsAmbushActive",
+     "upvalue": "0x0081e240"
+    },
+    {
+     "body": "0x008b4230",
+     "name": "IsAmbushDone",
+     "upvalue": "0x0070c560"
+    },
+    {
+     "body": "0x008b4230",
+     "name": "IsClear",
+     "upvalue": "0x00436080"
+    },
+    {
+     "body": "0x008b4230",
+     "name": "IsCurrentRoomLastBoss",
+     "upvalue": "0x008208e0"
+    },
+    {
+     "body": "0x008b3700",
+     "name": "IsDoorSlotAllowed",
+     "upvalue": "0x0059e250"
+    },
+    {
+     "body": "0x008b4230",
+     "name": "IsFirstEnemyDead",
+     "upvalue": "0x006b83f0"
+    },
+    {
+     "body": "0x008b4230",
+     "name": "IsFirstVisit",
+     "upvalue": "0x0065cef0"
+    },
+    {
+     "body": "0x008b33d0",
+     "name": "IsInitialized",
+     "upvalue": "0x006b83d0"
+    },
+    {
+     "body": "0x008b4230",
+     "name": "IsLShapedRoom",
+     "upvalue": "0x0081f890"
+    },
+    {
+     "body": "0x008b4230",
+     "name": "IsMirrorWorld",
+     "upvalue": "0x00827b70"
+    },
+    {
+     "body": "0x008b4570",
+     "name": "IsPositionInRoom",
+     "upvalue": "0x00813360"
+    },
+    {
+     "body": "0x008b4230",
+     "name": "IsSacrificeDone",
+     "upvalue": "0x005cd650"
+    },
+    {
+     "body": "0x008b3380",
+     "name": "KeepDoorsClosed",
+     "upvalue": "0x0085e0f0"
+    },
+    {
+     "body": "0x008b51a0",
+     "name": "MamaMegaExplosion",
+     "upvalue": "0x00820910"
+    },
+    {
+     "body": "0x008b3380",
+     "name": "PlayMusic",
+     "upvalue": "0x007eb1b0"
+    },
+    {
+     "body": "0x008b3790",
+     "name": "RemoveDoor",
+     "upvalue": "0x008167e0"
+    },
+    {
+     "body": "0x008b4a00",
+     "name": "RemoveGridEntity",
+     "upvalue": "0x0081e930"
+    },
+    {
+     "body": "0x008b3380",
+     "name": "Render",
+     "upvalue": "0x0080f200"
+    },
+    {
+     "body": "0x008b3380",
+     "name": "RespawnEnemies",
+     "upvalue": "0x0081fd60"
+    },
+    {
+     "body": "0x008b4470",
+     "name": "ScreenWrapPosition",
+     "upvalue": "0x00652ab0"
+    },
+    {
+     "body": "0x008b42a0",
+     "name": "SetAmbushDone",
+     "upvalue": "0x008332c0"
+    },
+    {
+     "body": "0x008b3790",
+     "name": "SetBrokenWatchState",
+     "upvalue": "0x0081edf0"
+    },
+    {
+     "body": "0x008b3380",
+     "name": "SetCardAgainstHumanity",
+     "upvalue": "0x007537d0"
+    },
+    {
+     "body": "0x008b42a0",
+     "name": "SetClear",
+     "upvalue": "0x004aae90"
+    },
+    {
+     "body": "0x008b42a0",
+     "name": "SetFirstEnemyDead",
+     "upvalue": "0x006b8400"
+    },
+    {
+     "body": "0x008b5280",
+     "name": "SetFloorColor",
+     "upvalue": "0x007e91b0"
+    },
+    {
+     "body": "0x008b38f0",
+     "name": "SetGridPath",
+     "upvalue": "0x0042a290"
+    },
+    {
+     "body": "0x008b3380",
+     "name": "SetRedHeartDamage",
+     "upvalue": "0x007537c0"
+    },
+    {
+     "body": "0x008b42a0",
+     "name": "SetSacrificeDone",
+     "upvalue": "0x004aaeb0"
+    },
+    {
+     "body": "0x008b3790",
+     "name": "SetSlowDown",
+     "upvalue": "0x00456720"
+    },
+    {
+     "body": "0x008b5280",
+     "name": "SetWallColor",
+     "upvalue": "0x007e91f0"
+    },
+    {
+     "body": "0x008b4b90",
+     "name": "ShopReshuffle",
+     "upvalue": "0x00816000"
+    },
+    {
+     "body": "0x008b3380",
+     "name": "ShopRestockFull",
+     "upvalue": "0x00815ae0"
+    },
+    {
+     "body": "0x008b3380",
+     "name": "ShopRestockPartial",
+     "upvalue": "0x008158a0"
+    },
+    {
+     "body": "0x008b3380",
+     "name": "SpawnClearAward",
+     "upvalue": "0x007fb250"
+    },
+    {
+     "body": "0x008b4900",
+     "name": "SpawnGridEntity",
+     "upvalue": "0x007ebca0"
+    },
+    {
+     "body": "0x008b3380",
+     "name": "StopRain",
+     "upvalue": "0x005784d0"
+    },
+    {
+     "body": "0x008b42a0",
+     "name": "TriggerClear",
+     "upvalue": "0x008068f0"
+    },
+    {
+     "body": "0x008b4f70",
+     "name": "TryMakeBridge",
+     "upvalue": "0x0081e6e0"
+    },
+    {
+     "body": "0x008b4da0",
+     "name": "TrySpawnBlueWombDoor",
+     "upvalue": "0x00820170"
+    },
+    {
+     "body": "0x008b4c10",
+     "name": "TrySpawnBossRushDoor",
+     "upvalue": "0x007f9960"
+    },
+    {
+     "body": "0x008b4c10",
+     "name": "TrySpawnDevilRoomDoor",
+     "upvalue": "0x007f83b0"
+    },
+    {
+     "body": "0x008b4d20",
+     "name": "TrySpawnMegaSatanRoomDoor",
+     "upvalue": "0x007f9df0"
+    },
+    {
+     "body": "0x008b4c10",
+     "name": "TrySpawnSecretExit",
+     "upvalue": "0x007f7a40"
+    },
+    {
+     "body": "0x008b4d20",
+     "name": "TrySpawnSecretShop",
+     "upvalue": "0x007f8190"
+    },
+    {
+     "body": "0x008b33d0",
+     "name": "TrySpawnSpecialQuestDoor",
+     "upvalue": "0x008279d0"
+    },
+    {
+     "body": "0x008b4d20",
+     "name": "TrySpawnTheVoidDoor",
+     "upvalue": "0x008204b0"
+    },
+    {
+     "body": "0x008b3380",
+     "name": "TurnGold",
+     "upvalue": "0x00820ac0"
+    },
+    {
+     "body": "0x008b3380",
+     "name": "Update",
+     "upvalue": "0x00802980"
+    },
+    {
+     "body": "0x008b5330",
+     "name": "WorldToScreenPosition",
+     "upvalue": "0x00820c00"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008c20d0",
+     "name": "Difficulty",
+     "setter": null,
+     "upvalue": "0x0000002c"
+    },
+    {
+     "getter": "0x008999e0",
+     "name": "Doors",
+     "setter": null,
+     "upvalue": "0x00872040"
+    },
+    {
+     "getter": "0x008c2350",
+     "name": "Height",
+     "setter": null,
+     "upvalue": "0x00000047"
+    },
+    {
+     "getter": "0x008c2290",
+     "name": "InitialWeight",
+     "setter": null,
+     "upvalue": "0x00000030"
+    },
+    {
+     "getter": "0x008c2190",
+     "name": "Mode",
+     "setter": null,
+     "upvalue": "0x00000004"
+    },
+    {
+     "getter": "0x008c2220",
+     "name": "Name",
+     "setter": null,
+     "upvalue": "0x00000014"
+    },
+    {
+     "getter": "0x008c2130",
+     "name": "OriginalVariant",
+     "setter": null,
+     "upvalue": "0x00000058"
+    },
+    {
+     "getter": "0x008c20d0",
+     "name": "Shape",
+     "setter": null,
+     "upvalue": "0x00000048"
+    },
+    {
+     "getter": "0x008c22f0",
+     "name": "SpawnCount",
+     "setter": null,
+     "upvalue": "0x00000044"
+    },
+    {
+     "getter": "0x00899930",
+     "name": "Spawns",
+     "setter": null,
+     "upvalue": "0x00872020"
+    },
+    {
+     "getter": "0x008c20d0",
+     "name": "StageID",
+     "setter": null,
+     "upvalue": "0x00000000"
+    },
+    {
+     "getter": "0x008c2130",
+     "name": "Subtype",
+     "setter": null,
+     "upvalue": "0x00000010"
+    },
+    {
+     "getter": "0x008c20d0",
+     "name": "Type",
+     "setter": null,
+     "upvalue": "0x00000008"
+    },
+    {
+     "getter": "0x008c2130",
+     "name": "Variant",
+     "setter": null,
+     "upvalue": "0x0000000c"
+    },
+    {
+     "getter": "0x008c2290",
+     "name": "Weight",
+     "setter": null,
+     "upvalue": "0x00000034"
+    },
+    {
+     "getter": "0x008c2350",
+     "name": "Width",
+     "setter": null,
+     "upvalue": "0x00000046"
+    }
+   ]
+  },
+  "RoomConfigEntries": {
+   "metamethods": [
+    {
+     "body": "0x008c5bf0",
+     "name": "__gc",
+     "upvalue": null
+    },
+    {
+     "body": "0x008c33f0",
+     "name": "__len",
+     "upvalue": "0x0040c3a0"
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008c5790",
+     "name": "Get",
+     "upvalue": "0x008a0720"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008c33f0",
+     "name": "Size",
+     "setter": null,
+     "upvalue": "0x0040c3a0"
+    }
+   ]
+  },
+  "RoomConfigSpawns": {
+   "metamethods": [
+    {
+     "body": "0x008c5bd0",
+     "name": "__gc",
+     "upvalue": null
+    },
+    {
+     "body": "0x008c3390",
+     "name": "__len",
+     "upvalue": "0x0040c3a0"
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008c5850",
+     "name": "Get",
+     "upvalue": "0x008a0700"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008c3390",
+     "name": "Size",
+     "setter": null,
+     "upvalue": "0x0040c3a0"
+    }
+   ]
+  },
+  "RoomDescriptor": {
+   "metamethods": [
+    {
+     "body": "0x008c2cd0",
+     "name": "__gc",
+     "upvalue": null
+    },
+    {
+     "body": "0x008c5bb0",
+     "name": "__gc",
+     "upvalue": null
+    },
+    {
+     "body": "0x008c3330",
+     "name": "__len",
+     "upvalue": "0x0040c3a0"
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008c5910",
+     "name": "Get",
+     "upvalue": "0x00899790"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008c25a0",
+     "name": "AllowedDoors",
+     "setter": "0x008c2630",
+     "upvalue": "0x00000018"
+    },
+    {
+     "getter": "0x008c26d0",
+     "name": "AwardSeed",
+     "setter": "0x008c2410",
+     "upvalue": "0x00000060"
+    },
+    {
+     "getter": "0x008998c0",
+     "name": "ChallengeDone",
+     "setter": "0x00899850",
+     "upvalue": "0x0070c550"
+    },
+    {
+     "getter": "0x008998c0",
+     "name": "Clear",
+     "setter": "0x00899850",
+     "upvalue": "0x00436010"
+    },
+    {
+     "getter": "0x008c2730",
+     "name": "ClearCount",
+     "setter": "0x008c2790",
+     "upvalue": "0x0000004a"
+    },
+    {
+     "getter": "0x008c2470",
+     "name": "Data",
+     "setter": "0x008c2510",
+     "upvalue": "0x00000010"
+    },
+    {
+     "getter": "0x008c26d0",
+     "name": "DecorationSeed",
+     "setter": "0x008c2410",
+     "upvalue": "0x00000058"
+    },
+    {
+     "getter": "0x008c23b0",
+     "name": "DeliriumDistance",
+     "setter": "0x008c2410",
+     "upvalue": "0x000000b0"
+    },
+    {
+     "getter": "0x008c26d0",
+     "name": "DisplayFlags",
+     "setter": "0x008c2410",
+     "upvalue": "0x0000003c"
+    },
+    {
+     "getter": "0x008c26d0",
+     "name": "Flags",
+     "setter": "0x008c2410",
+     "upvalue": "0x00000044"
+    },
+    {
+     "getter": "0x008c23b0",
+     "name": "GridIndex",
+     "setter": "0x008c2410",
+     "upvalue": "0x00000000"
+    },
+    {
+     "getter": "0x008998c0",
+     "name": "HasWater",
+     "setter": "0x00899850",
+     "upvalue": "0x00505c30"
+    },
+    {
+     "getter": "0x008c23b0",
+     "name": "ListIndex",
+     "setter": "0x008c2410",
+     "upvalue": "0x00000008"
+    },
+    {
+     "getter": "0x008998c0",
+     "name": "NoReward",
+     "setter": "0x00899850",
+     "upvalue": "0x007e9190"
+    },
+    {
+     "getter": "0x008c2470",
+     "name": "OverrideData",
+     "setter": "0x008c2510",
+     "upvalue": "0x00000014"
+    },
+    {
+     "getter": "0x008c23b0",
+     "name": "PitsCount",
+     "setter": "0x008c2410",
+     "upvalue": "0x00000054"
+    },
+    {
+     "getter": "0x008c27f0",
+     "name": "PoopCount",
+     "setter": "0x008c2790",
+     "upvalue": "0x00000050"
+    },
+    {
+     "getter": "0x008998c0",
+     "name": "PressurePlatesTriggered",
+     "setter": "0x00899850",
+     "upvalue": "0x00456560"
+    },
+    {
+     "getter": "0x008998c0",
+     "name": "SacrificeDone",
+     "setter": "0x00899850",
+     "upvalue": "0x005cd640"
+    },
+    {
+     "getter": "0x008c23b0",
+     "name": "SafeGridIndex",
+     "setter": "0x008c2410",
+     "upvalue": "0x00000004"
+    },
+    {
+     "getter": "0x008c27f0",
+     "name": "ShopItemDiscountIdx",
+     "setter": "0x008c2790",
+     "upvalue": "0x000000ae"
+    },
+    {
+     "getter": "0x008c27f0",
+     "name": "ShopItemIdx",
+     "setter": "0x008c2790",
+     "upvalue": "0x000000ac"
+    },
+    {
+     "getter": "0x008c3330",
+     "name": "Size",
+     "setter": null,
+     "upvalue": "0x0040c3a0"
+    },
+    {
+     "getter": "0x008c26d0",
+     "name": "SpawnSeed",
+     "setter": "0x008c2410",
+     "upvalue": "0x0000005c"
+    },
+    {
+     "getter": "0x008998c0",
+     "name": "SurpriseMiniboss",
+     "setter": "0x00899850",
+     "upvalue": "0x00738180"
+    },
+    {
+     "getter": "0x008c26d0",
+     "name": "VisitedCount",
+     "setter": "0x008c2410",
+     "upvalue": "0x00000040"
+    }
+   ]
+  },
+  "SFXManager": {
+   "metamethods": [
+    {
+     "body": "0x008c2bf0",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008b96d0",
+     "name": "AdjustPitch",
+     "upvalue": "0x0092e050"
+    },
+    {
+     "body": "0x008b96d0",
+     "name": "AdjustVolume",
+     "upvalue": "0x0092df40"
+    },
+    {
+     "body": "0x008b9950",
+     "name": "GetAmbientSoundVolume",
+     "upvalue": "0x0092e6e0"
+    },
+    {
+     "body": "0x008b9820",
+     "name": "IsPlaying",
+     "upvalue": "0x0092e560"
+    },
+    {
+     "body": "0x008b95a0",
+     "name": "Play",
+     "upvalue": "0x0092dc30"
+    },
+    {
+     "body": "0x008b9760",
+     "name": "Preload",
+     "upvalue": "0x0092cf40"
+    },
+    {
+     "body": "0x008b98b0",
+     "name": "SetAmbientSound",
+     "upvalue": "0x0092e620"
+    },
+    {
+     "body": "0x008b9760",
+     "name": "Stop",
+     "upvalue": "0x0092e230"
+    },
+    {
+     "body": "0x008b97d0",
+     "name": "StopLoopingSounds",
+     "upvalue": "0x0092e300"
+    }
+   ],
+   "parent": ""
+  },
+  "Seeds": {
+   "metamethods": [
+    {
+     "body": "0x008c2c70",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008b6320",
+     "name": "AddSeedEffect",
+     "upvalue": "0x006ef8f0"
+    },
+    {
+     "body": "0x008b6620",
+     "name": "CanAddSeedEffect",
+     "upvalue": "0x009e9c40"
+    },
+    {
+     "body": "0x008b6260",
+     "name": "ClearSeedEffects",
+     "upvalue": "0x00685e70"
+    },
+    {
+     "body": "0x008b6260",
+     "name": "ClearStartSeed",
+     "upvalue": "0x0085e180"
+    },
+    {
+     "body": "0x008b6390",
+     "name": "CountSeedEffects",
+     "upvalue": "0x0085e1b0"
+    },
+    {
+     "body": "0x008991a0",
+     "name": "CountUnlockedSeedEffects",
+     "upvalue": "0x009e9ab0"
+    },
+    {
+     "body": "0x008b6320",
+     "name": "ForgetStageSeed",
+     "upvalue": "0x009eb980"
+    },
+    {
+     "body": "0x008b64b0",
+     "name": "GetNextSeed",
+     "upvalue": "0x006ef890"
+    },
+    {
+     "body": "0x008b6390",
+     "name": "GetPlayerInitSeed",
+     "upvalue": "0x0042a2d0"
+    },
+    {
+     "body": "0x008991f0",
+     "name": "GetSeedEffect",
+     "upvalue": "0x009e9db0"
+    },
+    {
+     "body": "0x008b6510",
+     "name": "GetStageSeed",
+     "upvalue": "0x00738280"
+    },
+    {
+     "body": "0x008b6390",
+     "name": "GetStartSeed",
+     "upvalue": "0x00436140"
+    },
+    {
+     "body": "0x008b63f0",
+     "name": "GetStartSeedString",
+     "upvalue": "0x00685dc0"
+    },
+    {
+     "body": "0x008b6590",
+     "name": "HasSeedEffect",
+     "upvalue": "0x00456750"
+    },
+    {
+     "body": "0x008991d0",
+     "name": "InitSeedInfo",
+     "upvalue": "0x009e94e0"
+    },
+    {
+     "body": "0x008b62b0",
+     "name": "IsCustomRun",
+     "upvalue": "0x006b83d0"
+    },
+    {
+     "body": "0x008b62b0",
+     "name": "IsInitialized",
+     "upvalue": "0x0042a2c0"
+    },
+    {
+     "body": "0x008b66b0",
+     "name": "IsSeedComboBanned",
+     "upvalue": "0x009e9b10"
+    },
+    {
+     "body": "0x008992e0",
+     "name": "IsSpecialSeed",
+     "upvalue": "0x00685ea0"
+    },
+    {
+     "body": "0x008992e0",
+     "name": "IsStringValidSeed",
+     "upvalue": "0x009eb590"
+    },
+    {
+     "body": "0x008b6320",
+     "name": "RemoveBlockingSeedEffects",
+     "upvalue": "0x009e9d50"
+    },
+    {
+     "body": "0x008b6320",
+     "name": "RemoveSeedEffect",
+     "upvalue": "0x0085e190"
+    },
+    {
+     "body": "0x008b6260",
+     "name": "Reset",
+     "upvalue": "0x009e9bc0"
+    },
+    {
+     "body": "0x008b6320",
+     "name": "Restart",
+     "upvalue": "0x009eb950"
+    },
+    {
+     "body": "0x00899390",
+     "name": "Seed2String",
+     "upvalue": "0x009eb5b0"
+    },
+    {
+     "body": "0x008b6150",
+     "name": "SetStartSeed",
+     "upvalue": "0x009eb7f0"
+    },
+    {
+     "body": "0x00899440",
+     "name": "String2Seed",
+     "upvalue": "0x009eb6b0"
+    }
+   ],
+   "parent": ""
+  },
+  "Spawn": {
+   "metamethods": [
+    {
+     "body": "0x008c2d10",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008b3250",
+     "name": "PickEntry",
+     "upvalue": "0x0082d290"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x00899a50",
+     "name": "Entries",
+     "setter": null,
+     "upvalue": "0x00872000"
+    },
+    {
+     "getter": "0x008c1f40",
+     "name": "EntryCount",
+     "setter": "0x008c1fa0",
+     "upvalue": "0x00000008"
+    },
+    {
+     "getter": "0x008c2000",
+     "name": "SumWeights",
+     "setter": "0x008c2060",
+     "upvalue": "0x0000000c"
+    },
+    {
+     "getter": "0x008c1e80",
+     "name": "X",
+     "setter": "0x008c1ee0",
+     "upvalue": "0x00000000"
+    },
+    {
+     "getter": "0x008c1e80",
+     "name": "Y",
+     "setter": "0x008c1ee0",
+     "upvalue": "0x00000002"
+    }
+   ]
+  },
+  "Sprite": {
+   "metamethods": [
+    {
+     "body": "0x008c31f0",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008a9b60",
+     "name": "GetAnimation",
+     "upvalue": "0x0085db20"
+    },
+    {
+     "body": "0x008a9eb0",
+     "name": "GetDefaultAnimation",
+     "upvalue": "0x004a5cf0"
+    },
+    {
+     "body": "0x008a9eb0",
+     "name": "GetDefaultAnimationName",
+     "upvalue": "0x004a5cf0"
+    },
+    {
+     "body": "0x008a9b60",
+     "name": "GetFilename",
+     "upvalue": "0x004312e0"
+    },
+    {
+     "body": "0x008a9d10",
+     "name": "GetFrame",
+     "upvalue": "0x0040a780"
+    },
+    {
+     "body": "0x008a9e50",
+     "name": "GetLayerCount",
+     "upvalue": "0x00440e40"
+    },
+    {
+     "body": "0x008a9b60",
+     "name": "GetOverlayAnimation",
+     "upvalue": "0x0085db70"
+    },
+    {
+     "body": "0x008a9df0",
+     "name": "GetOverlayFrame",
+     "upvalue": "0x0040ac50"
+    },
+    {
+     "body": "0x008a9f20",
+     "name": "GetTexel",
+     "upvalue": "0x0040b590"
+    },
+    {
+     "body": "0x008a9440",
+     "name": "IsEventTriggered",
+     "upvalue": "0x0040b000"
+    },
+    {
+     "body": "0x008a9440",
+     "name": "IsFinished",
+     "upvalue": "0x0040a530"
+    },
+    {
+     "body": "0x0089e5a0",
+     "name": "IsLoaded",
+     "upvalue": "0x00420160"
+    },
+    {
+     "body": "0x008a9440",
+     "name": "IsOverlayFinished",
+     "upvalue": "0x0040aa50"
+    },
+    {
+     "body": "0x008a9440",
+     "name": "IsOverlayPlaying",
+     "upvalue": "0x0040a9d0"
+    },
+    {
+     "body": "0x008a9440",
+     "name": "IsPlaying",
+     "upvalue": "0x0040a4b0"
+    },
+    {
+     "body": "0x008a9520",
+     "name": "Load",
+     "upvalue": "0x0040bd50"
+    },
+    {
+     "body": "0x008a9740",
+     "name": "LoadGraphics",
+     "upvalue": "0x0040bff0"
+    },
+    {
+     "body": "0x008a9520",
+     "name": "Play",
+     "upvalue": "0x0040a360"
+    },
+    {
+     "body": "0x008a9520",
+     "name": "PlayOverlay",
+     "upvalue": "0x0040a920"
+    },
+    {
+     "body": "0x008a96d0",
+     "name": "PlayRandom",
+     "upvalue": "0x0040a2b0"
+    },
+    {
+     "body": "0x008a9740",
+     "name": "Reload",
+     "upvalue": "0x0040bea0"
+    },
+    {
+     "body": "0x008a9740",
+     "name": "RemoveOverlay",
+     "upvalue": "0x0040ac60"
+    },
+    {
+     "body": "0x008a9790",
+     "name": "Render",
+     "upvalue": "0x0040a0d0"
+    },
+    {
+     "body": "0x008a98a0",
+     "name": "RenderLayer",
+     "upvalue": "0x0040a140"
+    },
+    {
+     "body": "0x008a99d0",
+     "name": "ReplaceSpritesheet",
+     "upvalue": "0x0040bf30"
+    },
+    {
+     "body": "0x008a9740",
+     "name": "Reset",
+     "upvalue": "0x00407f10"
+    },
+    {
+     "body": "0x008a9c20",
+     "name": "SetAnimation",
+     "upvalue": "0x0040a5b0"
+    },
+    {
+     "body": "0x008a95f0",
+     "name": "SetFrame",
+     "upvalue": "0x0040a690"
+    },
+    {
+     "body": "0x008a96d0",
+     "name": "SetFrame_1",
+     "upvalue": "0x0040a720"
+    },
+    {
+     "body": "0x008a9740",
+     "name": "SetLastFrame",
+     "upvalue": "0x0040a760"
+    },
+    {
+     "body": "0x008a9d70",
+     "name": "SetLayerFrame",
+     "upvalue": "0x0040a7e0"
+    },
+    {
+     "body": "0x008a9c20",
+     "name": "SetOverlayAnimation",
+     "upvalue": "0x0040aad0"
+    },
+    {
+     "body": "0x008a95f0",
+     "name": "SetOverlayFrame",
+     "upvalue": "0x0040abb0"
+    },
+    {
+     "body": "0x0089e530",
+     "name": "SetOverlayRenderPriority",
+     "upvalue": "0x00431300"
+    },
+    {
+     "body": "0x008a9740",
+     "name": "Stop",
+     "upvalue": "0x0040a910"
+    },
+    {
+     "body": "0x008a9740",
+     "name": "Update",
+     "upvalue": "0x00409100"
+    },
+    {
+     "body": "0x008a9440",
+     "name": "WasEventTriggered",
+     "upvalue": "0x0040b060"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x0089e740",
+     "name": "Color",
+     "setter": "0x0089e6b0",
+     "upvalue": "0x00407410"
+    },
+    {
+     "getter": "0x0089e5a0",
+     "name": "FlipX",
+     "setter": "0x0089e530",
+     "upvalue": "0x00407420"
+    },
+    {
+     "getter": "0x0089e5a0",
+     "name": "FlipY",
+     "setter": "0x0089e530",
+     "upvalue": "0x00407430"
+    },
+    {
+     "getter": "0x0089e970",
+     "name": "Offset",
+     "setter": "0x0089e8e0",
+     "upvalue": "0x0049cb40"
+    },
+    {
+     "getter": "0x0089e870",
+     "name": "PlaybackSpeed",
+     "setter": "0x0089e7e0",
+     "upvalue": "0x00456360"
+    },
+    {
+     "getter": "0x0089e870",
+     "name": "Rotation",
+     "setter": "0x0089e7e0",
+     "upvalue": "0x00417210"
+    },
+    {
+     "getter": "0x0089e970",
+     "name": "Scale",
+     "setter": "0x0089e8e0",
+     "upvalue": "0x00417200"
+    }
+   ]
+  },
+  "TearParams": {
+   "metamethods": [
+    {
+     "body": "0x008c3090",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008bd690",
+     "name": "BombVariant",
+     "setter": "0x008bd6f0",
+     "upvalue": "0x00000004"
+    },
+    {
+     "getter": "0x008bd750",
+     "name": "TearColor",
+     "setter": "0x008bd7b0",
+     "upvalue": "0x00000008"
+    },
+    {
+     "getter": "0x008bd990",
+     "name": "TearDamage",
+     "setter": "0x008bd9f0",
+     "upvalue": "0x00000048"
+    },
+    {
+     "getter": "0x008bd870",
+     "name": "TearFlags",
+     "setter": "0x008bd900",
+     "upvalue": "0x00000038"
+    },
+    {
+     "getter": "0x008bd990",
+     "name": "TearHeight",
+     "setter": "0x008bd9f0",
+     "upvalue": "0x00000050"
+    },
+    {
+     "getter": "0x008bd990",
+     "name": "TearScale",
+     "setter": "0x008bd9f0",
+     "upvalue": "0x0000004c"
+    },
+    {
+     "getter": "0x008bd690",
+     "name": "TearVariant",
+     "setter": "0x008bd6f0",
+     "upvalue": "0x00000000"
+    }
+   ]
+  },
+  "TemporaryEffect": {
+   "metamethods": [
+    {
+     "body": "0x008c3050",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008bdd80",
+     "name": "Cooldown",
+     "setter": "0x008bdde0",
+     "upvalue": "0x00000008"
+    },
+    {
+     "getter": "0x008bdd80",
+     "name": "Count",
+     "setter": "0x008bdde0",
+     "upvalue": "0x00000004"
+    },
+    {
+     "getter": "0x008bdc50",
+     "name": "Item",
+     "setter": "0x008bdcf0",
+     "upvalue": "0x00000000"
+    }
+   ]
+  },
+  "TemporaryEffects": {
+   "metamethods": [
+    {
+     "body": "0x008c3030",
+     "name": "__gc",
+     "upvalue": null
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008ab2a0",
+     "name": "AddCollectibleEffect",
+     "upvalue": "0x009302e0"
+    },
+    {
+     "body": "0x008ab2a0",
+     "name": "AddNullEffect",
+     "upvalue": "0x00930390"
+    },
+    {
+     "body": "0x008ab2a0",
+     "name": "AddTrinketEffect",
+     "upvalue": "0x00930330"
+    },
+    {
+     "body": "0x008ab580",
+     "name": "ClearEffects",
+     "upvalue": "0x009306c0"
+    },
+    {
+     "body": "0x008ab440",
+     "name": "GetCollectibleEffect",
+     "upvalue": "0x00930980"
+    },
+    {
+     "body": "0x008ab500",
+     "name": "GetCollectibleEffectNum",
+     "upvalue": "0x00930a70"
+    },
+    {
+     "body": "0x008ab5f0",
+     "name": "GetEffectsList",
+     "upvalue": "0x007537a0"
+    },
+    {
+     "body": "0x008ab440",
+     "name": "GetNullEffect",
+     "upvalue": "0x00930a30"
+    },
+    {
+     "body": "0x008ab500",
+     "name": "GetNullEffectNum",
+     "upvalue": "0x00930ae0"
+    },
+    {
+     "body": "0x008ab440",
+     "name": "GetTrinketEffect",
+     "upvalue": "0x009309c0"
+    },
+    {
+     "body": "0x008ab500",
+     "name": "GetTrinketEffectNum",
+     "upvalue": "0x00930aa0"
+    },
+    {
+     "body": "0x008ab3b0",
+     "name": "HasCollectibleEffect",
+     "upvalue": "0x009305f0"
+    },
+    {
+     "body": "0x008ab3b0",
+     "name": "HasNullEffect",
+     "upvalue": "0x00930680"
+    },
+    {
+     "body": "0x008ab3b0",
+     "name": "HasTrinketEffect",
+     "upvalue": "0x00930640"
+    },
+    {
+     "body": "0x008ab330",
+     "name": "RemoveCollectibleEffect",
+     "upvalue": "0x009304a0"
+    },
+    {
+     "body": "0x008ab330",
+     "name": "RemoveNullEffect",
+     "upvalue": "0x00930550"
+    },
+    {
+     "body": "0x008ab330",
+     "name": "RemoveTrinketEffect",
+     "upvalue": "0x009304f0"
+    }
+   ],
+   "parent": ""
+  },
+  "Vector": {
+   "metamethods": [
+    {
+     "body": "0x008a8740",
+     "name": "__add",
+     "upvalue": "0x00a10420"
+    },
+    {
+     "body": "0x008a8810",
+     "name": "__div",
+     "upvalue": "0x00a105a0"
+    },
+    {
+     "body": "0x008c3290",
+     "name": "__gc",
+     "upvalue": null
+    },
+    {
+     "body": "0x008a8810",
+     "name": "__mul",
+     "upvalue": "0x00a104e0"
+    },
+    {
+     "body": "0x008a8740",
+     "name": "__sub",
+     "upvalue": "0x00a10480"
+    },
+    {
+     "body": "0x008a88f0",
+     "name": "__tostring",
+     "upvalue": "0x0085e630"
+    },
+    {
+     "body": "0x008a81d0",
+     "name": "__unm",
+     "upvalue": "0x00a10660"
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008a8610",
+     "name": "Clamp",
+     "upvalue": "0x00a103c0"
+    },
+    {
+     "body": "0x008a8680",
+     "name": "Clamped",
+     "upvalue": "0x00a103f0"
+    },
+    {
+     "body": "0x008a8270",
+     "name": "Cross",
+     "upvalue": "0x00a101a0"
+    },
+    {
+     "body": "0x008a8270",
+     "name": "Distance",
+     "upvalue": "0x00a0ff30"
+    },
+    {
+     "body": "0x008a8270",
+     "name": "DistanceSquared",
+     "upvalue": "0x00a0ff90"
+    },
+    {
+     "body": "0x008a8270",
+     "name": "Dot",
+     "upvalue": "0x00a10180"
+    },
+    {
+     "body": "0x008a8510",
+     "name": "GetAngleDegrees",
+     "upvalue": "0x00a10390"
+    },
+    {
+     "body": "0x008a8510",
+     "name": "Length",
+     "upvalue": "0x00a0fea0"
+    },
+    {
+     "body": "0x008a8510",
+     "name": "LengthSquared",
+     "upvalue": "0x00a0fed0"
+    },
+    {
+     "body": "0x008a8310",
+     "name": "Lerp",
+     "upvalue": "0x00a10210"
+    },
+    {
+     "body": "0x008a8180",
+     "name": "Normalize",
+     "upvalue": "0x00a0ffc0"
+    },
+    {
+     "body": "0x008a81d0",
+     "name": "Normalized",
+     "upvalue": "0x00a10030"
+    },
+    {
+     "body": "0x008a8580",
+     "name": "Resize",
+     "upvalue": "0x00a100b0"
+    },
+    {
+     "body": "0x008a8430",
+     "name": "Resized",
+     "upvalue": "0x00a10100"
+    },
+    {
+     "body": "0x008a8430",
+     "name": "Rotated",
+     "upvalue": "0x00a102e0"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008bb2e0",
+     "name": "X",
+     "setter": "0x008bb340",
+     "upvalue": "0x00000000"
+    },
+    {
+     "getter": "0x008bb2e0",
+     "name": "Y",
+     "setter": "0x008bb340",
+     "upvalue": "0x00000004"
+    }
+   ]
+  },
+  "VectorList": {
+   "metamethods": [
+    {
+     "body": "0x008c5c30",
+     "name": "__gc",
+     "upvalue": null
+    },
+    {
+     "body": "0x008c34b0",
+     "name": "__len",
+     "upvalue": "0x0042f160"
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008c5490",
+     "name": "Get",
+     "upvalue": "0x008a8050"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008c34b0",
+     "name": "Size",
+     "setter": null,
+     "upvalue": "0x0042f160"
+    }
+   ]
+  },
+  "intValues": {
+   "metamethods": [
+    {
+     "body": "0x008c5b90",
+     "name": "__gc",
+     "upvalue": null
+    },
+    {
+     "body": "0x008c32d0",
+     "name": "__len",
+     "upvalue": "0x0040c3a0"
+    }
+   ],
+   "methods": [
+    {
+     "body": "0x008c59d0",
+     "name": "Get",
+     "upvalue": "0x00899770"
+    }
+   ],
+   "parent": "",
+   "properties": [
+    {
+     "getter": "0x008c32d0",
+     "name": "Size",
+     "setter": null,
+     "upvalue": "0x0040c3a0"
+    }
+   ]
+  }
+ },
+ "format": 2,
+ "namespaces": {
+  "Input": {
+   "metamethods": [],
+   "methods": [
+    {
+     "body": "0x00897870",
+     "name": "GetActionValue",
+     "upvalue": "0x0086fd70"
+    },
+    {
+     "body": "0x0089e300",
+     "name": "GetBuiltInCallbackState",
+     "upvalue": "0x0086f4f0"
+    },
+    {
+     "body": "0x00897870",
+     "name": "GetButtonValue",
+     "upvalue": "0x0086fcd0"
+    },
+    {
+     "body": "0x008977f0",
+     "name": "GetMousePosition",
+     "upvalue": "0x0086fe50"
+    },
+    {
+     "body": "0x008978d0",
+     "name": "IsActionPressed",
+     "upvalue": "0x0086fd40"
+    },
+    {
+     "body": "0x008978d0",
+     "name": "IsActionTriggered",
+     "upvalue": "0x0086fd10"
+    },
+    {
+     "body": "0x008978d0",
+     "name": "IsButtonPressed",
+     "upvalue": "0x0086fca0"
+    },
+    {
+     "body": "0x008978d0",
+     "name": "IsButtonTriggered",
+     "upvalue": "0x0086fc70"
+    },
+    {
+     "body": "0x0089e300",
+     "name": "IsMouseBtnPressed",
+     "upvalue": "0x0086fdb0"
+    }
+   ]
+  },
+  "Isaac": {
+   "metamethods": [],
+   "methods": [
+    {
+     "body": "0x008984e0",
+     "name": "AddPillEffectToPool",
+     "upvalue": "0x0086fc40"
+    },
+    {
+     "body": "0x00898cf0",
+     "name": "ConsoleOutput",
+     "upvalue": "0x00870130"
+    },
+    {
+     "body": "0x008991a0",
+     "name": "CountBosses",
+     "upvalue": "0x00870da0"
+    },
+    {
+     "body": "0x008991a0",
+     "name": "CountEnemies",
+     "upvalue": "0x00870d70"
+    },
+    {
+     "body": null,
+     "name": "CountEntities",
+     "upvalue": null
+    },
+    {
+     "body": "0x00898cf0",
+     "name": "DebugString",
+     "upvalue": "0x0086ef30"
+    },
+    {
+     "body": "0x008981b0",
+     "name": "ExecuteCommand",
+     "upvalue": "0x00870020"
+    },
+    {
+     "body": "0x00898530",
+     "name": "Explode",
+     "upvalue": "0x0086f400"
+    },
+    {
+     "body": null,
+     "name": "FindByType",
+     "upvalue": null
+    },
+    {
+     "body": null,
+     "name": "FindInRadius",
+     "upvalue": null
+    },
+    {
+     "body": "0x00898e70",
+     "name": "Game_0",
+     "upvalue": "0x0086fc60"
+    },
+    {
+     "body": "0x0089e300",
+     "name": "GetBuiltInCallbackState",
+     "upvalue": "0x0086f4f0"
+    },
+    {
+     "body": "0x008983e0",
+     "name": "GetCardIdByName",
+     "upvalue": "0x0086f800"
+    },
+    {
+     "body": "0x008991a0",
+     "name": "GetChallenge",
+     "upvalue": "0x0086fc30"
+    },
+    {
+     "body": "0x008983e0",
+     "name": "GetChallengeIdByName",
+     "upvalue": "0x0086f900"
+    },
+    {
+     "body": "0x008983e0",
+     "name": "GetCostumeIdByPath",
+     "upvalue": "0x0086f980"
+    },
+    {
+     "body": "0x008983e0",
+     "name": "GetCurseIdByName",
+     "upvalue": "0x0086f9f0"
+    },
+    {
+     "body": "0x008983e0",
+     "name": "GetEntityTypeByName",
+     "upvalue": "0x0086f520"
+    },
+    {
+     "body": "0x008983e0",
+     "name": "GetEntityVariantByName",
+     "upvalue": "0x0086f5b0"
+    },
+    {
+     "body": "0x008991a0",
+     "name": "GetFrameCount",
+     "upvalue": "0x0086f090"
+    },
+    {
+     "body": "0x00898600",
+     "name": "GetFreeNearPosition",
+     "upvalue": "0x0086f3d0"
+    },
+    {
+     "body": "0x00898140",
+     "name": "GetItemConfig",
+     "upvalue": "0x0042ca00"
+    },
+    {
+     "body": "0x008983e0",
+     "name": "GetItemIdByName",
+     "upvalue": "0x0086f640"
+    },
+    {
+     "body": "0x008983e0",
+     "name": "GetMusicIdByName",
+     "upvalue": "0x0086fa50"
+    },
+    {
+     "body": "0x008983e0",
+     "name": "GetPillEffectByName",
+     "upvalue": "0x0086f880"
+    },
+    {
+     "body": null,
+     "name": "GetPlayer",
+     "upvalue": null
+    },
+    {
+     "body": "0x008982a0",
+     "name": "GetPlayerTypeByName",
+     "upvalue": "0x0086f760"
+    },
+    {
+     "body": "0x00898ee0",
+     "name": "GetRandomPosition",
+     "upvalue": "0x0086f3a0"
+    },
+    {
+     "body": "0x00898490",
+     "name": "GetRoomEntities",
+     "upvalue": "0x0086fb20"
+    },
+    {
+     "body": "0x00897930",
+     "name": "GetScreenHeight",
+     "upvalue": "0x00870de0"
+    },
+    {
+     "body": "0x00897930",
+     "name": "GetScreenPointScale",
+     "upvalue": "0x00870df0"
+    },
+    {
+     "body": "0x00897930",
+     "name": "GetScreenWidth",
+     "upvalue": "0x00870dd0"
+    },
+    {
+     "body": "0x008983e0",
+     "name": "GetSoundIdByName",
+     "upvalue": "0x0086fab0"
+    },
+    {
+     "body": "0x00899440",
+     "name": "GetTextWidth",
+     "upvalue": "0x0086f370"
+    },
+    {
+     "body": "0x00898f50",
+     "name": "GetTime",
+     "upvalue": "0x0086ffa0"
+    },
+    {
+     "body": "0x008983e0",
+     "name": "GetTrinketIdByName",
+     "upvalue": "0x0086f6e0"
+    },
+    {
+     "body": "0x00898ae0",
+     "name": "GridSpawn",
+     "upvalue": "0x0086f0d0"
+    },
+    {
+     "body": "0x00897b00",
+     "name": "HasModData",
+     "upvalue": "0x00871980"
+    },
+    {
+     "body": "0x0089e300",
+     "name": "IsMouseBtnPressed",
+     "upvalue": "0x0086fdb0"
+    },
+    {
+     "body": "0x00897c00",
+     "name": "LoadModData",
+     "upvalue": "0x00871550"
+    },
+    {
+     "body": "0x00898d90",
+     "name": "MusicManager",
+     "upvalue": "0x00428cd0"
+    },
+    {
+     "body": "0x00898f50",
+     "name": "Random",
+     "upvalue": "0x0067f060"
+    },
+    {
+     "body": "0x00898ee0",
+     "name": "RandomVector",
+     "upvalue": "0x0067f070"
+    },
+    {
+     "body": "0x00897f50",
+     "name": "RegisterMod",
+     "upvalue": "0x00870f40"
+    },
+    {
+     "body": "0x00897a10",
+     "name": "RemoveModData",
+     "upvalue": "0x00871c10"
+    },
+    {
+     "body": "0x008986d0",
+     "name": "RenderScaledText",
+     "upvalue": "0x0086f280"
+    },
+    {
+     "body": "0x00898890",
+     "name": "RenderText",
+     "upvalue": "0x0086f1b0"
+    },
+    {
+     "body": "0x00898e00",
+     "name": "SFXManager",
+     "upvalue": "0x00420af0"
+    },
+    {
+     "body": "0x00897d50",
+     "name": "SaveModData",
+     "upvalue": "0x008711f0"
+    },
+    {
+     "body": "0x00897970",
+     "name": "ScreenToWorld",
+     "upvalue": "0x00870160"
+    },
+    {
+     "body": "0x00897970",
+     "name": "ScreenToWorldDistance",
+     "upvalue": "0x008704c0"
+    },
+    {
+     "body": "0x00897f00",
+     "name": "SetBuiltInCallbackState",
+     "upvalue": "0x0086f4b0"
+    },
+    {
+     "body": "0x00898c00",
+     "name": "Spawn",
+     "upvalue": "0x0086f0a0"
+    },
+    {
+     "body": "0x00897970",
+     "name": "WorldToRenderPosition",
+     "upvalue": "0x008703c0"
+    },
+    {
+     "body": "0x00897970",
+     "name": "WorldToScreen",
+     "upvalue": "0x00870220"
+    },
+    {
+     "body": "0x00897970",
+     "name": "WorldToScreenDistance",
+     "upvalue": "0x00870390"
+    }
+   ]
+  },
+  "Options": {
+   "metamethods": [],
+   "methods": [],
+   "properties": [
+    {
+     "getter": "0x008991a0",
+     "name": "AnnouncerVoiceMode",
+     "setter": null,
+     "upvalue": "0x00897080"
+    },
+    {
+     "getter": "0x00897770",
+     "name": "BulletVisibility",
+     "setter": null,
+     "upvalue": "0x00896fb0"
+    },
+    {
+     "getter": "0x008991a0",
+     "name": "CameraStyle",
+     "setter": null,
+     "upvalue": "0x00896e20"
+    },
+    {
+     "getter": "0x00897770",
+     "name": "ChargeBars",
+     "setter": null,
+     "upvalue": "0x00896f80"
+    },
+    {
+     "getter": "0x00898f50",
+     "name": "ConsoleFont",
+     "setter": null,
+     "upvalue": "0x008972a0"
+    },
+    {
+     "getter": "0x00897770",
+     "name": "DebugConsoleEnabled",
+     "setter": null,
+     "upvalue": "0x00897360"
+    },
+    {
+     "getter": "0x008991a0",
+     "name": "DisplayPopups",
+     "setter": null,
+     "upvalue": "0x00896ca0"
+    },
+    {
+     "getter": "0x008991a0",
+     "name": "ExtraHUDStyle",
+     "setter": null,
+     "upvalue": "0x00896e70"
+    },
+    {
+     "getter": "0x00897770",
+     "name": "FadedConsoleDisplay",
+     "setter": null,
+     "upvalue": "0x008972d0"
+    },
+    {
+     "getter": "0x00897770",
+     "name": "Filter",
+     "setter": null,
+     "upvalue": "0x00896c10"
+    },
+    {
+     "getter": "0x00897770",
+     "name": "FoundHUD",
+     "setter": null,
+     "upvalue": "0x00896f20"
+    },
+    {
+     "getter": "0x00897770",
+     "name": "Fullscreen",
+     "setter": null,
+     "upvalue": "0x00896ab0"
+    },
+    {
+     "getter": "0x00897930",
+     "name": "Gamma",
+     "setter": null,
+     "upvalue": "0x00896c40"
+    },
+    {
+     "getter": "0x00897930",
+     "name": "HUDOffset",
+     "setter": null,
+     "upvalue": "0x00896ec0"
+    },
+    {
+     "getter": "0x008991a0",
+     "name": "JacobEsauControls",
+     "setter": null,
+     "upvalue": "0x00897390"
+    },
+    {
+     "getter": "0x008976a0",
+     "name": "Language",
+     "setter": "0x0085cad0",
+     "upvalue": "0x0085eee0"
+    },
+    {
+     "getter": "0x00897930",
+     "name": "MapOpacity",
+     "setter": null,
+     "upvalue": "0x00896a50"
+    },
+    {
+     "getter": "0x00898f50",
+     "name": "MaxRenderScale",
+     "setter": null,
+     "upvalue": "0x00897250"
+    },
+    {
+     "getter": "0x00898f50",
+     "name": "MaxScale",
+     "setter": null,
+     "upvalue": "0x008970d0"
+    },
+    {
+     "getter": "0x00897770",
+     "name": "MouseControl",
+     "setter": null,
+     "upvalue": "0x00897040"
+    },
+    {
+     "getter": "0x00897930",
+     "name": "MusicVolume",
+     "setter": null,
+     "upvalue": "0x00896810"
+    },
+    {
+     "getter": "0x00897770",
+     "name": "PauseOnFocusLost",
+     "setter": null,
+     "upvalue": "0x00897010"
+    },
+    {
+     "getter": "0x00897770",
+     "name": "RumbleEnabled",
+     "setter": null,
+     "upvalue": "0x00896f50"
+    },
+    {
+     "getter": "0x00897930",
+     "name": "SFXVolume",
+     "setter": null,
+     "upvalue": "0x008969e0"
+    },
+    {
+     "getter": "0x00897770",
+     "name": "SaveCommandHistory",
+     "setter": null,
+     "upvalue": "0x00897300"
+    },
+    {
+     "getter": "0x00897770",
+     "name": "UseBorderlessFullscreen",
+     "setter": null,
+     "upvalue": "0x00897330"
+    },
+    {
+     "getter": "0x00897770",
+     "name": "VSync",
+     "setter": null,
+     "upvalue": "0x00896fe0"
+    }
+   ]
+  }
+ },
+ "notes": [
+  "Every name here was recovered from the registration code of isaac-ng.exe, not from a name table.",
+  "Class hierarchy is not included: the binary stores __parent as a table taken from the Lua stack, so the parent name is not recoverable from the registration code.",
+  "The three global namespaces (Isaac, Input, Options) are Lua globals, not classes.",
+  "A body address is provenance, not identity: the binary reuses one closure body for several members (Vector.X and Vector.Y share 0x008bb2e0, because the field offset travels as an upvalue), so the 'upvalue' field is the part that distinguishes them."
+ ],
+ "source": "isaac-ng.exe registration code (tools/probe_class_attribution.py)"
+}
