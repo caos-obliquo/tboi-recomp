@@ -734,3 +734,34 @@ other class still raises. See docs/binding-surface-findings.md §18.
    different problem: their closures call game virtuals, so they need the
    game side, not just the binding.
 4. The REPENTOGON `libzhl` cross-check (#20) for the names and the arities.
+
+## 20. The Color class is implemented; the value classes share one dispatch
+
+`Color` is the second class that runs. Its seven properties (`R`, `G`, `B`,
+`A`, `RO`, `GO`, `BO`) are fully determined by the binary: one getter body
+(`0x0089f590`) and one setter body (`0x0089f500`), with a per-field
+accessor in the upvalue that reads the field at a fixed offset. The
+offsets are in `include/isaec/api/color.hpp`, and they are the game's own.
+
+Its four methods and the `__mul` metamethod call into the game's C++ colour
+object, which is not in the binary, so they keep the loud stub. Their
+argument shapes are known (four numbers for `SetColorize`/`SetTint`, three
+for `SetOffset`, none for `Reset`), their meaning is not.
+
+The dispatch that reads a property and finds a method now lives in
+`include/isaec/api/lua_value.hpp` and is shared by `Vector` and `Color`:
+`ValueClass::install` creates the metatable and installs the read and the
+write dispatch, `ValueClass::check` refuses a value of another class, and
+`ValueClass::push` creates an instance.
+
+Next steps, in order:
+
+1. the classes whose members are pure data or pure arithmetic
+   (`PosVel`, `RNG`, the list classes), one group at a time;
+2. the classes that need the game side (`Entity` and its subclasses, `Room`,
+   `Level`), which cannot be implemented before the engine has the state
+   they read;
+3. the #20 cross-check against REPENTOGON's libzhl;
+4. the open issues: #28 (the definition behind the "434/441 lua_type
+   guard"), #33 (the class hierarchy is not recoverable from the binary),
+   #35 (the other 71 metamethods are not wired).

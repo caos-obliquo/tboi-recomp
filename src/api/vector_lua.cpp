@@ -4,6 +4,7 @@
 #include "isaec/api/vector_lua.hpp"
 
 #include "isaec/api/binding.hpp"
+#include "isaec/api/lua_value.hpp"
 #include "isaec/api/vector.hpp"
 
 #if ISAEC_HAS_LUA
@@ -20,143 +21,20 @@ namespace {
 // uses, so the class table the spec created is the one the dispatch looks in.
 constexpr const char* kVectorClassName = "Vector";
 
-// The registry key of the Vector metatable. One per interpreter state, which
-// is the same lifetime as the Binding that owns it.
-constexpr const char* kVectorMetatableKey = "__isaec_vector_metatable";
-
 #if ISAEC_HAS_LUA
 
 lua_State* as_state(void* state) { return static_cast<lua_State*>(state); }
 
 // -- the metatable ----------------------------------------------------------
 
-// Pushes the Vector metatable onto the stack, creating it on first use.
-//
-// The metatable carries the read and write dispatch (the game uses a custom
-// model: a property getter lives in the class table's __propget table and a
-// method in its __index table, and a single __index function decides which
-// one a name resolves to), the garbage collector hook, and the arithmetic
-// metamethods.
-void push_vector_metatable(lua_State* L) {
-    lua_getfield(L, LUA_REGISTRYINDEX, kVectorMetatableKey);
-    if (lua_istable(L, -1)) return;
-    lua_pop(L, 1);
-
-    lua_createtable(L, 0, 12);
-
-    // The type name, for error messages and tostring().
-    lua_pushstring(L, kVectorClassName);  // NOLINT(google-runtime-printf)
-    lua_setfield(L, -2, "__name");
-
-    // The game's vectors own no resources, so the collector has nothing to do.
-    lua_pushcfunction(L, [](lua_State* /*state*/) -> int { return 0; });
-    lua_setfield(L, -2, "__gc");
-
-    // Remember it for the next call.
-    lua_pushvalue(L, -1);
-    lua_setfield(L, LUA_REGISTRYINDEX, kVectorMetatableKey);
-}
-
 // The Vector at `index`, or a Lua error. A wrong argument is an error here
 // rather than a silent zero: the original checks the receiver type too
 // (lua_type plus a "nil passed to reference" check in the shared helper).
 Vector* check_vector(lua_State* L, int index) {
-    void* payload = lua_touserdata(L, index);
-    if (payload == nullptr) {
-        luaL_error(L, "isaec: Vector expected at argument %d", index);
-        return nullptr;
-    }
-    if (lua_getmetatable(L, index) == 0) {
-        luaL_error(L, "isaec: Vector expected at argument %d", index);
-        return nullptr;
-    }
-    push_vector_metatable(L);
-    const bool same = lua_rawequal(L, -1, -2) != 0;
-    lua_pop(L, 2);
-    if (!same) {
-        luaL_error(L, "isaec: Vector expected at argument %d", index);
-        return nullptr;
-    }
-    return static_cast<Vector*>(payload);
+    return static_cast<Vector*>(ValueClass::check(L, index, kVectorClassName));
 }
 
 // -- dispatch ----------------------------------------------------------------
-
-// __index(instance, name).
-//
-// A property wins over a method, because the game keeps the property
-// accessors in a separate table: a name that is in __propget is a property
-// and is read here, a name that is in __index is a method and is returned so
-// that Lua calls it with the instance as the first argument.
-int vector_index_dispatch(lua_State* L) {
-    if (lua_type(L, 2) != LUA_TSTRING) {
-        lua_pushnil(L);
-        return 1;
-    }
-    const char* name = lua_tostring(L, 2);  // NOLINT(google-runtime-printf)
-
-    lua_getfield(L, LUA_REGISTRYINDEX, kVectorClassName);  // NOLINT
-    if (!lua_istable(L, -1)) {
-        lua_pop(L, 1);
-        lua_pushnil(L);
-        return 1;
-    }
-
-    // A property getter: call it with the instance and return its result.
-    lua_getfield(L, -1, "__propget");
-    if (lua_istable(L, -1)) {
-        lua_getfield(L, -1, name);
-        if (lua_isfunction(L, -1)) {
-            lua_pushvalue(L, 1);
-            lua_call(L, 1, 1);
-            return 1;
-        }
-        lua_pop(L, 1);
-    }
-    lua_pop(L, 1);
-
-    // A method: hand the function back so Lua calls it with the instance.
-    lua_getfield(L, -1, "__index");
-    if (lua_istable(L, -1)) {
-        lua_getfield(L, -1, name);
-        if (lua_isfunction(L, -1)) {
-            return 1;
-        }
-        lua_pop(L, 1);
-    }
-    lua_pop(L, 1);
-
-    lua_pop(L, 1);  // the class table
-    lua_pushnil(L);
-    return 1;
-}
-
-// __newindex(instance, name, value).
-//
-// Writes go through the class table's __propset table. A name that has no
-// setter is an error, which is what the original does for a read-only
-// property.
-int vector_newindex_dispatch(lua_State* L) {
-    if (lua_type(L, 2) != LUA_TSTRING) {
-        return luaL_error(L, "isaec: Vector property name must be a string");
-    }
-    const char* name = lua_tostring(L, 2);  // NOLINT(google-runtime-printf)
-
-    lua_getfield(L, LUA_REGISTRYINDEX, kVectorClassName);  // NOLINT
-    if (lua_istable(L, -1)) {
-        lua_getfield(L, -1, "__propset");
-        if (lua_istable(L, -1)) {
-            lua_getfield(L, -1, name);
-            if (lua_isfunction(L, -1)) {
-                lua_pushvalue(L, 1);  // the instance
-                lua_pushvalue(L, 3);  // the value
-                lua_call(L, 2, 0);
-                return 0;
-            }
-        }
-    }
-    return luaL_error(L, "isaec: Vector:%s cannot be assigned", name);
-}
 
 // -- methods ----------------------------------------------------------------
 
@@ -339,18 +217,13 @@ void install_vector_class(Binding& binding) {
     if (!binding.attached()) return;
     auto* L = as_state(binding.state());
 
-    // The metatable has to exist before the first instance does.
-    push_vector_metatable(L);
-    lua_pop(L, 1);
+    // The metatable with the read and the write dispatch is shared with the
+    // other value classes.
+    ValueClass::install(L, kVectorClassName);
 
-    // The read and write dispatch, and the arithmetic metamethods, live on
-    // the metatable of the instances.
-    lua_getfield(L, LUA_REGISTRYINDEX, kVectorMetatableKey);
+    // The arithmetic metamethods live on the metatable of the instances.
+    ValueClass::push_metatable(L, kVectorClassName);
     if (lua_istable(L, -1)) {
-        lua_pushcfunction(L, vector_index_dispatch);
-        lua_setfield(L, -2, "__index");
-        lua_pushcfunction(L, vector_newindex_dispatch);
-        lua_setfield(L, -2, "__newindex");
         lua_pushcfunction(L, vector_meta_add);
         lua_setfield(L, -2, "__add");
         lua_pushcfunction(L, vector_meta_sub);
@@ -404,13 +277,11 @@ void install_vector_class(Binding& binding) {
 
 void push_vector(void* state, const Vector& value) {
 #if ISAEC_HAS_LUA
-    auto* L = as_state(state);
-    // The userdata goes on the stack first and the metatable second, so that
-    // lua_setmetatable(L, -2) sets the metatable of the instance.
-    void* payload = lua_newuserdata(L, kVectorUserdataBytes);
-    *static_cast<Vector*>(payload) = value;
-    push_vector_metatable(L);
-    lua_setmetatable(L, -2);
+    auto* payload =
+        static_cast<Vector*>(ValueClass::push(state, kVectorClassName, kVectorUserdataBytes));
+    if (payload != nullptr) {
+        *payload = value;
+    }
 #else
     (void)state;
     (void)value;
