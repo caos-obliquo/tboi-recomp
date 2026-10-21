@@ -922,7 +922,7 @@ the per-property implementation, e.g. `0x0040c3a0`, which disassembles to
 offset**, e.g. `0` for `Vector.X` and `4` for `Vector.Y`.
 
 One generic body serves several properties: `X` and `Y` both come from the
-registration helper `0x00886840`, distinguished only by the upvalue. The
+registration helper `0x00875230`, distinguished only by the upvalue. The
 discriminating key is therefore **(name, upvalue)**, not the body.
 
 ### 15.6 The new census
@@ -980,8 +980,9 @@ A further 10 were labelled `__len` and are not.
 ### 15.8 Retraction: there are 911 closure bodies, not 441
 
 The "441" is not a count of closure bodies. It is the number of bodies
-`probe_closures.py` could *reach*: 63 "bound" + 417 metatable-key + 20
-shared-name. Its own categories are a partition of the same 441 the kuna seed
+`probe_closures.py` could *reach*: 63 "bound", 417 metatable-key and 20
+shared-name bodies. Those three categories **overlap** -- 63 + 417 + 20
+is 500, not 441 -- so they are a cover, not a partition. Its own categories are a partition of the same 441 the kuna seed
 file uses, which splits them 69 identifier-labelled / 372 generic — two
 different partitions of one set.
 
@@ -1076,26 +1077,61 @@ metatable. In this build that routine is at `0x0085d040`.
 Those literals are the class names, and they yield **64 distinct classes** --
 `Room` and `RoomDescriptor` are each registered twice, in two places.
 
+The routines that call it are per class and hardcode their own name. The
+routine for `Vector` is `0x008a7c00`, and it pushes `0x00b701dc` ("Vector")
+three times -- to look the class up, to create it, and to install its `__gc`
+closure:
+
+```
+  8a7c5b:  push   0xb701dc        ; "Vector"
+  8a7c95:  push   0xb701dc        ; "Vector" -- create the class
+  8a7c9a:  call   0x85d040        ; the class-registration routine
+  8a7cbc:  push   0xb753b4        ; "__gc"
+```
+
+That per-class literal is what makes the attribution evidence-based rather
+than a guess: the class name is in the code of the registrar itself, not only
+at the call site.
+
 ### 16.2 The master function and the scope rule
 
-All 66 call sites live in one function, `0x00866960`, in class order:
+All 66 call sites live in one function, `0x00866960`, in class order. Each
+class block has the same shape:
 
 ```
-    push   0x00b701dc        ; "Vector"
-    lea    ecx,[ebp-0x14]
-    call   0x008a7c00        ; the class-registration routine for "Vector"
-    ...
-    push   0x00b6a748        ; "X"
-    call   0x00875230        ; the property registrar
-    push   0x00b6d134        ; "Y"
-    call   0x00875230
-    ...
-    push   0x00b702e8        ; "KColor"
-    call   0x008a79f0        ; the next class scope opens here
+  866a48:  call   0x0085dab0      ; construct the scope's table
+  866a4e:  push   0x00b701dc      ; "Vector"
+  866a5d:  call   0x008a7c00      ; the class-registration routine
+  ...
+  866c81:  push   0x00b6a748      ; "X"
+  866c86:  call   0x00875230      ; the property registrar
+  866c8f:  push   0x00b6d134      ; "Y"
+  866c96:  call   0x00875230
+  ...
+  866ce1:  call   0x0085dab0      ; the next scope's table
 ```
 
-The scopes are flat: a class scope runs from its registration call to the
-next registration call. No nesting analysis is needed, and none is done.
+`0x0085dab0` constructs a scope's table and `0x0085d980` destroys it. The
+scope rules are:
+
+1. **The last class-registration call before a registration names the
+   class** -- as long as no scope construct happened after it.
+2. **A construct with no class-registration call after it opens a namespace
+   scope**, not a class scope. The tail of the master function does exactly
+   this: it registers the game's Lua globals.
+3. **A registration before the namespace is named belongs to the plain global
+   scope** -- the table is constructed first and named later.
+
+The anchor is the class-registration call, *not* the construct: the twelve
+entity classes (`Entity`, `EntityTear`, `EntityPlayer`, `EntityPickup`,
+`EntityEffect`, `EntityFamiliar`, `EntityProjectile`, `EntityNPC`,
+`EntityBomb`, `EntityLaser`, `EntityKnife`) all live under a single
+construct at `0x00868909` and each has its own registration call.
+
+Rule 2 is what keeps the globals out of the classes. The last class before
+the global block is `MusicManager`; without rule 2 the 56 global functions
+would be attributed to `MusicManager`, which is what the first version of this
+tool did. The self-test now pins that with negative controls.
 
 Three shapes of registration have to be attributed, and all three are covered:
 
@@ -1114,8 +1150,9 @@ Three shapes of registration have to be attributed, and all three are covered:
 |---|---:|
 | class-registration routines | 66 |
 | distinct classes | **64** |
-| attributed registration records | 2005 |
-| distinct (class, property) pairs | **1531** |
+| global namespaces (not classes) | **3** |
+| attributed registration records | **2011** |
+| distinct (class, property) pairs | **1537** |
 | distinct bodies attributed to a class | 907 |
 
 The 64 classes and their property counts:
@@ -1124,7 +1161,6 @@ The 64 classes and their property counts:
 |---|---:|---:|
 | `EntityPlayer` | 275 | 95 |
 | `Room` | 131 | 57 |
-| `MusicManager` | 110 | 46 |
 | `Entity` | 100 | 66 |
 | `Game` | 87 | 47 |
 | `Level` | 65 | 28 |
@@ -1141,6 +1177,7 @@ The 64 classes and their property counts:
 | `ProjectileParams` | 25 | 14 |
 | `Vector` | 24 | 15 |
 | `EntityProjectile` | 20 | 6 |
+| `MusicManager` | 20 | 11 |
 | `EntityEffect` | 18 | 14 |
 | `TemporaryEffects` | 18 | 8 |
 | `EntityPickup` | 17 | 9 |
@@ -1187,6 +1224,23 @@ The 64 classes and their property counts:
 | `GridEntitySpikes` | 1 | 2 |
 | `GridEntityTNT` | 1 | 2 |
 
+The global namespaces are not classes -- they are the game's Lua
+globals. They are listed separately so they are never mistaken for
+a class with an unusually large API:
+
+| namespace | members | distinct bodies |
+|---|---:|---:|
+| `global:Isaac` | 56 | 29 |
+| `global:Options` | 27 | 6 |
+| `global:Input` | 13 | 8 |
+
+
+`global:Isaac` is the game's Lua global namespace -- `Isaac.GetPlayer()`,
+`Isaac.CountEntities()`, `Isaac.FindInRadius()` and so on. `global:Input` and
+`global:Options` are the other two. They are not classes, and they are listed
+separately so that they are never mistaken for a class with an unusually
+large API.
+
 ### 16.4 The contamination is gone
 
 §13's surface was built by string adjacency and carried a documented
@@ -1197,7 +1251,7 @@ settles it:
 | class | old bucket (§13, adjacency) | code-derived (§16) |
 |---|---:|---:|
 | `HUD` | 42 | **13** |
-| `Isaac` | 76 | **0** -- there is no such class |
+| `Isaac` | 76 | **0** -- there is no such class; the global namespace is `global:Isaac` |
 | `Entity` | 261 | **100** |
 | `KColor` | 18 | **5** |
 | `EntityPlayer` | 77 | **275** |
@@ -1210,9 +1264,8 @@ settles it:
 `AssignPlayerHUDs`, `FlashChargeBar`, `InvalidateActiveItem`,
 `InvalidateCraftingItem`, `PostUpdate`, `IsVulnerableEnemy`, `__gc`.
 
-The two classes the old surface had that the code does not have are `Isaac`
-(the contamination) and `Input`. The old surface also had only 9 classes
-where the code has 64.
+The old surface also had only 9 classes where the code has 64, and it had
+`Input` as a class, which it is not.
 
 ### 16.5 What this does not establish
 
@@ -1223,7 +1276,14 @@ where the code has 64.
   there.
 - **A property is not a signature.** `TearFlags` is on `Entity`; what it
   returns is still unknown.
-- **The counts are per registration, not per method.** 1531 (class, property)
-  pairs over 64 classes, from 2005 records; the same body appears in several
-  classes, and the same name appears in many.
+- **The counts are per registration, not per method.** 1537 (class, property)
+  pairs over 64 classes, from 2011 records; the same body appears in several
+  classes, and the same name appears in many. A property with a getter and a
+  setter is counted twice, which is correct for a registration table and
+  wrong for a method count.
+- **Function extents are frame-pointer based.** A helper that does not push
+  `ebp` is attributed to the function that encloses it, so the `func` field
+  of a record can name the caller rather than the helper. The class
+  attribution does not depend on it, because it is resolved from the call
+  site.
 - **One binary.** No independent cross-check yet.

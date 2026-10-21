@@ -503,7 +503,6 @@ architectures.
 > before the name, so the scan lands on the previous registration's literal:
 > 451 of the 524 names here are wrong, and the 441-body figure is not a count
 > of closure bodies at all. See §16 and
-> closure bodies at all. See §16 and
 > `docs/binding-surface-findings.md` §15.
 
 The earlier claim of 92 confirmed bindings was **wrong** and was retracted. The
@@ -624,7 +623,8 @@ Full mechanism, the class table and the contamination delta are in
 ```
 66 class-registration routines (0x0085d040), 64 distinct classes
 one master function (0x00866960) holds every class scope, in class order
-2005 attributed records, 1531 (class, property) pairs, 907 bodies attributed
+3 global namespaces (Isaac, Input, Options) -- not classes
+2011 attributed records, 1537 (class, property) pairs, 907 bodies attributed
 ```
 
 The documented HUD/Isaac contamination is resolved: `HUD` has 13 properties,
