@@ -18,8 +18,9 @@ of its respective owners and is used here only to identify the game this project
 aims to be compatible with.
 
 > **Status: nothing here plays the game.** The binding surface is fully mapped
-> and every recovered function body has been decompiled, but **0 of 441 are
-> implemented**. Read [Progress](#progress) before getting excited.
+> (64 classes + 3 namespaces, 1003 methods + 461 properties) and 441 of the 911
+> recovered bodies are decompiled, but **0 are implemented**. Read
+> [Progress](#progress) before getting excited.
 
 ---
 
@@ -234,7 +235,7 @@ established from the shipped DLL rather than assumed — see
 |---|---|
 | Class registry, metatable model, inheritance | **done** — 16 tests green |
 | Declarative `ApiSpec` → `Binding` codegen | **done** |
-| Recovered 655-name surface registers and resolves | **done** (as stubs) |
+| Recovered surface registers and resolves | **done** (as stubs) — 64 classes + 3 namespaces, 1003 methods + 461 properties, all behind `not_implemented_trampoline` |
 | Directory-backed data source | **done** |
 | Headless renderer (counts, draws nothing) | **done** |
 | **Closure bodies located** | **911 distinct bodies** of 1064 call sites — accounting complete |
@@ -242,14 +243,16 @@ established from the shipped DLL rather than assumed — see
 | **Property-accessor ABI** | **recovered** — [§14](docs/binding-surface-findings.md) |
 | **Lua binding index space** | **patched Lua identified** — [§14.6](docs/binding-surface-findings.md) |
 | **Closure bodies named** | **911 / 911** — every closure body carries a name ([§15](docs/binding-surface-findings.md)) |
-| **Closures attributed to a class** | **2011 records over 64 classes** (+ 3 global namespaces) — 1537 (class, property) pairs ([§16](docs/binding-surface-findings.md)) |
+| **Closures attributed to a class** | **2012 records over 64 classes** (+ 3 global namespaces) — 1538 (class, property) pairs ([§16](docs/binding-surface-findings.md)) |
+| → method / property / metamethod split | **method 1026 · property 861 · metamethod 125** — read off the helper that performs each registration ([§16.5](docs/binding-surface-findings.md)) |
+| **Generated binding surface** | **64 classes + 3 namespaces, 1003 methods + 461 properties** — generated from the code-derived table, all trampolines |
 | **Closure bodies implemented** | **0 / 911** — all resolve to `not_implemented_trampoline` |
 | **Packed archive (`ARCH000`) container** | **container solved**, codec open |
 | → `ARCH000` payload codec | **not started** — see [#2](https://github.com/caos-obliquo/tboi-recomp/issues/2) |
 | → `ARCH000` 64-bit name hash | **not started** — see [#1](https://github.com/caos-obliquo/tboi-recomp/issues/1) |
 | GPU rendering | **not started** — see [#5](https://github.com/caos-obliquo/tboi-recomp/issues/5) |
 | Graphics/performance epic | **scoped, not started** — see [#19](https://github.com/caos-obliquo/tboi-recomp/issues/19) |
-| **Class coverage** | 9 of ~23 classes |
+| **Class coverage** | 64 classes + 3 global namespaces, every name code-derived |
 | **Repentance+ (2024 co-op update) API** | **not examined at all** — see [#6](https://github.com/caos-obliquo/tboi-recomp/issues/6) |
 
 Every recovered method currently resolves to a `not_implemented_trampoline`.
@@ -292,8 +295,9 @@ Three numbers are easy to read as more than they are:
 - The **417** metatable-key bodies are property accessors, so they map onto the
   *field* layer rather than the method layer.
 - A **name** is not a **signature**. Every closure now has a name *and* a
-  class ([§16](docs/binding-surface-findings.md)) — 64 classes, 1537
-  (class, property) pairs — but what a property returns is still open
+  class ([§16](docs/binding-surface-findings.md)) — 64 classes, 1538
+  (class, property) pairs, split method / property / metamethod — but what a
+  property returns is still open
   ([#3](https://github.com/caos-obliquo/tboi-recomp/issues/3)).
 
 The 655 figure this project has tracked since the beginning is a count of
@@ -382,15 +386,15 @@ milestone `M1 Foundation` covers the current blockers.
 |---|---|---|
 | [#1](https://github.com/caos-obliquo/tboi-recomp/issues/1) | Locate the runtime archive loader | **blocked** — enumeration ruled out; approach exhausted |
 | [#2](https://github.com/caos-obliquo/tboi-recomp/issues/2) | `ARCH000` payload codec | **partially advanced** — mode 0x02 is an LCG, constants not recovered |
-| [#3](https://github.com/caos-obliquo/tboi-recomp/issues/3) | Recover bodies and signatures | **largely resolved** — 441/441 decompiled and classified |
-| [#4](https://github.com/caos-obliquo/tboi-recomp/issues/4) | Per-class attribution | **blocked** on [#17](https://github.com/caos-obliquo/tboi-recomp/issues/17) |
+| [#3](https://github.com/caos-obliquo/tboi-recomp/issues/3) | Recover bodies and signatures | **partially advanced** — 441/911 decompiled, 0 implemented |
+| [#4](https://github.com/caos-obliquo/tboi-recomp/issues/4) | Per-class attribution | **largely resolved** — 64 classes + 3 namespaces, code-derived; hierarchy not recoverable |
 | [#5](https://github.com/caos-obliquo/tboi-recomp/issues/5) | Real GPU renderer | **blocked** — nothing to draw yet |
 | [#6](https://github.com/caos-obliquo/tboi-recomp/issues/6) | Repentance+ API surface | **partially advanced** |
-| [#7](https://github.com/caos-obliquo/tboi-recomp/issues/7) | Purge HUD/Isaac contamination | **open** |
+| [#7](https://github.com/caos-obliquo/tboi-recomp/issues/7) | Purge HUD/Isaac contamination | **resolved** — the code-derived surface replaces the contaminated one |
 | [#12](https://github.com/caos-obliquo/tboi-recomp/issues/12) | Name the patched-Lua anchored value | **open** — the last gap in the ABI |
 | [#16](https://github.com/caos-obliquo/tboi-recomp/issues/16) | Cross-built libpng for Android | **open** |
-| [#17](https://github.com/caos-obliquo/tboi-recomp/issues/17) | Name the 372 anonymous bodies | **open** — blocks [#4](https://github.com/caos-obliquo/tboi-recomp/issues/4) and [#5](https://github.com/caos-obliquo/tboi-recomp/issues/5) |
-| [#18](https://github.com/caos-obliquo/tboi-recomp/issues/18) | `macos-arm64` never dispatches | **blocked** — required context, holds every merge |
+| [#17](https://github.com/caos-obliquo/tboi-recomp/issues/17) | Name the 372 anonymous bodies | **resolved** — all 911 bodies are named and class-attributed |
+| [#18](https://github.com/caos-obliquo/tboi-recomp/issues/18) | `macos-arm64` never dispatches | **resolved** — the required context was removed, the job is gone |
 | [#19](https://github.com/caos-obliquo/tboi-recomp/issues/19) | Graphics + performance epic | **scoped, not started** |
 | [#20](https://github.com/caos-obliquo/tboi-recomp/issues/20) | Cross-check the 372 anonymous bodies against REPENTOGON | **open** — highest-leverage item on the board |
 

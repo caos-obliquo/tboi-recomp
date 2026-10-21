@@ -571,14 +571,19 @@ disassembly and reconstruction in `docs/binding-surface-findings.md` §14.6.
 
 0. ~~Resolve what `0xfff0b9d7` means~~ — **done**, see §14 above.
 1. ~~Attach a **class** to each of the 911 named bodies~~ — **done**, see §17.
+1b. ~~Split the surface into methods / properties / metamethods~~ — **done**,
+    §17; `bindings/code-derived-surface.json` is the generated table.
 2. Fix CI: `CMakeLists.txt:50` `pkg_check_modules(libpng16)` is a hard
    requirement and no runner has it, so every build job dies in Configure.
    Root cause is a missing dependency, not the runner labels — those are fixed.
-3. Split the recovered surface into one source file per domain
+3. Wire the metamethods into the runtime binding (they are in the spec only).
+4. Split the recovered surface into one source file per domain
    (`entity`, `player`, `render`, `input`, `audio`, `data`, `lua`), following
    the `runtime_<subsystem>` pattern in `docs/reimplementation-references.md`.
-4. Instrument which Lua methods the game actually calls during boot, and
+5. Instrument which Lua methods the game actually calls during boot, and
    implement in that measured order rather than address order.
+6. Recover the class hierarchy. Not recoverable from the registration code
+   (`__parent` is a stack table); it needs a runtime or REPENTOGON cross-check.
 
 ## 16. Property names are recovered; the earlier names were off by one
 
@@ -624,11 +629,27 @@ Full mechanism, the class table and the contamination delta are in
 66 class-registration routines (0x0085d040), 64 distinct classes
 one master function (0x00866960) holds every class scope, in class order
 3 global namespaces (Isaac, Input, Options) -- not classes
-2011 attributed records, 1537 (class, property) pairs, 907 bodies attributed
+2012 attributed records, 1538 (class, property) pairs, 911 bodies attributed
+kind split: method 1026 / property 861 / metamethod 125
+surface: 64 classes + 3 namespaces, 938 class methods, 434 class properties,
+         76 class metamethods, 65 namespace methods, 27 namespace properties
 ```
 
-The documented HUD/Isaac contamination is resolved: `HUD` has 13 properties,
-`Isaac` is not a class at all, and the class list grew from 9 to 64.
+The scope rule: `0x0085dab0` is a *constructor* that opens a scope and
+`0x0085d980` is the destructor that ends it (neither is a class registrar); the
+class comes from the last class-registrar call, unless a construct happened
+after it, in which case the record belongs to the namespace opened by that
+construct. The classification is per call site, so a helper that installs both
+sides of a property (`0x00875230`, Vector `X`/`Y`) yields one getter and one
+setter.
 
-What this does not deliver: no body is implemented, and the class hierarchy
-(the `__parent` link) is not modelled yet.
+The documented HUD/Isaac contamination is resolved: `HUD` has 12 properties,
+`Isaac` is not a class at all, and the class list grew from 9 to 64. Three
+corrections to the earlier pass: the mod-data functions are `global:Isaac` and
+not `global:Input`, `IsVulnerableEnemy` belongs to `Entity`, and `__mul`
+belongs to `Color`.
+
+What this does not deliver: no body is implemented, metamethods are recorded
+in the spec but have no runtime registration path, and the class hierarchy
+(the `__parent` link) is not recoverable -- it is a Lua table taken from the
+stack, never a name literal.

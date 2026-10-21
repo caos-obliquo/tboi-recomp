@@ -26,14 +26,35 @@ The master function
 Those 66 call sites all live in one function (`0x00866960` in this build), in
 class order:
 
+    call <scope constructor>            ; 0x85dab0 -- opens a scope
+    push "EntityPtr"
     call <registrar for "EntityPtr">   ; class scope opens
       ... property registrations ...
+    call <scope destructor>             ; 0x85d980 -- ends the scope
+    call <scope constructor>
+    push "Vector"
     call <registrar for "Vector">      ; the next class scope opens
       ... property registrations ...
 
-So the class scope of a registration is simply: the registrar call that
-precedes it, up to the next registrar call. No nesting analysis is needed
-because the scopes do not nest -- the master function is a flat sequence.
+Two things open and close a scope, and they are not what their names
+suggest:
+
+  * `0x0085dab0` **constructs** the scope's table (it calls `lua_createtable`
+    and stores the table in the object's field 0). It *opens* a scope.
+  * `0x0085d980` **destroys** the scope's table. It *closes* a scope.
+
+The class scope of a registration is the registrar call that precedes it, as
+long as no scope constructor happened after it. Twelve entity classes
+(`Entity`, `EntityTear`, `EntityPlayer`, ...) share a single constructor but
+have a registrar call each, so the registrar call -- not the constructor --
+is the anchor.
+
+Where the constructor is *not* followed by a registrar call, the scope is a
+namespace, not a class: the game's Lua globals `Isaac`, `Input` and
+`Options` are registered by `0x0085da00` and their members are not class
+members at all. They are reported as `global:Isaac`, `global:Input` and
+`global:Options`, and they are excluded from the class count. This is what
+the old adjacency surface got wrong: it reported 76 `Isaac` members.
 
 The three shapes of a registration
 ----------------------------------
@@ -48,15 +69,29 @@ The three shapes of a registration
    record per class -- a property that exists on several classes is a real
    thing in this API, not a contradiction.
 
+Property, method or metamethod
+-------------------------------
+The *kind* of a registration is read off the helper that performs it:
+
+  * a helper that pushes `__propget` or `__propset` installs a property
+    (the closure is the getter or the setter);
+  * a helper that installs a name that begins with `__` installs a
+    metamethod;
+  * anything else installs a method.
+
+The helper is found with a leaf-aware function extent. `probe_property_names`
+only knows functions with a `push ebp` prologue, and the small helpers in
+this binary are entered with `push ebx`; the leaf-aware extent used here
+recognises them, which is what makes the kind classification possible.
+
 What this tool does NOT establish
 ---------------------------------
   * It does not implement anything. It is a table, not code.
   * It does not prove the class *hierarchy*. A property inherited from a
     parent class is registered on the parent's table, so it appears under the
     parent here; the parent link lives in the class-registration routine.
-  * It does not verify the property's *type*. Whether a name is a field, a
-    method or a metamethod is a separate question; a name that begins with
-    "__" is a metamethod by construction.
+  * It does not prove the *type* of a property. `kind` says whether a name
+    is a property, a method or a metamethod, not what it holds.
   * It does not say whether a name is unique across the whole API. The same
     name is registered on many classes -- that is what inheritance looks
     like from this side.
@@ -79,6 +114,7 @@ Controls
 from __future__ import annotations
 
 import argparse
+import bisect
 import collections
 import json
 import sys
@@ -120,6 +156,38 @@ SCOPE_CONSTRUCTS = (0x85DAB0,)
 # a destructor, not a scope closer, so it is not used for attribution.
 SCOPE_DESTRUCTORS = (0x85D980,)
 
+# The metatable keys that mark a registration as a property. A helper that
+# pushes one of these installs the closure into the class's `__propget` or
+# `__propset` table, i.e. it is a property accessor rather than a method.
+# The addresses are read out of .rdata; the names are listed in
+# `docs/binding-surface-findings.md` §16.4.
+PROPERTY_KEY_VAS = {
+    0xB6E994: "__propget",
+    0xB6EA38: "__propset",
+    0xB6EA80: "__newindex",
+}
+
+# Which side of a property a registration installs. `__propget` holds the
+# reader, `__propset` and `__newindex` hold the writer.
+PROPERTY_ROLE = {
+    0xB6E994: "get",
+    0xB6EA38: "set",
+    0xB6EA80: "set",
+}
+
+# The metatable keys that mark a registration as a metamethod.
+METAMETHOD_KEY_VAS = {
+    0xB6EA70: "__class",
+    0xB6E988: "__parent",
+    0xB6EA78: "__index",
+    0xB6E9C4: "__const",
+    0xB6EA64: "__metatable",
+    0xB6E9CC: "__type",
+    0xB753B4: "__gc",
+    0xB70F1C: "__len",
+    0xB75378: "__call",
+}
+
 # Literals that are pushed where a class name is expected but are not class
 # names. "ArrayProxy" is the Lua-side proxy type used for the list classes
 # (RoomDescriptor, RoomConfigSpawns, RoomConfigEntries): the shared routine
@@ -143,6 +211,20 @@ CONTROL_CLASSES = {
     "MusicManager": ("Play", "Crossfade"),
 }
 
+# Control (class, name) pairs whose *kind* must be recovered: a property is
+# installed through the `__propget` / `__propset` table, a method is installed
+# directly into the class table, and a metamethod is a name that begins with
+# two underscores.
+CONTROL_KINDS = {
+    ("Vector", "X"): "property",
+    ("Vector", "Y"): "property",
+    ("Game", "GetPlayer"): "method",
+    ("Game", "GetRoom"): "method",
+    ("Entity", "IsVulnerableEnemy"): "method",
+    ("MusicManager", "Play"): "method",
+    ("global:Isaac", "GetPlayer"): "method",
+}
+
 # The global namespaces are not classes. Their members must land in the
 # namespace scope and nowhere else -- the bug this control guards against is
 # the global block being attributed to the class that precedes it, which gave
@@ -163,6 +245,78 @@ CONTROL_EXCLUSIONS = (
 )
 
 
+class LeafFns:
+    """Function extents that also recognise frame-less leaf helpers.
+
+    `probe_property_names.Fns` only knows functions that begin with
+    `push ebp` (the MSVC frame-pointer prologue). The small helpers in this
+    binary are entered with `push ebx` / `push esi` instead and are separated
+    from their neighbours by `int3` padding, so the old rule folds them into
+    the enclosing function. That is harmless for name recovery but fatal for
+    classification: the helper that installs a property is a *different*
+    function from the registrar that calls it.
+
+    A function start is therefore one of
+
+      * an instruction with a `push ebp` prologue,
+      * the first instruction after an `int3` run that follows a terminator,
+      * the first instruction after a `ret`.
+
+    `jmp` is deliberately not used as a terminator for the padding rule:
+    unconditional jumps are also loop back-edges, and treating them as
+    function ends would cut functions in the middle.
+    """
+
+    def __init__(self, d: Disasm) -> None:
+        self.d = d
+        self.starts = self._compute()
+
+    def _compute(self) -> list[int]:
+        insns = self.d.insns
+        starts: set[int] = set()
+        i = 0
+        n = len(insns)
+        while i < n:
+            ins = insns[i]
+            if ins.mnemonic == "push" and ins.operands.strip() == "ebp":
+                starts.add(ins.va)
+            elif ins.mnemonic == "int3":
+                # Skip the whole padding run and look at what follows it.
+                j = i
+                while j + 1 < n and insns[j + 1].mnemonic == "int3":
+                    j += 1
+                if i > 0 and insns[i - 1].is_terminator and j + 1 < n:
+                    if insns[j + 1].mnemonic != "int3":
+                        starts.add(insns[j + 1].va)
+                i = j
+            elif ins.mnemonic == "ret" and i + 1 < n and insns[i + 1].mnemonic != "int3":
+                starts.add(insns[i + 1].va)
+            i += 1
+        return sorted(starts)
+
+    def host(self, va: int) -> int | None:
+        """The function that contains `va`."""
+        idx = bisect.bisect_right(self.starts, va) - 1
+        if idx < 0:
+            return None
+        return self.starts[idx]
+
+    def body(self, start: int) -> list:
+        """The instructions of the function that starts at `start`."""
+        idx = bisect.bisect_left(self.starts, start)
+        if idx >= len(self.starts):
+            return []
+        end = self.starts[idx + 1] if idx + 1 < len(self.starts) else None
+        out = []
+        for ins in self.d.insns:
+            if ins.va < start:
+                continue
+            if end is not None and ins.va >= end:
+                break
+            out.append(ins)
+        return out
+
+
 class Attributor:
     """Class attribution over the registration records."""
 
@@ -173,6 +327,11 @@ class Attributor:
         self.rdata_lo = self.probe.rdata_lo
         self.rdata_hi = self.probe.rdata_hi
         self.fns = self.probe.fns
+        # Leaf-aware extents: the small registration helpers in this binary
+        # have no frame pointer, and the frame-pointer-only extent folds them
+        # into their caller. The kind of a registration depends on which
+        # helper performs it, so the leaf-aware extent is required.
+        self.leaf = LeafFns(self.d)
 
         # Call sites per target function, built once: the attribution needs
         # "where is this helper called from", and the disassembly is large.
@@ -196,23 +355,25 @@ class Attributor:
 
         # Per-host indexes for the scope lookup: "the last class registrar
         # before this address", "the last scope construct", "the last
-        # namespace registration".
+        # namespace registration". The host is resolved with the leaf-aware
+        # extent, so a helper that is called from inside another helper is
+        # indexed under its own host.
         self.class_openers: dict[int, list[tuple[int, str]]] = (
             collections.defaultdict(list))
         for site, name in self.openers.items():
-            host = self.fns.start_of(site)
+            host = self.leaf.host(site)
             if host is not None:
                 self.class_openers[host].append((site, name))
         self.constructs_by_host: dict[int, list[tuple[int, str]]] = (
             collections.defaultdict(list))
         for site in self.constructs:
-            host = self.fns.start_of(site)
+            host = self.leaf.host(site)
             if host is not None:
                 self.constructs_by_host[host].append((site, ""))
         self.ns_by_host: dict[int, list[tuple[int, str]]] = (
             collections.defaultdict(list))
         for site, name in self.namespace_openers.items():
-            host = self.fns.start_of(site)
+            host = self.leaf.host(site)
             if host is not None:
                 self.ns_by_host[host].append((site, name))
         for lst in (self.class_openers, self.constructs_by_host,
@@ -438,15 +599,102 @@ class Attributor:
 
     # -- attribution ----------------------------------------------------
 
-    def class_of_record(self, rec: dict) -> list[str]:
+    def helper_of(self, rec: dict) -> int | None:
+        """The function that performs the registration.
+
+        The registration helper is the function that contains the
+        `lua_pushcclosure` call, found with the leaf-aware extent: the
+        helpers that install properties and methods are small and are
+        entered without a frame pointer, so the frame-pointer-only extent
+        would report the calling registrar instead.
+        """
+        call = rec.get("call")
+        if call is None:
+            return None
+        return self.leaf.host(call)
+
+    def prop_role(self, rec: dict) -> str:
+        """Which side of a property a registration installs: "get", "set" or "".
+
+        The helper that performs the registration decides the side, but a
+        single helper can install *both* sides: the generic property
+        registrar (`0x875230`, used by `Vector.X` and `Vector.Y`) looks up
+        `__propget`, installs the reader, then looks up `__propset` and
+        installs the writer.  The role therefore has to be decided per call
+        site.
+
+        The rule: the code region between the previous `lua_pushcclosure`
+        call and the next one belongs to exactly one registration, and the
+        metatable key pushed inside that region says which side it is.  The
+        nearest key *before* the closure wins, because the compiler looks
+        the key up before it creates the closure.
+        """
+        helper = self.helper_of(rec)
+        call = rec.get("call")
+        if helper is None or call is None:
+            return ""
+        body = self.leaf.body(helper)
+        index = {ins.va: n for n, ins in enumerate(body)}
+        here = index.get(call)
+        if here is None:
+            return ""
+        slot = self.probe.slots["lua_pushcclosure"]
+
+        lo = 0
+        for n in range(here - 1, -1, -1):
+            if body[n].calls_slot(slot):
+                lo = n + 1
+                break
+        hi = len(body)
+        for n in range(here + 1, len(body)):
+            if body[n].calls_slot(slot):
+                hi = n
+                break
+
+        for n in range(here - 1, lo - 1, -1):
+            imm = body[n].immediate()
+            if body[n].mnemonic == "push" and imm in PROPERTY_ROLE:
+                return PROPERTY_ROLE[imm]
+        for n in range(here, hi):
+            imm = body[n].immediate()
+            if body[n].mnemonic == "push" and imm in PROPERTY_ROLE:
+                return PROPERTY_ROLE[imm]
+        return ""
+
+    def kind_of(self, rec: dict) -> str:
+        """Whether a registration installs a property, a method or a metamethod.
+
+        The helper that performs the registration decides: a helper that
+        pushes `__propget` / `__propset` installs the closure into the
+        class's property table (a property accessor), and a registration
+        whose name begins with `__` installs a metamethod.
+        """
+        if self.prop_role(rec):
+            return "property"
+        name = rec.get("name") or ""
+        if name.startswith("__"):
+            return "metamethod"
+        return "method"
+
+    def class_of_record(self, rec: dict, depth: int = 0) -> list[str]:
         """The classes a registration record belongs to.
 
         More than one class means the same helper is called from several
         class scopes, which is a real property of the API, not an error.
+
+        The resolution is recursive because a helper can live inside another
+        helper: the small property installers are called from the class
+        registrar, which is itself called from the master function. When the
+        enclosing function has no scope of its own, the search continues in
+        the enclosing function's own scope.
         """
-        func = rec.get("func")
+        func = self.helper_of(rec)
         if func is None:
             return []
+        return self._classes_of_function(func, depth)
+
+    def _classes_of_function(self, func: int, depth: int) -> list[str]:
+        out: list[str] = []
 
         # Shape 1: the registration is inside the class's own registrar.
         own = self.registrar_class.get(func)
@@ -455,14 +703,20 @@ class Attributor:
 
         # Shape 2 and 3: a shared helper. The class is the scope that holds
         # the call site of the helper.
-        out = []
         for site in self.call_sites.get(func, []):
-            host = self.fns.start_of(site)
+            host = self.leaf.host(site)
             if host is None:
                 continue
             name = self.scope_of(host, site)
-            if name and name not in out:
-                out.append(name)
+            if name:
+                if name not in out:
+                    out.append(name)
+            elif depth < 3 and host != func:
+                # The helper is called from inside another helper: continue
+                # the search in that function's own scope.
+                for cls in self._classes_of_function(host, depth + 1):
+                    if cls not in out:
+                        out.append(cls)
         return out
 
     def attribute(self) -> list[dict]:
@@ -473,10 +727,14 @@ class Attributor:
             classes = self.class_of_record(rec)
             if not classes:
                 continue
+            kind = self.kind_of(rec)
+            role = self.prop_role(rec)
             for cls in classes:
                 out.append({
                     "class": cls,
                     "name": rec.get("name"),
+                    "kind": kind,
+                    "role": role,
                     "body": rec.get("body"),
                     "upvalue": rec.get("upvalue"),
                     "call": rec.get("call"),
@@ -488,17 +746,128 @@ class Attributor:
     def summary(self, attributed: list[dict]) -> dict:
         per_class: dict[str, set[str]] = collections.defaultdict(set)
         bodies: dict[str, set[int]] = collections.defaultdict(set)
+        kinds: dict[str, int] = collections.Counter()
+        class_kinds: dict[str, set[str]] = collections.defaultdict(set)
         for rec in attributed:
             if rec["name"]:
                 per_class[rec["class"]].add(rec["name"])
+                class_kinds[rec["class"]].add(rec["kind"])
             if rec["body"]:
                 bodies[rec["class"]].add(rec["body"])
+            kinds[rec.get("kind", "method")] += 1
         return {
             "classes": len(per_class),
             "attributed_records": len(attributed),
             "distinct_class_property_pairs": sum(len(v) for v in per_class.values()),
             "distinct_bodies": len({r["body"] for r in attributed if r["body"]}),
+            "kinds": dict(kinds),
+            "class_kinds": {k: sorted(v) for k, v in class_kinds.items()},
         }
+
+
+def build_surface(attr: Attributor, attributed: list[dict]) -> dict:
+    """The binding surface, in the shape the spec generator consumes.
+
+    The surface is grouped by class, and each class lists its methods, its
+    properties and its metamethods separately. A property appears once, with
+    the reader and the writer bodies recorded side by side; the writer is
+    null when the binary only installs a reader.
+
+    The three global namespaces (`Isaac`, `Input`, `Options`) are not classes
+    and are listed under "namespaces" so the spec generator never registers
+    them as classes.
+
+    The class hierarchy is *not* in here: the `__parent` value the binary
+    stores is a table taken from the Lua stack, not a name, so the parent
+    name is not recoverable from the registration code. The generator keeps
+    its own curated parent map.
+    """
+    def hexbody(value) -> str | None:
+        return None if value is None else "0x%08x" % value
+
+    classes: dict[str, dict] = {}
+    namespaces: dict[str, dict] = {}
+
+    for rec in attributed:
+        name = rec.get("name")
+        if not name:
+            continue
+        cls = rec["class"]
+        if cls.startswith("global:"):
+            bucket = namespaces.setdefault(
+                cls[len("global:"):],
+                {"methods": [], "metamethods": []},
+            )
+        else:
+            bucket = classes.setdefault(
+                cls, {"parent": "", "methods": [], "properties": [], "metamethods": []}
+            )
+
+        body = hexbody(rec.get("body"))
+        upvalue = hexbody(rec.get("upvalue"))
+        kind = rec.get("kind")
+
+        if kind == "property":
+            props = bucket.setdefault("properties", [])
+            prop = None
+            for cand in props:
+                if cand["name"] == name:
+                    prop = cand
+                    break
+            if prop is None:
+                prop = {
+                    "name": name,
+                    "getter": None,
+                    "setter": None,
+                    "upvalue": upvalue,
+                }
+                props.append(prop)
+            role = rec.get("role") or ""
+            if role == "get" and prop["getter"] is None:
+                prop["getter"] = body
+                if prop["upvalue"] is None:
+                    prop["upvalue"] = upvalue
+            elif role == "set" and prop["setter"] is None:
+                prop["setter"] = body
+                if prop["upvalue"] is None:
+                    prop["upvalue"] = upvalue
+        elif kind == "metamethod":
+            entry = {"name": name, "body": body, "upvalue": upvalue}
+            if entry not in bucket["metamethods"]:
+                bucket["metamethods"].append(entry)
+        else:
+            entry = {"name": name, "body": body, "upvalue": upvalue}
+            if not any(m["name"] == name for m in bucket["methods"]):
+                bucket["methods"].append(entry)
+
+    for bucket in list(classes.values()) + list(namespaces.values()):
+        for key in ("methods", "properties", "metamethods"):
+            if key in bucket:
+                bucket[key].sort(key=lambda e: e["name"])
+        # A namespace has no property table in the recovered surface; drop the
+        # empty list so the two kinds of bucket stay distinguishable.
+        if "properties" in bucket and not bucket["properties"]:
+            del bucket["properties"]
+
+    return {
+        "source": "isaac-ng.exe registration code (tools/probe_class_attribution.py)",
+        "format": 2,
+        "notes": [
+            "Every name here was recovered from the registration code of "
+            "isaac-ng.exe, not from a name table.",
+            "Class hierarchy is not included: the binary stores __parent as a "
+            "table taken from the Lua stack, so the parent name is not "
+            "recoverable from the registration code.",
+            "The three global namespaces (Isaac, Input, Options) are Lua "
+            "globals, not classes.",
+            "A body address is provenance, not identity: the binary reuses one "
+            "closure body for several members (Vector.X and Vector.Y share "
+            "0x008bb2e0, because the field offset travels as an upvalue), so "
+            "the 'upvalue' field is the part that distinguishes them.",
+        ],
+        "classes": dict(sorted(classes.items())),
+        "namespaces": dict(sorted(namespaces.items())),
+    }
 
 
 def self_test(exe: str, cache: str | None) -> int:
@@ -559,6 +928,16 @@ def self_test(exe: str, cache: str | None) -> int:
     if CANARY_CLASS in per_class:
         fail("canary class appeared in the attribution")
 
+    # positive control 4: the kind of a registration.
+    kinds = {(rec["class"], rec["name"]): rec["kind"] for rec in attributed
+             if rec["name"]}
+    for (cls, name), want in CONTROL_KINDS.items():
+        got = kinds.get((cls, name))
+        if got != want:
+            fail(f"{cls}.{name} is {got!r}, expected {want!r}")
+        else:
+            print(f"control kind {cls}.{name}: {got}")
+
     # positive control 3: the global namespaces hold their own members.
     for ns, wanted in CONTROL_NAMESPACES.items():
         got = per_class.get(ns, set())
@@ -590,6 +969,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("exe")
     ap.add_argument("--cache", help="objdump text cache for the binary")
     ap.add_argument("--json-out", help="write the attributed records as JSON")
+    ap.add_argument("--surface-out",
+                    help="write the binding surface (methods, properties) as JSON")
     ap.add_argument("--self-test", action="store_true")
     a = ap.parse_args(argv)
 
@@ -599,6 +980,19 @@ def main(argv: list[str] | None = None) -> int:
     attr = Attributor(a.exe, a.cache)
     attributed = attr.attribute()
     s = attr.summary(attributed)
+
+    if a.surface_out:
+        surface = build_surface(attr, attributed)
+        with open(a.surface_out, "w") as fh:
+            json.dump(surface, fh, indent=1, sort_keys=True)
+            fh.write("\n")
+        n_methods = sum(len(c["methods"]) for c in surface["classes"].values())
+        n_props = sum(len(c.get("properties", [])) for c in surface["classes"].values())
+        n_meta = sum(len(c["metamethods"]) for c in surface["classes"].values())
+        print(f"surface written    : {a.surface_out}")
+        print(f"  classes {len(surface['classes'])}, namespaces "
+              f"{len(surface['namespaces'])}, methods {n_methods}, "
+              f"properties {n_props}, metamethods {n_meta}")
 
     per_class: dict[str, set[str]] = collections.defaultdict(set)
     for rec in attributed:
@@ -610,9 +1004,12 @@ def main(argv: list[str] | None = None) -> int:
     print(f"attributed records         : {s['attributed_records']}")
     print(f"class/property pairs       : {s['distinct_class_property_pairs']}")
     print(f"distinct bodies attributed : {s['distinct_bodies']}")
+    for kind, count in sorted(s["kinds"].items(), key=lambda kv: -kv[1]):
+        print(f"  kind {kind:12s} {count:5d}")
     print()
     for cls in sorted(per_class, key=lambda c: (-len(per_class[c]), c)):
-        print(f"  {cls:24s} {len(per_class[cls]):4d} properties")
+        kinds = s["class_kinds"].get(cls, [])
+        print(f"  {cls:24s} {len(per_class[cls]):4d} names  [{', '.join(kinds)}]")
 
     if a.json_out:
         Path(a.json_out).write_text(json.dumps(attributed, indent=1))

@@ -9,14 +9,14 @@ a binary **you** already own, from a path **you** pass in.
 | tool | what it does | needs the game binary? |
 |---|---|---|
 | `extract-binding-tables.py` | Surveys the native→Lua binding surface from `isaac-ng.exe`. Hard-fails if its class anchors do not validate. | yes |
-| `gen-api-spec.py` | Turns committed recovered data into `bindings/isaac-api-spec.json` + a generated C++ header. | no |
+| `gen-api-spec.py` | Turns the code-derived surface into `bindings/isaac-api-spec.json` + a generated C++ header (methods, properties, metamethods). | no |
 | `pe_vaddr.py` | PE section reader. Translates addresses and **refuses to guess** when a VA is ambiguous. | yes |
 | `probe_metatable_keys.py` | Locates the nine recovered metatable keys in `.rdata`. | yes |
 | `probe_xrefs.py` | Counts `.text` references to each metatable key address. | yes |
 | `probe_iat.py` | Walks the PE import directory, maps every IAT slot to its imported name, and finds each `call dword ptr [slot]` site. | yes |
 | `probe_property_names.py` | Recovers the name and upvalue of every Lua closure registration, by scanning forward from each `lua_pushcclosure` call site. | yes |
 | `probe_body_signatures.py` | Counts the Lua entry points and patched-Lua pseudo-indices each closure body touches. | yes |
-| `probe_class_attribution.py` | Attributes every closure registration to the game class that owns it. | yes |
+| `probe_class_attribution.py` | Attributes every closure registration to the game class that owns it, classifies it (method / property / metamethod) and writes `bindings/code-derived-surface.json`. | yes |
 | `negctl-baseline.py` | Negative control for the test suite. Proves a green baseline can go red. | no |
 
 Current findings from these probes are written up in
@@ -206,47 +206,90 @@ of 392).
 ```sh
 tools/probe_class_attribution.py /path/to/isaac-ng.exe
 tools/probe_class_attribution.py /path/to/isaac-ng.exe --json-out attrib.json
+tools/probe_class_attribution.py /path/to/isaac-ng.exe \
+    --surface-out bindings/code-derived-surface.json
 tools/probe_class_attribution.py /path/to/isaac-ng.exe --self-test
 ```
 
-Attributes each closure registration to the game class that owns it.
+Attributes each closure registration to the game class that owns it, classifies
+it as a method, a property or a metamethod, and writes the resulting table.
 
-The mechanism: every class is registered by a routine that takes the class
-name as an argument and installs the class metatable (`0x0085d040` in this
-build). Its 66 call sites all live in one master function, in class order, and
+### Mechanism
+
+Every class is registered by a routine that takes the class name as an
+argument and installs the class metatable (`0x0085d040` in this build). Its 66
+call sites all live in one master function (`0x00866960`), in class order, and
 each passes the class name as a `.rdata` literal. The registrar routine for a
-class hardcodes that class's own name, so the name is in the code, not only
-at the call site.
+class hardcodes that class's own name, so the name is in the code, not only at
+the call site.
 
-A scope is opened by the table constructor (`0x0085dab0`) and the class of a
-registration is the last class-registration call before it. A construct with
-no class-registration call after it opens a *namespace* scope instead, which
-is how the game's Lua globals (`Isaac`, `Input`, `Options`) are kept out of
-the classes -- without that rule the 56 global functions land on
-`MusicManager`, the class that happens to precede them.
+The scope is opened by the table constructor (`0x0085dab0`) and closed by the
+destructor (`0x0085d980`); neither is a class registrar, and the destructor is
+not a scope boundary in this tool -- the class comes from the **last
+class-registration call** before the record, unless a construct happened after
+it, in which case the record belongs to the *namespace* opened by that
+construct. That is how the game's Lua globals (`Isaac`, `Input`, `Options`) are
+kept out of the classes: without the construct rule the 56 global functions
+land on `MusicManager`, the class that happens to precede them. Twelve entity
+classes share one construct, so the anchor is the registrar call, not the
+construct.
 
-A property registered by a shared helper belongs to the scope that holds the
-*call site* of that helper.
+Function extents are leaf-aware (`push ebp` prologues, and the first instruction
+after an `int3` run that follows a terminator), so a small helper is not folded
+into its caller. The classification of a registration therefore depends on
+*which* helper performs it, and a shared helper is attributed through its call
+sites with a recursive resolution.
 
-Result: **64 classes** and 3 global namespaces, 2011 attributed records,
-**1537 (class, property) pairs**, 907 distinct bodies attributed.
+### Classification
+
+| pushed metatable key | kind |
+|---|---|
+| `__propget`, `__propset`, `__newindex` | property |
+| `__gc`, `__len`, `__call`, `__tostring`, `__add`, ... | metamethod |
+| none | method |
+
+The property **role** (getter vs setter) is read per call site, because one
+helper can install both sides: `0x00875230` pushes `__propget` and installs the
+reader `0x008bb2e0`, then pushes `__propset` and installs the writer
+`0x008bb340`, so `Vector.X` carries `getter 0x008bb2e0 / setter 0x008bb340 /
+upvalue 0x00000000` and `Vector.Y` the same bodies with `upvalue 0x00000004`.
+The field offset travels as the upvalue, so a body address is not an identity.
+
+### Result
+
+**64 classes** and 3 global namespaces, **2012 attributed records**,
+**1538 (class, property) pairs**, **911 distinct bodies** attributed, kinds
+**method 1026 / property 861 / metamethod 125**. `--surface-out` writes
+`bindings/code-derived-surface.json` (format 2), which drives
+`bindings/isaac-api-spec.json` and the generated header through
+`tools/gen-api-spec.py`: 64 classes + 3 namespaces, 938 class methods, 434
+class properties, 76 class metamethods, 65 namespace methods, 27 namespace
+properties.
 
 ### What it establishes
 
 - The class list, from the code: 64 classes, not the 9 the string-adjacency
   surface claimed.
-- The class/property table: 1537 pairs. `HUD` has 13 properties, not the 42
+- The class/property table: 1538 pairs. `HUD` has 12 properties, not the 42
   the adjacency surface claimed; `Isaac` does not exist as a class, so the
   documented HUD/Isaac contamination is resolved.
+- The kind of every member, from the metatable key its helper pushes.
+- The class of every record is a *name* from the code, with the address that
+  produced it, so every row is checkable by hand.
 
 ### What it does **not** establish
 
 - **Not an implementation.** It is a table.
 - **Not the class hierarchy.** A property a class inherits is registered on
-  its parent's table, so it is attributed to the parent.
+  its parent's table, so it is attributed to the parent; the `__parent` link is
+  a Lua table taken from the stack, never a name literal, so no parent *name* is
+  recoverable from the binary. The eight known `Entity` subclasses are curated
+  in `tools/gen-api-spec.py`.
 - **Not a signature.** Which field a property touches is a separate question.
 - **Not a method count.** A property with a getter and a setter is two
   registrations but one member.
+- **Not runtime wiring.** Metamethods are in the spec but have no registration
+  path in the binding yet.
 
 ## `negctl-baseline.py`
 
@@ -311,22 +354,29 @@ zero-method results); and treating a fixed byte span as a table boundary.
 python3 tools/gen-api-spec.py
 ```
 
-Reads `bindings/recovered-binding-surface.json` — committed, so a fresh checkout
-can regenerate. Keys beginning with `_` are reserved metadata (`_provenance`,
-`_caveat`) and are skipped by the class loop.
+Reads `bindings/code-derived-surface.json` — committed, so a fresh checkout can
+regenerate. That file is written by `probe_class_attribution.py --surface-out`
+(format 2: per class `parent`, `methods`, `properties`, `metamethods`, plus the
+`namespaces` table for `Isaac`, `Input` and `Options`).
 
 Idempotent, and it writes **both** the JSON and a C++ header so a malformed
-method name fails at compile time instead of at load time. CI enforces this
-with a `git diff --exit-code` job (`spec-freshness`).
+member name fails at compile time instead of at load time. CI enforces this
+with a `git diff --exit-code` job (`generated-spec-is-current`), so the surface,
+the JSON and the header must change in the same commit.
 
 Every method is currently `argc 0 / returns 0 / documented false`. Those are
 placeholders until signatures are recovered; they are not claims about the real
-API.
+API. Properties carry the getter and setter closure addresses as provenance, and
+metamethods are recorded in the spec but have no runtime registration path yet.
 
-`bindings/recovered-binding-surface.json` carries a `_caveat` key: the `HUD` and
-`Isaac` buckets are **known-contaminated** with animation, layer-fade, and
-table-config field names that were not filtered out. Treat those two buckets as
-provisional.
+The class hierarchy is **curated**, not recovered: the eight known `Entity`
+subclasses are listed in `PARENTS` in this file. The `__parent` link is a Lua
+table taken from the stack in the registration routine, never a name literal, so
+no parent name is recoverable from the binary.
+
+`bindings/recovered-binding-surface.json` is the earlier, string-adjacency
+surface and is kept as the historical record of the contaminated attempt. It is
+not read by this generator.
 
 ## `decompile_corpus.py`
 

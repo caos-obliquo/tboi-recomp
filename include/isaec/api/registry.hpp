@@ -29,11 +29,26 @@ struct MethodSpec {
     bool documented = false;
 };
 
+// One property of a generated API table.
+//
+// The game exposes most of its state as properties rather than methods: a
+// getter closure is installed under the class metatable's `__propget` table
+// and a setter under `__propset`. `getter` and `setter` carry the address of
+// the closure body that implements the side, as a string, because the address
+// is provenance: the body still lives in the shipped binary and is not yet
+// callable from here. An empty `setter` means the property is read-only.
+struct PropertySpec {
+    std::string name;
+    std::string getter;
+    std::string setter;
+};
+
 // A generated API table for one class.
 struct ClassSpec {
     std::string name;
     std::string parent;
     std::vector<MethodSpec> methods;
+    std::vector<PropertySpec> properties;
 };
 
 // A whole API surface, as produced by the generator.
