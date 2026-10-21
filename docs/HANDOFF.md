@@ -804,3 +804,39 @@ Next steps, in order:
    #35 (the other 71 metamethods are not wired), #37/#38 (the `Vector`
    members whose shape does not match the public API), #40 (the `Color`
    methods that call into C++ that is not in the binary).
+
+## 22. The field layout is cross-checked against an independent source
+
+`tools/crosscheck_libzhl.py` compares the field offsets recovered from the
+closure bodies with the `.zhl` class layouts the Repentogon project
+publishes (`TeamREPENTOGON/REPENTOGON`, `libzhl/functions/`). The tool
+downloads the files (public, no token) and caches them outside the repo.
+
+Measured: 64 classes in the surface, 43 with a published layout, **105
+fields confirmed**, 11 at the same offset under a different name, 3 moved,
+141 only in the binary, 493 only in the layout. The first hand checks agree:
+`Vector` x = 0 / y = 4, `PosVel` pos = 0 / vel = 8, `ActiveItemDesc` item =
+0 / charge = 8 / battery charge = 12, `ProjectileParams` dot product limit =
+120.
+
+The differences are tracked, not dropped: the `Room` layout of the later
+release does not match this build (`Room.Variant` at 0xc is `_gridWidth` in
+the layout), `GridEntityDoor` grew by 0x114 bytes, and `Entity.Friction` at
+0x36c has no counterpart in the layout at all.
+
+The `.zhl` files describe *Repentance+*, a later release than the build this
+project reads, so a difference is not automatically an error in either
+direction, and a matching offset does not prove that two members are the
+same member.
+
+### Next steps, in order
+
+1. The "field object" slice: a generic field support in the C++ layer (a
+   flat payload and a table of name, offset and type) for the classes whose
+   properties are all plain fields -- `ActiveItemDesc`, `ProjectileParams`,
+   `Item`, `EntityPlayer`, `EntityLaser`, `EntityFamiliar`, `EntityNPC` --
+   with the types read from the getter bodies and the layout checked
+   against the `.zhl` offsets.
+2. The remaining classes that need the game side: the list classes, `RNG`,
+   the entity classes.
+3. The rest of the open issues: #28, #33, #35, #37, #38, #40, #5, #6, #12.

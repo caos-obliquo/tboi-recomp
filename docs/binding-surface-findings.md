@@ -1700,3 +1700,111 @@ cover 13 of the 911 bodies. Still 0 of the 911 bodies are translated: the
 `Vector` arithmetic is reimplemented from the public API, the `Color` field
 offsets are recovered from the binary, and the `PosVel` offsets are recovered
 from the binary.
+
+## 21. Cross-check against the Repentogon class layouts
+===============================================
+
+The field offsets recovered from the binary are claims about the game's
+memory layout. They can be checked against a source that did not come from
+this binary: the Repentogon project publishes the game classes as `.zhl`
+definition files in `libzhl/functions/` of `TeamREPENTOGON/REPENTOGON`
+(244 files). Each file writes the field offsets and the size of the class
+out explicitly:
+
+    int _item : 0x0;
+    int _charge : 0x8;
+    int _batteryCharge : 0xC;
+    ...
+    } : 0x20;
+
+`tools/crosscheck_libzhl.py` downloads the file for each class of the
+recovered surface, parses the layout, and compares it with the offsets the
+binary gave us. The recovered side is the property `upvalue` of
+`bindings/code-derived-surface.json`: a value below `0x1000` is a field
+offset, a larger value is the code pointer of a per-field accessor (the
+`Color` fields use that form, see §19.2).
+
+The comparison classifies every recovered field as **confirmed** (the same
+offset and the same name, modulo case and the leading underscore), **name
+differs**, **moved** (the same name at a different offset), **only in the
+binary** or **only in the layout**. A class whose layout declares no fields
+of its own -- the derived grid entities keep their fields in a base class --
+is reported as *unchecked*, and a class with no `.zhl` file as *no layout*.
+
+### 21.1 The result
+
+| | |
+|---|---|
+| classes in the recovered surface | 64 |
+| classes with a published layout | 43 |
+| **fields confirmed** | **105** |
+| fields at the same offset under a different name | 11 |
+| fields that moved | 3 |
+| fields only in the binary | 141 |
+| fields only in the layout | 493 |
+
+The 105 confirmed fields are the interesting part: the offsets this project
+recovered from the closure bodies agree, one for one, with an independent
+description of the same game objects. The first checks were done by hand
+before the tool existed and they agree as well -- `Vector` x = 0, y = 4,
+size 8; `PosVel` pos = 0, vel = 8, size 16; `ActiveItemDesc` item = 0,
+charge = 8, battery charge = 12, sub charge = 16, time recharge cooldown =
+20, var data = 28, size 32; `ProjectileParams` dot product limit = 120,
+change velocity = 136, depth offset = 144.
+
+Of the 141 fields that only the binary knows, 71 belong to classes that do
+have a layout: the entity classes (`Entity` 1, `EntityEffect` 6,
+`EntityFamiliar` 10, `EntityKnife` 3, `EntityLaser` 15, `EntityNPC` 1,
+`EntityPickup` 1, `EntityTear` 5), the grid entities (`GridEntityDoor` 8,
+`GridEntityPit` 1, `GridEntityPoop` 3, `GridEntityPressurePlate` 3,
+`GridEntityRock` 3, `GridEntitySpikes` 1) and `Room` 10. The other 70 are
+in the classes with no published layout at all (`Card`, `Costume`, `Item`,
+`KColor`, `PillEffect`, `Entry`, `Spawn`).
+
+### 21.2 The differences
+
+The 11 fields at the same offset under a different name split in two:
+
+- **the same field under a different name**: `ActiveItemDesc.TimedRechargeCooldown`
+  at 0x14 is `_timeRechargeCooldown`, `BitSet128.l` at 0x0 is `_ll`,
+  `BitSet128.h` at 0x8 is `_hl`, `GridEntityTNT.FrameCnt` at 0x154 is
+  `_frameCount`, `PosVel.Position` at 0x0 is `pos`, `PosVel.Velocity` at 0x8
+  is `vel`, `TearParams.TearFlags` at 0x38 is `_flags`, `Room.Mode` at 0x4 is
+  `_descriptor` and `Room.Type` at 0x8 is `_roomType`.
+- **two different fields at the same offset**: `Room.Variant` at 0xc against
+  `_gridWidth` and `Room.Subtype` at 0x10 against `_gridHeight`. The `Room`
+  layout of the later release does not match the layout of this build, so
+  these two are coincidences of offset, not agreements.
+
+The 3 fields that moved are all in `GridEntityDoor`: `ExtraSprite` at 0x27c
+against 0x168, `PreviousState` at 0x398 against 0x284 and `PreviousVariant`
+at 0x39c against 0x288. The door object grew by 0x114 bytes between the two
+releases.
+
+One recovered field has no counterpart at all: `Entity.Friction` at 0x36c.
+Either the field was removed, or it was renamed into something the layout
+file does not list.
+
+### 21.3 What this does not establish
+
+- **That the two games are the same build.** The `.zhl` files describe
+  *Repentance+*, a later release than the *Repentance* build this project
+  reads. A difference is not automatically an error in either direction: the
+  `Room` layout demonstrably changed, and the `GridEntityDoor` object grew.
+- **That a matching offset means a matching member.** The offsets agree; the
+  members are matched by name, and where the names differ the tool says so
+  instead of claiming a match.
+- **Anything about the members the layouts do not list.** The 493 fields
+  only the layout knows are game internals the Lua API does not expose.
+- **The field *types*.** The layout gives the type of a field, but the tool
+  does not yet compare it with the type the getter body reads (an integer
+  through `0x85bfd0`, a float through `lua_pushnumber`, a boolean through
+  `lua_pushboolean`, an object through `lua_newuserdata`).
+
+The report is reproducible with
+
+    python3 tools/crosscheck_libzhl.py --surface bindings/code-derived-surface.json \
+        --cache /tmp/isaec-zhl --report /tmp/crosscheck.md --json-out /tmp/crosscheck.json
+
+The `.zhl` files are third-party and are not committed; the cache directory
+holds them.

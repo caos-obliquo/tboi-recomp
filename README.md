@@ -146,7 +146,7 @@ Two things in it matter more here than the port itself:
    this project reads. That turns
    [#17](https://github.com/caos-obliquo/tboi-recomp/issues/17) from a derivation
    problem into a cross-check, and it is tracked as
-   [#20](https://github.com/caos-obliquo/tboi-recomp/issues/20). Its credits also
+| [#20](https://github.com/caos-obliquo/tboi-recomp/issues/20) | Cross-check the 372 anonymous bodies against the REPENTOGON libzhl | **partially advanced** — the 911 bodies are named; 105 field offsets confirmed against the `.zhl` layouts, the differences tracked ([§21](docs/binding-surface-findings.md)) |
    name [`Gibbed.Rebirth`](https://github.com/gibbed/Gibbed.Rebirth) for archive
    encryption and framing, which is the open half of
    [#2](https://github.com/caos-obliquo/tboi-recomp/issues/2).
@@ -249,6 +249,7 @@ established from the shipped DLL rather than assumed — see
 | **Body shape census** | **911 bodies measured** — `argc` bound 0…8 (52 unmeasured), `returns` 0 → 359 · 1 → 534 · unknown → 18 ([§17](docs/binding-surface-findings.md)) |
 | **Generated binding surface** | **64 classes + 3 namespaces, 1003 methods + 461 properties** — generated from the code-derived table, all trampolines |
 | **Implemented classes** | **`Vector`** — 13 methods, the `X`/`Y` properties, 5 arithmetic metamethods; `Clamp`/`Clamped` stay loud stubs ([§18](docs/binding-surface-findings.md)). **`Color`** — the 7 colour properties `R` `G` `B` `A` `RO` `GO` `BO`, with the game's own field offsets; its 4 methods and `__mul` stay loud stubs ([§19](docs/binding-surface-findings.md)). **`PosVel`** — the `Position` and `Velocity` properties, with the game's own field offsets; the first class that is fully recovered from the binary ([§20](docs/binding-surface-findings.md)) |
+| **Field layout cross-check** | **105 recovered field offsets confirmed** against the Repentogon `.zhl` layouts — 11 under another name, 3 moved ([§21](docs/binding-surface-findings.md)) |
 | **Closure bodies implemented** | **0 / 911 translated** — the 24 implemented members cover 13 bodies; the `Vector` arithmetic is reimplemented from the public API, the `Color` and `PosVel` field offsets are recovered from the binary |
 | **Packed archive (`ARCH000`) container** | **container solved**, codec open |
 | → `ARCH000` payload codec | **not started** — see [#2](https://github.com/caos-obliquo/tboi-recomp/issues/2) |
@@ -390,7 +391,7 @@ milestone `M1 Foundation` covers the current blockers.
 |---|---|---|
 | [#1](https://github.com/caos-obliquo/tboi-recomp/issues/1) | Locate the runtime archive loader | **blocked** — enumeration ruled out; approach exhausted |
 | [#2](https://github.com/caos-obliquo/tboi-recomp/issues/2) | `ARCH000` payload codec | **partially advanced** — mode 0x02 is an LCG, constants not recovered |
-| [#3](https://github.com/caos-obliquo/tboi-recomp/issues/3) | Recover bodies and signatures | **partially advanced** — 911/911 decompiled, the shape census done, 15 members implemented, **0 of 911 bodies translated** |
+| [#3](https://github.com/caos-obliquo/tboi-recomp/issues/3) | Recover bodies and signatures | **partially advanced** — 911/911 decompiled, the shape census done, 24 members implemented, **0 of 911 bodies translated** |
 | [#4](https://github.com/caos-obliquo/tboi-recomp/issues/4) | Per-class attribution | **largely resolved** — 64 classes + 3 namespaces, code-derived; hierarchy not recoverable |
 | [#5](https://github.com/caos-obliquo/tboi-recomp/issues/5) | Real GPU renderer | **blocked** — nothing to draw yet |
 | [#6](https://github.com/caos-obliquo/tboi-recomp/issues/6) | Repentance+ API surface | **partially advanced** |

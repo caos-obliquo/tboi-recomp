@@ -553,6 +553,39 @@ python3 tools/probe_body_arity.py isaac-ng.exe --cache disasm.txt \
 - That every body was measured: 52 bodies have no index evidence and 18 have
   an unmeasurable return; those stay unmeasured in the generated spec.
 
+## `crosscheck_libzhl.py` — the field layout against an independent source
+
+Compares the field offsets recovered from the closure bodies with the
+`.zhl` class layouts the Repentogon project publishes
+(`TeamREPENTOGON/REPENTOGON`, `libzhl/functions/`). The tool downloads the
+file for each class of `bindings/code-derived-surface.json` (public, no
+token), parses the layout and classifies every recovered field as confirmed,
+name-differs, moved, binary-only or layout-only.
+
+    python3 tools/crosscheck_libzhl.py --surface bindings/code-derived-surface.json \
+        --cache /tmp/isaec-zhl --report /tmp/crosscheck.md --json-out /tmp/crosscheck.json
+
+`--self-test` runs on a synthetic layout file. The `.zhl` files are
+third-party and are not committed; `--cache` keeps them outside the repo.
+
+**What it establishes**
+
+- 105 recovered field offsets agree, one for one, with an independent
+  description of the same game objects (`Vector`, `PosVel`,
+  `ActiveItemDesc`, `ProjectileParams`, …).
+- 11 fields sit at the same offset under another name, 3 moved, and the
+  classes that carry them are listed.
+
+**What it does NOT establish**
+
+- That the two games are the same build: the layouts describe
+  *Repentance+*, a later release than the build this project reads.
+- That a matching offset means a matching member: the members are matched
+  by name, and where the names differ the tool says so.
+- Anything about the members the layouts do not list, and nothing about the
+  field types (the type is read from the layout, but not yet compared with
+  the type the getter body reads).
+
 ## Conventions for reporting findings
 
 `CONTRIBUTING.md` has the full rules. The short version:
