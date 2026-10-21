@@ -236,7 +236,7 @@ established from the shipped DLL rather than assumed — see
 |---|---|
 | Class registry, metatable model, inheritance | **done** — 16 tests green |
 | Declarative `ApiSpec` → `Binding` codegen | **done** |
-| Recovered surface registers and resolves | **done** (as stubs) — 64 classes + 3 namespaces, 1003 methods + 461 properties, all behind `not_implemented_trampoline` except the 15 implemented `Vector` members |
+| Recovered surface registers and resolves | **done** (as stubs) — 64 classes + 3 namespaces, 1003 methods + 461 properties, all behind `not_implemented_trampoline` except the 22 implemented `Vector` and `Color` members |
 | Directory-backed data source | **done** |
 | Headless renderer (counts, draws nothing) | **done** |
 | **Closure bodies located** | **911 distinct bodies** of 1064 call sites — accounting complete |
@@ -248,8 +248,8 @@ established from the shipped DLL rather than assumed — see
 | → method / property / metamethod split | **method 1026 · property 861 · metamethod 125** — read off the helper that performs each registration ([§16.5](docs/binding-surface-findings.md)) |
 | **Body shape census** | **911 bodies measured** — `argc` bound 0…8 (52 unmeasured), `returns` 0 → 359 · 1 → 534 · unknown → 18 ([§17](docs/binding-surface-findings.md)) |
 | **Generated binding surface** | **64 classes + 3 namespaces, 1003 methods + 461 properties** — generated from the code-derived table, all trampolines |
-| **First implemented class** | **`Vector`** — 13 methods, the `X`/`Y` properties, 5 arithmetic metamethods; `Clamp`/`Clamped` stay loud stubs ([§18](docs/binding-surface-findings.md)) |
-| **Closure bodies implemented** | **0 / 911 translated** — the 15 implemented members cover 9 bodies, reimplemented from the public API, not ported from the original |
+| **Implemented classes** | **`Vector`** — 13 methods, the `X`/`Y` properties, 5 arithmetic metamethods; `Clamp`/`Clamped` stay loud stubs ([§18](docs/binding-surface-findings.md)). **`Color`** — the 7 colour properties `R` `G` `B` `A` `RO` `GO` `BO`, with the game's own field offsets; its 4 methods and `__mul` stay loud stubs ([§19](docs/binding-surface-findings.md)) |
+| **Closure bodies implemented** | **0 / 911 translated** — the 22 implemented members cover 11 bodies; the `Vector` arithmetic is reimplemented from the public API, the `Color` field offsets are recovered from the binary |
 | **Packed archive (`ARCH000`) container** | **container solved**, codec open |
 | → `ARCH000` payload codec | **not started** — see [#2](https://github.com/caos-obliquo/tboi-recomp/issues/2) |
 | → `ARCH000` 64-bit name hash | **not started** — see [#1](https://github.com/caos-obliquo/tboi-recomp/issues/1) |

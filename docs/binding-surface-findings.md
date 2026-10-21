@@ -1572,3 +1572,68 @@ script that calls `Vector:Clamp` gets that error, not a wrong answer.
   reimplementations of the public API, not ports of the original code. The
   original's arithmetic is a C++ vtable call that this project does not
   reproduce.
+
+## 19. Second implementation: the Color class
+
+The `Color` class was the second choice, because its properties turned out to
+be fully determined by the binary: the game reaches every colour field
+through a per-field accessor, and the accessor is a plain field read, so the
+offsets are the game's own.
+
+### 19.1 What is implemented
+
+The seven colour properties, `R`, `G`, `B`, `A` and the three overlay
+channels `RO`, `GO`, `BO`, each with a getter and a setter. The four
+methods (`Reset`, `SetColorize`, `SetTint`, `SetOffset`) and the `__mul`
+metamethod keep the loud stub of the generated spec.
+
+### 19.2 What came from the binary
+
+Every colour property shares one getter body (`0x0089f590`) and one setter
+body (`0x0089f500`); the two are told apart by their upvalue, and the
+getter's upvalue is a per-field accessor routine that reads one float at a
+fixed offset of the object:
+
+| Property | Accessor | Offset |
+|----------|----------|--------|
+| `R`  | `0x00407240` | 0  |
+| `G`  | `0x00407250` | 4  |
+| `B`  | `0x00407260` | 8  |
+| `A`  | `0x00407270` | 12 |
+| `RO` | `0x004072b0` | 32 |
+| `GO` | `0x004072c0` | 36 |
+| `BO` | `0x004072d0` | 40 |
+
+The accessors read the field and return; the getter body checks the
+receiver, calls the accessor and pushes the float (one return value), the
+setter body checks the receiver, reads the value with `luaL_checknumber`
+and stores it (no return value). The offsets 16..31 are read by no
+recovered accessor, so the recomp leaves them reserved.
+
+### 19.3 What did not come from the binary
+
+`Reset`, `SetColorize`, `SetTint` and `SetOffset` are calls into the game's
+own C++ colour object through a vtable slot, and that C++ is not in the
+binary. What the binary does say is the shape of their arguments:
+`SetColorize` and `SetTint` read four numbers (through the shared helper
+`0x8ba890`), `SetOffset` reads three, `Reset` takes none, and `__mul`
+multiplies with another colour. The semantics are therefore unknown, and
+the four methods and the metamethod refuse loudly.
+
+### 19.4 The shared value-class support
+
+`Vector` and `Color` are both userdata types with a metatable, a property
+table and a method table, so the dispatch now lives in one place
+(`include/isaec/api/lua_value.hpp`): one `__index` function reads the
+class name from the instance's metatable, looks the class table up in the
+registry and decides between a property (in `__propget`) and a method (in
+`__index`), and one `__newindex` function writes through `__propset`. A
+class that adds metamethods gets the metatable from the same support.
+
+### 19.5 The honest count
+
+22 of the 1464 registered members now do something: the 15 `Vector`
+members of §18 and the 7 `Color` properties. They cover 11 of the 911
+bodies. Still 0 of the 911 bodies are translated: the colour *fields* are
+recovered from the binary, but every method of the class is a call into
+code that is not there.
