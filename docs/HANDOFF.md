@@ -880,3 +880,28 @@ same member.
 2. The remaining classes that need the game side: the list classes, `RNG`,
    the entity classes.
 3. The rest of the open issues: #28, #33, #35, #37, #38, #40, #5, #6, #12.
+
+## 25. The field classes are generated
+
+The nine field classes of §24 are now generated from the measured layout:
+`tools/gen-field-classes.py` reads `bindings/code-derived-field-layout.json`
+and writes `include/isaec/api/generated/field_classes.hpp` and
+`src/api/field_classes_generated.cpp`. The hand written tables are gone.
+
+* 43 classes, 301 plain fields, 193 distinct closure bodies.
+* The CI context `generated-spec-is-current` regenerates both files and
+  diffs them, so the tables cannot drift from the JSON.
+* The JSON still needs the binary and is refreshed by hand with
+  `tools/probe_field_layout.py`; that is the one step CI cannot repeat.
+* The honest count: **316 of the 1464 members do something**, they cover
+  **202 of the 911 bodies**, and **0 of the 911 bodies are translated**.
+
+The next steps, in order:
+
+1. The remaining plain fields of the classes whose layout is incomplete
+   (`Entity` has 24 of 37 fields, `Item` 30, `EntityPlayer` 26): the types
+   that could not be recovered need a second look at their getter bodies.
+2. The class hierarchy (#33) and the metamethod wiring (#35).
+3. The classes whose values live in the game: the methods, the object
+   fields and the list classes. These need the game side, not more
+   disassembly.

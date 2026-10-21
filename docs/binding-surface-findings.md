@@ -1986,3 +1986,83 @@ confirmed by the Repentogon `.zhl` file (section 21).
 54 of the 1464 members now do something (24 before this section), covering 40
 of the 911 closure bodies. **0 of 911 bodies are translated**: the field
 classes reproduce the *layout* the binary shows, not the code it runs.
+
+## 24. The field classes are generated from the measured layout
+
+The nine field classes of §23 were written by hand. That does not scale: the
+layout census knows **434 fields over 53 classes**, and 43 of those classes
+have at least one plain field (int, float or bool) — 301 fields in total,
+covering 193 distinct closure bodies. The tables are therefore *generated*.
+
+### 24.1 The generator
+
+`tools/gen-field-classes.py` reads `bindings/code-derived-field-layout.json`
+(the output of `tools/probe_field_layout.py`, §22) and writes two files:
+
+| file | what it holds |
+| --- | --- |
+| `include/isaec/api/generated/field_classes.hpp` | `k<Class>Fields[]` and `k<Class>Size` per class, plus the `kFieldClassTables[]` table |
+| `src/api/field_classes_generated.cpp` | `install_field_classes(Binding&)`, which walks that table |
+
+Only the plain fields are emitted. A field of type `object` points into the
+game's heap and the game is not part of this build, so those members keep the
+loud stub of the generated API spec; a field whose type could not be
+recovered is skipped for the same reason.
+
+The layout JSON itself needs the shipped binary and is refreshed by hand:
+
+```
+python3 tools/probe_field_layout.py isaac-ng.exe --cache disasm.txt \
+    --surface bindings/code-derived-surface.json \
+    --json-out bindings/code-derived-field-layout.json
+```
+
+The C++ tables come out of that JSON alone, so the CI context
+`generated-spec-is-current` regenerates and diffs them without the binary.
+
+### 24.2 What the tables contain
+
+43 classes, 301 plain fields, 193 distinct closure bodies. A few of the
+classes the port now covers:
+
+| class | size | plain fields |
+| --- | --- | --- |
+| `ActiveItemDesc` | 32 | 7 |
+| `KColor` | 16 | 4 |
+| `GridEntityDesc` | 32 | 8 |
+| `Entity` | 1008 | 24 |
+| `ProjectileParams` | 152 | 17 |
+| `TearParams` | 84 | 5 |
+| `Sprite` | 264 | 4 |
+
+The hand written `Vector`, `Color` and `PosVel` classes (§18–§20) stay:
+their *methods* are not fields, and `PosVel`'s two members are objects, so
+the generated tables do not replace them. The generated tables do cover
+`Vector.X`, `Vector.Y` and the seven `Color` members with the same offsets,
+which is why the counts below subtract the overlap.
+
+### 24.3 What this does not establish
+
+* The offsets and the types are recovered; the *values* are the port's own
+  bytes. Nothing fills them but the game.
+* A field of type `object` is a pointer into the game's heap, and the port
+  does not have the heap. Those members stay stubs.
+* The type comes from the push helper the getter calls. A getter that pushes
+  something else would be typed wrongly; the six hand checked controls in
+  `tools/probe_field_layout.py --self-test` cover the shapes that occur.
+* The `bool` fields are one byte wide and their setters use the truthiness
+  of the value, both read out of the binary (a `cmp BYTE PTR` read and a
+  `mov BYTE PTR` write).
+
+### 24.4 The honest count
+
+| what | before | now |
+| --- | --- | --- |
+| members of the surface that do something | 54 | **316** of 1464 |
+| closure bodies covered by those members | 40 | **202** of 911 |
+| closure bodies translated from the binary | 0 | **0** of 911 |
+
+The nine generated field classes plus the three hand written ones cover 37
+of the 64 classes. The members that are still stubs are the ones whose
+value lives in the game's C++ (the methods) or in the game's heap (the
+object fields).

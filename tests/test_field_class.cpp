@@ -8,7 +8,7 @@
 
 #include "isaec/api/binding.hpp"
 #include "isaec/api/field_class.hpp"
-#include "isaec/api/field_classes.hpp"
+#include "isaec/api/generated/field_classes.hpp"
 #include "isaec/api/generated/isaac_api_spec.hpp"
 #include "isaec/api/registry.hpp"
 #include "isaec/platform/types.hpp"
@@ -90,30 +90,30 @@ ISAEC_TEST(field_tables_sit_at_the_recovered_offsets) {
     // The upvalues of the ActiveItemDesc properties are the offsets of the
     // fields: the item id at 0, the charge at 8, the partial charge at 24
     // and the var data at 28. The Repentogon layout agrees.
-    CHECK(isaec::api::kActiveItemDescFields[0].name != nullptr);
-    CHECK(std::strcmp(isaec::api::kActiveItemDescFields[0].name, "Item") == 0);
-    CHECK(isaec::api::kActiveItemDescFields[0].offset == 0);
-    CHECK(isaec::api::kActiveItemDescFields[0].type == FieldType::Int);
-    CHECK(std::strcmp(isaec::api::kActiveItemDescFields[1].name, "Charge") == 0);
-    CHECK(isaec::api::kActiveItemDescFields[1].offset == 8);
-    CHECK(std::strcmp(isaec::api::kActiveItemDescFields[5].name, "PartialCharge") == 0);
-    CHECK(isaec::api::kActiveItemDescFields[5].offset == 24);
-    CHECK(isaec::api::kActiveItemDescFields[5].type == FieldType::Float);
-    CHECK(std::strcmp(isaec::api::kActiveItemDescFields[6].name, "VarData") == 0);
-    CHECK(isaec::api::kActiveItemDescFields[6].offset == 28);
-    CHECK(isaec::api::kActiveItemDescSize == 32);
+    CHECK(isaec::api::generated::kActiveItemDescFields[0].name != nullptr);
+    CHECK(std::strcmp(isaec::api::generated::kActiveItemDescFields[0].name, "Item") == 0);
+    CHECK(isaec::api::generated::kActiveItemDescFields[0].offset == 0);
+    CHECK(isaec::api::generated::kActiveItemDescFields[0].type == FieldType::Int);
+    CHECK(std::strcmp(isaec::api::generated::kActiveItemDescFields[1].name, "Charge") == 0);
+    CHECK(isaec::api::generated::kActiveItemDescFields[1].offset == 8);
+    CHECK(std::strcmp(isaec::api::generated::kActiveItemDescFields[5].name, "PartialCharge") == 0);
+    CHECK(isaec::api::generated::kActiveItemDescFields[5].offset == 24);
+    CHECK(isaec::api::generated::kActiveItemDescFields[5].type == FieldType::Float);
+    CHECK(std::strcmp(isaec::api::generated::kActiveItemDescFields[6].name, "VarData") == 0);
+    CHECK(isaec::api::generated::kActiveItemDescFields[6].offset == 28);
+    CHECK(isaec::api::generated::kActiveItemDescSize == 32);
 
     // KColor is four floats, the same shape as the Color class.
-    CHECK(isaec::api::kKColorFields[0].offset == 0);
-    CHECK(isaec::api::kKColorFields[3].offset == 12);
-    CHECK(isaec::api::kKColorFields[3].type == FieldType::Float);
-    CHECK(isaec::api::kKColorSize == 16);
+    CHECK(isaec::api::generated::kKColorFields[0].offset == 0);
+    CHECK(isaec::api::generated::kKColorFields[3].offset == 12);
+    CHECK(isaec::api::generated::kKColorFields[3].type == FieldType::Float);
+    CHECK(isaec::api::generated::kKColorSize == 16);
 
     // The "initialized" flag of a grid entity description is a byte, the
     // rest are integers.
-    CHECK(std::strcmp(isaec::api::kGridEntityDescFields[6].name, "Initialized") == 0);
-    CHECK(isaec::api::kGridEntityDescFields[6].offset == 24);
-    CHECK(isaec::api::kGridEntityDescFields[6].type == FieldType::Bool);
+    CHECK(std::strcmp(isaec::api::generated::kGridEntityDescFields[6].name, "Initialized") == 0);
+    CHECK(isaec::api::generated::kGridEntityDescFields[6].offset == 24);
+    CHECK(isaec::api::generated::kGridEntityDescFields[6].type == FieldType::Bool);
 }
 
 #if ISAEC_HAS_LUA
@@ -126,7 +126,7 @@ ISAEC_TEST(field_properties_are_reachable_from_a_script) {
 
     // The port owns the bytes of the object: the game side that would fill
     // them is still missing, so the test writes them by hand.
-    void* payload = FieldClass::create(L, "ActiveItemDesc", isaec::api::kActiveItemDescSize);
+    void* payload = FieldClass::create(L, "ActiveItemDesc", isaec::api::generated::kActiveItemDescSize);
     REQUIRE(payload != nullptr);
     store_i32(payload, 0, 5);       // the item id
     store_i32(payload, 8, 3);       // the charge
@@ -152,7 +152,7 @@ ISAEC_TEST(field_properties_can_be_written) {
     Fixture fixture;
     lua_State* L = fixture.L;
 
-    void* payload = FieldClass::create(L, "ActiveItemDesc", isaec::api::kActiveItemDescSize);
+    void* payload = FieldClass::create(L, "ActiveItemDesc", isaec::api::generated::kActiveItemDescSize);
     REQUIRE(payload != nullptr);
     store_i32(payload, 8, 3);
     lua_setglobal(L, "d");
@@ -177,7 +177,7 @@ ISAEC_TEST(field_bool_members_read_and_write) {
     lua_State* L = fixture.L;
 
     void* payload =
-        FieldClass::create(L, "GridEntityDesc", isaec::api::kGridEntityDescSize);
+        FieldClass::create(L, "GridEntityDesc", isaec::api::generated::kGridEntityDescSize);
     REQUIRE(payload != nullptr);
     store_i32(payload, 0, 2);   // the type
     store_u8(payload, 24, 1);   // the initialized flag
@@ -201,7 +201,7 @@ ISAEC_TEST(kcolor_fields_round_trip) {
     Fixture fixture;
     lua_State* L = fixture.L;
 
-    void* payload = FieldClass::create(L, "KColor", isaec::api::kKColorSize);
+    void* payload = FieldClass::create(L, "KColor", isaec::api::generated::kKColorSize);
     REQUIRE(payload != nullptr);
     store_f32(payload, 0, 0.25f);
     store_f32(payload, 4, 0.5f);
@@ -230,7 +230,7 @@ ISAEC_TEST(object_members_keep_the_loud_stub) {
     // The "Item" member of a temporary effect is a pointer into the game's
     // heap: the port cannot reproduce it, so it keeps the stub of the
     // generated spec and refuses loudly.
-    void* payload = FieldClass::create(L, "TemporaryEffect", isaec::api::kTemporaryEffectSize);
+    void* payload = FieldClass::create(L, "TemporaryEffect", isaec::api::generated::kTemporaryEffectSize);
     REQUIRE(payload != nullptr);
     store_i32(payload, 4, 2);  // the count
     lua_setglobal(L, "e");
@@ -240,6 +240,31 @@ ISAEC_TEST(object_members_keep_the_loud_stub) {
         local ok, err = pcall(function() return e.Item end)
         assert(not ok, "an object member must refuse")
         assert(string.find(err, "not implemented") ~= nil, "the refusal says so")
+    )lua";
+
+    const int status = luaL_dostring(L, script);
+    if (status != 0) {
+        std::fprintf(stderr, "lua error: %s\n", lua_tostring(L, -1));
+    }
+    CHECK(status == 0);
+}
+
+// A class that is not one of the hand written ones: the tables come from the
+// generated header, so a class like TearParams is covered without any hand
+// written table.
+ISAEC_TEST(generated_classes_work_without_a_hand_written_table) {
+    Fixture fixture;
+    lua_State* L = fixture.L;
+
+    void* payload = FieldClass::create(L, "TearParams", isaec::api::generated::kTearParamsSize);
+    REQUIRE(payload != nullptr);
+    store_i32(payload, 0, 12);        // the tear variant
+    store_f32(payload, 72, 3.5f);     // the tear damage
+    lua_setglobal(L, "t");
+
+    const char* script = R"lua(
+        assert(t.TearVariant == 12, "TearVariant")
+        assert(t.TearDamage == 3.5, "TearDamage")
     )lua";
 
     const int status = luaL_dostring(L, script);
