@@ -1057,3 +1057,173 @@ first Lua call is `lua_type` in 783, `0xfff0b9d7` in 825, `0xfff0b9d8` in 238,
 - **Nothing here is cross-checked against an independent source.** The names
   are self-consistent and hand-verified, but they come from one binary; an
   independent check against REPENTOGON's `libzhl` is still open.
+
+## 16. Per-class attribution: which class owns which closure
+
+§15 named every closure. It did not say which class a closure belongs to,
+because the registration site alone does not carry the class. This section
+closes that gap, from the code.
+
+Tool: `tools/probe_class_attribution.py` (see `tools/README.md`).
+
+### 16.1 The class-registration routine
+
+Every game class is registered by a dedicated routine that receives the class
+name as a C string argument, builds the class table, and installs its
+metatable. In this build that routine is at `0x0085d040`.
+
+**66** call sites of it exist, and each passes a `.rdata` string literal.
+Those literals are the class names, and they yield **64 distinct classes** --
+`Room` and `RoomDescriptor` are each registered twice, in two places.
+
+### 16.2 The master function and the scope rule
+
+All 66 call sites live in one function, `0x00866960`, in class order:
+
+```
+    push   0x00b701dc        ; "Vector"
+    lea    ecx,[ebp-0x14]
+    call   0x008a7c00        ; the class-registration routine for "Vector"
+    ...
+    push   0x00b6a748        ; "X"
+    call   0x00875230        ; the property registrar
+    push   0x00b6d134        ; "Y"
+    call   0x00875230
+    ...
+    push   0x00b702e8        ; "KColor"
+    call   0x008a79f0        ; the next class scope opens here
+```
+
+The scopes are flat: a class scope runs from its registration call to the
+next registration call. No nesting analysis is needed, and none is done.
+
+Three shapes of registration have to be attributed, and all three are covered:
+
+1. **Inside the class's own registrar** -- the `__gc` closure, for instance.
+   The class is that routine's class.
+2. **In a shared helper called from the master function** -- the usual case.
+   The class is the scope that contains the *call site* of the helper.
+3. **In a shared helper called from several class scopes** -- then the closure
+   really is registered on several classes, and the tool emits one record per
+   class. A property that exists on several classes is a fact about this API,
+   not a contradiction.
+
+### 16.3 The result
+
+| quantity | value |
+|---|---:|
+| class-registration routines | 66 |
+| distinct classes | **64** |
+| attributed registration records | 2005 |
+| distinct (class, property) pairs | **1531** |
+| distinct bodies attributed to a class | 907 |
+
+The 64 classes and their property counts:
+
+| class | properties | distinct bodies |
+|---|---:|---:|
+| `EntityPlayer` | 275 | 95 |
+| `Room` | 131 | 57 |
+| `MusicManager` | 110 | 46 |
+| `Entity` | 100 | 66 |
+| `Game` | 87 | 47 |
+| `Level` | 65 | 28 |
+| `Sprite` | 46 | 26 |
+| `EntityLaser` | 41 | 32 |
+| `EntityFamiliar` | 39 | 20 |
+| `EntityNPC` | 37 | 30 |
+| `Item` | 36 | 17 |
+| `GridEntityDoor` | 30 | 23 |
+| `GridEntity` | 29 | 34 |
+| `RoomDescriptor` | 29 | 16 |
+| `Seeds` | 28 | 18 |
+| `EntityTear` | 25 | 19 |
+| `ProjectileParams` | 25 | 14 |
+| `Vector` | 24 | 15 |
+| `EntityProjectile` | 20 | 6 |
+| `EntityEffect` | 18 | 14 |
+| `TemporaryEffects` | 18 | 8 |
+| `EntityPickup` | 17 | 9 |
+| `ItemPool` | 17 | 15 |
+| `Card` | 15 | 10 |
+| `EntityKnife` | 15 | 10 |
+| `PathFinder` | 14 | 11 |
+| `Config` | 13 | 9 |
+| `FontRenderSettings` | 13 | 9 |
+| `HUD` | 13 | 8 |
+| `BitSet128` | 12 | 10 |
+| `PillEffect` | 12 | 11 |
+| `Color` | 11 | 5 |
+| `SFXManager` | 10 | 8 |
+| `Costume` | 9 | 9 |
+| `EntityRef` | 9 | 11 |
+| `Font` | 9 | 8 |
+| `GridEntityDesc` | 9 | 6 |
+| `ActiveItemDesc` | 8 | 5 |
+| `TearParams` | 8 | 9 |
+| `GridEntityRock` | 7 | 8 |
+| `RNG` | 7 | 7 |
+| `Spawn` | 7 | 9 |
+| `EntityBomb` | 5 | 7 |
+| `Entry` | 5 | 7 |
+| `GridEntityPoop` | 5 | 7 |
+| `KColor` | 5 | 3 |
+| `CardConfigList` | 4 | 4 |
+| `CostumeConfigList` | 4 | 4 |
+| `EffectList` | 4 | 4 |
+| `EntityList` | 4 | 3 |
+| `GridEntityPit` | 4 | 5 |
+| `GridEntityPressurePlate` | 4 | 7 |
+| `ItemConfigList` | 4 | 4 |
+| `PillConfigList` | 4 | 4 |
+| `QueueItemData` | 4 | 7 |
+| `RoomConfigEntries` | 4 | 3 |
+| `RoomConfigSpawns` | 4 | 3 |
+| `TemporaryEffect` | 4 | 5 |
+| `VectorList` | 4 | 4 |
+| `intValues` | 4 | 3 |
+| `PosVel` | 3 | 3 |
+| `EntityPtr` | 2 | 2 |
+| `GridEntitySpikes` | 1 | 2 |
+| `GridEntityTNT` | 1 | 2 |
+
+### 16.4 The contamination is gone
+
+§13's surface was built by string adjacency and carried a documented
+caveat: `HUD` and `Isaac` were "known-contaminated" with animation,
+layer-fade and table-config field names. The code-derived attribution
+settles it:
+
+| class | old bucket (§13, adjacency) | code-derived (§16) |
+|---|---:|---:|
+| `HUD` | 42 | **13** |
+| `Isaac` | 76 | **0** -- there is no such class |
+| `Entity` | 261 | **100** |
+| `KColor` | 18 | **5** |
+| `EntityPlayer` | 77 | **275** |
+| `Sprite` | 33 | **46** |
+| `Vector` | 22 | **24** |
+| `Font` | 8 | **9** |
+
+`HUD` now carries exactly the methods it should: `Render`, `Update`,
+`ShowItemText`, `ShowFortuneText`, `SetVisible`, `IsVisible`,
+`AssignPlayerHUDs`, `FlashChargeBar`, `InvalidateActiveItem`,
+`InvalidateCraftingItem`, `PostUpdate`, `IsVulnerableEnemy`, `__gc`.
+
+The two classes the old surface had that the code does not have are `Isaac`
+(the contamination) and `Input`. The old surface also had only 9 classes
+where the code has 64.
+
+### 16.5 What this does not establish
+
+- **No body is implemented.** This is a table, not code. 0 of 911 bodies run.
+- **Inheritance is not modelled.** A property that a class inherits is
+  registered on its parent's table, so it is attributed to the parent. The
+  `__parent` link lives in the class-registration routine and is read from
+  there.
+- **A property is not a signature.** `TearFlags` is on `Entity`; what it
+  returns is still unknown.
+- **The counts are per registration, not per method.** 1531 (class, property)
+  pairs over 64 classes, from 2005 records; the same body appears in several
+  classes, and the same name appears in many.
+- **One binary.** No independent cross-check yet.

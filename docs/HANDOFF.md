@@ -36,7 +36,7 @@ clean-room project cannot be built on a tampered artifact.
 | PNG decoding | from an in-memory buffer, via libpng |
 | Headless binary | reads an archive, decodes, counts draws, exits |
 | Windowed binary | SDL2 window; the renderer **counts calls and draws nothing** |
-| Native binding surface | **911 bodies located, all named; 441 decompiled; 0 implemented** |
+| Native binding surface | **911 bodies located, all named and class-attributed (64 classes); 441 decompiled; 0 implemented** |
 
 The last row is the whole ballgame. The binding surface is the per-frame cost centre — `repentogxm` measures its own port and concludes that below 60 FPS the
 cost is *translated code, draws, and Lua* — so until those bodies are
@@ -571,9 +571,7 @@ disassembly and reconstruction in `docs/binding-surface-findings.md` §14.6.
 ## 15. Next steps, in order
 
 0. ~~Resolve what `0xfff0b9d7` means~~ — **done**, see §14 above.
-1. Attach a **class** to each of the 911 named bodies. The name is known; the
-   owning class is not. This is the remaining half of
-   [#4](https://github.com/caos-obliquo/tboi-recomp/issues/4).
+1. ~~Attach a **class** to each of the 911 named bodies~~ — **done**, see §17.
 2. Fix CI: `CMakeLists.txt:50` `pkg_check_modules(libpng16)` is a hard
    requirement and no runner has it, so every build job dies in Configure.
    Root cause is a missing dependency, not the runner labels — those are fixed.
@@ -615,3 +613,22 @@ What this retires:
 What this does not deliver: no body is implemented, and no body is attached to
 a class. Naming is one of the four states tracked in the `README.md` progress
 table, and it is the only one that moved.
+
+## 17. Per-class attribution
+
+`tools/probe_class_attribution.py` attributes every closure registration to
+the game class that owns it, from the code rather than from string adjacency.
+Full mechanism, the class table and the contamination delta are in
+`docs/binding-surface-findings.md` §16.
+
+```
+66 class-registration routines (0x0085d040), 64 distinct classes
+one master function (0x00866960) holds every class scope, in class order
+2005 attributed records, 1531 (class, property) pairs, 907 bodies attributed
+```
+
+The documented HUD/Isaac contamination is resolved: `HUD` has 13 properties,
+`Isaac` is not a class at all, and the class list grew from 9 to 64.
+
+What this does not deliver: no body is implemented, and the class hierarchy
+(the `__parent` link) is not modelled yet.
