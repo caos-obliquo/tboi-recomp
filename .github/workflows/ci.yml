@@ -260,7 +260,9 @@ jobs:
       - name: Regenerate and diff
         run: |
           python3 tools/gen-api-spec.py
+          python3 tools/gen-field-classes.py
           git diff --exit-code bindings/isaac-api-spec.json include/isaec/api/generated/isaac_api_spec.hpp
+          git diff --exit-code include/isaec/api/generated/field_classes.hpp src/api/field_classes_generated.cpp
 
   # The extractor reads the shipped binary, which is not distributable and is
   # not in the repository. Verify only that the tool still parses and that its

@@ -612,6 +612,32 @@ call has no offset (the list `Size` properties stay unresolved); an `object`
 field is a pointer into the game's own heap, which the port cannot produce;
 the type comes from the push helper, so a getter that pushes something other
 than it appears to hold would be mistyped.
+## `gen-field-classes.py` -- the field class tables, generated
+
+Reads `bindings/code-derived-field-layout.json` (the layout census of
+`probe_field_layout.py`) and writes the per-class field tables:
+
+```
+python3 tools/gen-field-classes.py
+```
+
+  include/isaec/api/generated/field_classes.hpp   the tables
+  src/api/field_classes_generated.cpp             the installer
+
+Only the plain fields (int, float, bool) are emitted; `object`, `string` and
+unrecovered types are skipped, and their members keep the loud stub of the
+generated API spec.
+
+**What it establishes:** that the tables in the generated header are exactly
+what the committed layout JSON says, and nothing else. The CI context
+`generated-spec-is-current` regenerates both files and diffs them.
+
+**What it does NOT establish:** the layout JSON itself. That file needs the
+shipped binary and is refreshed by hand with `tools/probe_field_layout.py`;
+CI cannot repeat that step. The offsets and types in the JSON were recovered
+from the binary (see §22), but the *values* of the fields are the port's own
+bytes: nothing fills them but the game.
+
 ## Conventions for reporting findings
 
 `CONTRIBUTING.md` has the full rules. The short version:

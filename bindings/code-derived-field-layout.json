@@ -1,0 +1,4435 @@
+{
+ "source": "bindings/code-derived-surface.json",
+ "summary": {
+  "classes": 53,
+  "complete_classes": 21,
+  "fields": 434,
+  "types": {
+   "int": 174,
+   "float": 104,
+   "unknown": 32,
+   "bool": 48,
+   "object": 75,
+   "string": 1
+  }
+ },
+ "classes": {
+  "ActiveItemDesc": {
+   "size": 32,
+   "fields": [
+    {
+     "name": "Item",
+     "offset": 0,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bdf80",
+     "setter": "0x008bdfe0"
+    },
+    {
+     "name": "Charge",
+     "offset": 8,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bdf80",
+     "setter": "0x008bdfe0"
+    },
+    {
+     "name": "BatteryCharge",
+     "offset": 12,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bdf80",
+     "setter": "0x008bdfe0"
+    },
+    {
+     "name": "SubCharge",
+     "offset": 16,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bdf80",
+     "setter": "0x008bdfe0"
+    },
+    {
+     "name": "TimedRechargeCooldown",
+     "offset": 20,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bdf80",
+     "setter": "0x008bdfe0"
+    },
+    {
+     "name": "PartialCharge",
+     "offset": 24,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008be040",
+     "setter": "0x008be0a0"
+    },
+    {
+     "name": "VarData",
+     "offset": 28,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bdf80",
+     "setter": "0x008bdfe0"
+    }
+   ],
+   "complete": true,
+   "unresolved": []
+  },
+  "BitSet128": {
+   "size": 0,
+   "fields": [
+    {
+     "name": "l",
+     "offset": 0,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008bc3c0",
+     "setter": "0x008bc420"
+    },
+    {
+     "name": "h",
+     "offset": 8,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008bc3c0",
+     "setter": "0x008bc420"
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "h",
+    "l"
+   ]
+  },
+  "Card": {
+   "size": 104,
+   "fields": [
+    {
+     "name": "ID",
+     "offset": 0,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bc480",
+     "setter": "0x008bc4e0"
+    },
+    {
+     "name": "AchievementID",
+     "offset": 4,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bc480",
+     "setter": "0x008bc4e0"
+    },
+    {
+     "name": "Name",
+     "offset": 8,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008bc540",
+     "setter": "0x008bc5b0"
+    },
+    {
+     "name": "Description",
+     "offset": 32,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008bc540",
+     "setter": "0x008bc5b0"
+    },
+    {
+     "name": "HudAnim",
+     "offset": 56,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008bc540",
+     "setter": "0x008bc5b0"
+    },
+    {
+     "name": "GreedModeAllowed",
+     "offset": 80,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008bc6c0",
+     "setter": "0x008bc720"
+    },
+    {
+     "name": "PickupSubtype",
+     "offset": 84,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bc790",
+     "setter": "0x008bc4e0"
+    },
+    {
+     "name": "CardType",
+     "offset": 88,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bc7f0",
+     "setter": "0x008bc4e0"
+    },
+    {
+     "name": "AnnouncerVoice",
+     "offset": 92,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bc7f0",
+     "setter": "0x008bc4e0"
+    },
+    {
+     "name": "AnnouncerDelay",
+     "offset": 96,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bc480",
+     "setter": "0x008bc4e0"
+    },
+    {
+     "name": "MimicCharge",
+     "offset": 100,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bc480",
+     "setter": "0x008bc4e0"
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "Description",
+    "HudAnim",
+    "Name"
+   ]
+  },
+  "CardConfigList": {
+   "size": 0,
+   "fields": [
+    {
+     "name": "Size",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c3630",
+     "setter": null
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "Size"
+   ]
+  },
+  "Color": {
+   "size": 44,
+   "fields": [
+    {
+     "name": "R",
+     "offset": 0,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089f590",
+     "setter": "0x0089f500"
+    },
+    {
+     "name": "G",
+     "offset": 4,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089f590",
+     "setter": "0x0089f500"
+    },
+    {
+     "name": "B",
+     "offset": 8,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089f590",
+     "setter": "0x0089f500"
+    },
+    {
+     "name": "A",
+     "offset": 12,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089f590",
+     "setter": "0x0089f500"
+    },
+    {
+     "name": "RO",
+     "offset": 32,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089f590",
+     "setter": "0x0089f500"
+    },
+    {
+     "name": "GO",
+     "offset": 36,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089f590",
+     "setter": "0x0089f500"
+    },
+    {
+     "name": "BO",
+     "offset": 40,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089f590",
+     "setter": "0x0089f500"
+    }
+   ],
+   "complete": true,
+   "unresolved": []
+  },
+  "Costume": {
+   "size": 41,
+   "fields": [
+    {
+     "name": "ID",
+     "offset": 0,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bd250",
+     "setter": "0x008bd2b0"
+    },
+    {
+     "name": "Anm2Path",
+     "offset": 4,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008bd310",
+     "setter": "0x008bd380"
+    },
+    {
+     "name": "Priority",
+     "offset": 28,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bd250",
+     "setter": "0x008bd2b0"
+    },
+    {
+     "name": "HasOverlay",
+     "offset": 32,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008bd490",
+     "setter": "0x008bd4f0"
+    },
+    {
+     "name": "IsFlying",
+     "offset": 33,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008bd490",
+     "setter": "0x008bd4f0"
+    },
+    {
+     "name": "HasSkinAlt",
+     "offset": 34,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008bd490",
+     "setter": "0x008bd4f0"
+    },
+    {
+     "name": "SkinColor",
+     "offset": 36,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008bd560",
+     "setter": "0x008bd5f0"
+    },
+    {
+     "name": "OverwriteColor",
+     "offset": 40,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008bd490",
+     "setter": "0x008bd4f0"
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "Anm2Path"
+   ]
+  },
+  "CostumeConfigList": {
+   "size": 0,
+   "fields": [
+    {
+     "name": "Size",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c3510",
+     "setter": null
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "Size"
+   ]
+  },
+  "EffectList": {
+   "size": 0,
+   "fields": [
+    {
+     "name": "Size",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c3450",
+     "setter": null
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "Size"
+   ]
+  },
+  "Entity": {
+   "size": 1008,
+   "fields": [
+    {
+     "name": "Index",
+     "offset": 32,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089de30",
+     "setter": null
+    },
+    {
+     "name": "Type",
+     "offset": 40,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089de90",
+     "setter": null
+    },
+    {
+     "name": "Variant",
+     "offset": 44,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089de30",
+     "setter": "0x0089dab0"
+    },
+    {
+     "name": "SubType",
+     "offset": 48,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089de30",
+     "setter": "0x0089dab0"
+    },
+    {
+     "name": "SpawnerType",
+     "offset": 52,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089de90",
+     "setter": "0x0089dab0"
+    },
+    {
+     "name": "SpawnerVariant",
+     "offset": 56,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089de30",
+     "setter": "0x0089dab0"
+    },
+    {
+     "name": "SpriteOffset",
+     "offset": 220,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089db80",
+     "setter": "0x0089e020"
+    },
+    {
+     "name": "SpriteScale",
+     "offset": 228,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089db80",
+     "setter": "0x0089e020"
+    },
+    {
+     "name": "SpriteRotation",
+     "offset": 236,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089da40",
+     "setter": "0x0089d9b0"
+    },
+    {
+     "name": "FlipX",
+     "offset": 328,
+     "offset_source": "accessor",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x0089dc90",
+     "setter": "0x0089dc20"
+    },
+    {
+     "name": "Visible",
+     "offset": 369,
+     "offset_source": "accessor",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x0089dc90",
+     "setter": "0x0089dc20"
+    },
+    {
+     "name": "GridCollisionClass",
+     "offset": 388,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089de90",
+     "setter": "0x0089dab0"
+    },
+    {
+     "name": "EntityCollisionClass",
+     "offset": 392,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089de90",
+     "setter": "0x0089dab0"
+    },
+    {
+     "name": "Color",
+     "offset": 440,
+     "offset_source": "accessor",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x0089df90",
+     "setter": "0x0089def0"
+    },
+    {
+     "name": "SplatColor",
+     "offset": 484,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089dd90",
+     "setter": "0x0089dd00"
+    },
+    {
+     "name": "SpawnGridIndex",
+     "offset": 812,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089de90",
+     "setter": null
+    },
+    {
+     "name": "TargetPosition",
+     "offset": 820,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089db80",
+     "setter": "0x0089d800"
+    },
+    {
+     "name": "PositionOffset",
+     "offset": 844,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089db80",
+     "setter": "0x0089e020"
+    },
+    {
+     "name": "RenderZOffset",
+     "offset": 852,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089de90",
+     "setter": "0x0089dab0"
+    },
+    {
+     "name": "DepthOffset",
+     "offset": 856,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089da40",
+     "setter": "0x0089d9b0"
+    },
+    {
+     "name": "SortingLayer",
+     "offset": 860,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089db20",
+     "setter": "0x0089dab0"
+    },
+    {
+     "name": "Friction",
+     "offset": 876,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008be110",
+     "setter": "0x008be170"
+    },
+    {
+     "name": "Size",
+     "offset": 880,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089d930",
+     "setter": "0x0089d8b0"
+    },
+    {
+     "name": "Mass",
+     "offset": 892,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089da40",
+     "setter": "0x0089d9b0"
+    },
+    {
+     "name": "HitPoints",
+     "offset": 896,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089da40",
+     "setter": "0x0089d9b0"
+    },
+    {
+     "name": "MaxHitPoints",
+     "offset": 900,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089da40",
+     "setter": "0x0089d9b0"
+    },
+    {
+     "name": "CollisionDamage",
+     "offset": 904,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089da40",
+     "setter": "0x0089d9b0"
+    },
+    {
+     "name": "Parent",
+     "offset": 956,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089d760",
+     "setter": "0x0089d6b0"
+    },
+    {
+     "name": "Child",
+     "offset": 960,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089d760",
+     "setter": "0x0089d6b0"
+    },
+    {
+     "name": "Target",
+     "offset": 964,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089d760",
+     "setter": "0x0089d6b0"
+    },
+    {
+     "name": "SpawnerEntity",
+     "offset": 968,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089d760",
+     "setter": "0x0089d6b0"
+    },
+    {
+     "name": "DropSeed",
+     "offset": 988,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089de30",
+     "setter": null
+    },
+    {
+     "name": "InitSeed",
+     "offset": 1004,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089de30",
+     "setter": null
+    },
+    {
+     "name": "FrameCount",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089de90",
+     "setter": null
+    },
+    {
+     "name": "Position",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089e0b0",
+     "setter": "0x0089e020"
+    },
+    {
+     "name": "SizeMulti",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089e0b0",
+     "setter": "0x0089e020"
+    },
+    {
+     "name": "Velocity",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089e0b0",
+     "setter": "0x0089e020"
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "Color",
+    "FrameCount",
+    "Position",
+    "SizeMulti",
+    "Velocity"
+   ]
+  },
+  "EntityBomb": {
+   "size": 1104,
+   "fields": [
+    {
+     "name": "ExplosionDamage",
+     "offset": 1048,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089ae00",
+     "setter": "0x0089ad70"
+    },
+    {
+     "name": "IsFetus",
+     "offset": 1096,
+     "offset_source": "accessor",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x0089aee0",
+     "setter": "0x0089ae70"
+    },
+    {
+     "name": "RadiusMultiplier",
+     "offset": 1100,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089ae00",
+     "setter": "0x0089ad70"
+    },
+    {
+     "name": "Flags",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089aff0",
+     "setter": "0x0089af50"
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "Flags"
+   ]
+  },
+  "EntityEffect": {
+   "size": 1148,
+   "fields": [
+    {
+     "name": "m_Height",
+     "offset": 1040,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bee70",
+     "setter": "0x008beed0"
+    },
+    {
+     "name": "FallingSpeed",
+     "offset": 1044,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089bbf0",
+     "setter": "0x0089bb60"
+    },
+    {
+     "name": "FallingAcceleration",
+     "offset": 1048,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089bbf0",
+     "setter": "0x0089bb60"
+    },
+    {
+     "name": "State",
+     "offset": 1104,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bef40",
+     "setter": "0x008befa0"
+    },
+    {
+     "name": "MinRadius",
+     "offset": 1108,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bee70",
+     "setter": "0x008beed0"
+    },
+    {
+     "name": "MaxRadius",
+     "offset": 1112,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bee70",
+     "setter": "0x008beed0"
+    },
+    {
+     "name": "Timeout",
+     "offset": 1116,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bef40",
+     "setter": "0x008befa0"
+    },
+    {
+     "name": "LifeSpan",
+     "offset": 1120,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bef40",
+     "setter": "0x008befa0"
+    },
+    {
+     "name": "IsFollowing",
+     "offset": 1124,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008bf000",
+     "setter": "0x008bf060"
+    },
+    {
+     "name": "ParentOffset",
+     "offset": 1128,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008bf0d0",
+     "setter": "0x008bf170"
+    },
+    {
+     "name": "DamageSource",
+     "offset": 1136,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bef40",
+     "setter": "0x008befa0"
+    },
+    {
+     "name": "Rotation",
+     "offset": 1140,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089bbf0",
+     "setter": "0x0089bb60"
+    },
+    {
+     "name": "Scale",
+     "offset": 1144,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089bbf0",
+     "setter": "0x0089bb60"
+    }
+   ],
+   "complete": true,
+   "unresolved": []
+  },
+  "EntityFamiliar": {
+   "size": 3472,
+   "fields": [
+    {
+     "name": "Player",
+     "offset": 1040,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089bac0",
+     "setter": "0x0089ba10"
+    },
+    {
+     "name": "FireCooldown",
+     "offset": 3404,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bf210",
+     "setter": "0x008bf270"
+    },
+    {
+     "name": "HeadFrameDelay",
+     "offset": 3408,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bf210",
+     "setter": "0x008bf270"
+    },
+    {
+     "name": "MoveDirection",
+     "offset": 3412,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bf210",
+     "setter": "0x008bf270"
+    },
+    {
+     "name": "ShootDirection",
+     "offset": 3416,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bf210",
+     "setter": "0x008bf270"
+    },
+    {
+     "name": "LastDirection",
+     "offset": 3420,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bf210",
+     "setter": "0x008bf270"
+    },
+    {
+     "name": "OrbitAngleOffset",
+     "offset": 3424,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bf2d0",
+     "setter": "0x008bf330"
+    },
+    {
+     "name": "OrbitDistance",
+     "offset": 3428,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008bf3a0",
+     "setter": "0x008bf440"
+    },
+    {
+     "name": "OrbitSpeed",
+     "offset": 3436,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bf2d0",
+     "setter": "0x008bf330"
+    },
+    {
+     "name": "OrbitLayer",
+     "offset": 3440,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bf210",
+     "setter": "0x008bf270"
+    },
+    {
+     "name": "IsFollower",
+     "offset": 3444,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008bf4e0",
+     "setter": "0x008bf540"
+    },
+    {
+     "name": "IsDelayed",
+     "offset": 3445,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008bf4e0",
+     "setter": "0x008bf540"
+    },
+    {
+     "name": "Coins",
+     "offset": 3452,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089b9b0",
+     "setter": "0x0089b940"
+    },
+    {
+     "name": "Hearts",
+     "offset": 3456,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089b9b0",
+     "setter": "0x0089b940"
+    },
+    {
+     "name": "Keys",
+     "offset": 3460,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089b9b0",
+     "setter": "0x0089b940"
+    },
+    {
+     "name": "State",
+     "offset": 3464,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bf210",
+     "setter": "0x008bf270"
+    },
+    {
+     "name": "RoomClearCount",
+     "offset": 3468,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bf210",
+     "setter": "0x008bf270"
+    }
+   ],
+   "complete": true,
+   "unresolved": []
+  },
+  "EntityKnife": {
+   "size": 1228,
+   "fields": [
+    {
+     "name": "Scale",
+     "offset": 1072,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008c04f0",
+     "setter": "0x008c0550"
+    },
+    {
+     "name": "Rotation",
+     "offset": 1080,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089a700",
+     "setter": "0x0089a670"
+    },
+    {
+     "name": "RotationOffset",
+     "offset": 1084,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089a700",
+     "setter": "0x0089a670"
+    },
+    {
+     "name": "MaxDistance",
+     "offset": 1116,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008c04f0",
+     "setter": "0x008c0550"
+    },
+    {
+     "name": "Charge",
+     "offset": 1120,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008c04f0",
+     "setter": "0x008c0550"
+    },
+    {
+     "name": "PathOffset",
+     "offset": 1220,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008c04f0",
+     "setter": "0x008c0550"
+    },
+    {
+     "name": "PathFollowSpeed",
+     "offset": 1224,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008c04f0",
+     "setter": "0x008c0550"
+    },
+    {
+     "name": "TearFlags",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089a810",
+     "setter": "0x0089a770"
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "TearFlags"
+   ]
+  },
+  "EntityLaser": {
+   "size": 1303,
+   "fields": [
+    {
+     "name": "ParentOffset",
+     "offset": 1040,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008bfac0",
+     "setter": "0x008bfb60"
+    },
+    {
+     "name": "StartAngleDegrees",
+     "offset": 1048,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bfc00",
+     "setter": "0x008bfc60"
+    },
+    {
+     "name": "Angle",
+     "offset": 1052,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089aae0",
+     "setter": "0x0089aa50"
+    },
+    {
+     "name": "AngleDegrees",
+     "offset": 1052,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bfc00",
+     "setter": "0x008bfc60"
+    },
+    {
+     "name": "LastAngleDegrees",
+     "offset": 1056,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bfc00",
+     "setter": "0x008bfc60"
+    },
+    {
+     "name": "Timeout",
+     "offset": 1112,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bfdf0",
+     "setter": "0x008bfe50"
+    },
+    {
+     "name": "FirstUpdate",
+     "offset": 1116,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008bfeb0",
+     "setter": "0x008bff10"
+    },
+    {
+     "name": "SampleLaser",
+     "offset": 1117,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008bff80",
+     "setter": "0x008c0010"
+    },
+    {
+     "name": "Shrink",
+     "offset": 1118,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008bfeb0",
+     "setter": "0x008bff10"
+    },
+    {
+     "name": "LaserLength",
+     "offset": 1120,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bfc00",
+     "setter": "0x008bfc60"
+    },
+    {
+     "name": "HomingLaser",
+     "offset": 1124,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008c00b0",
+     "setter": "0x008c0140"
+    },
+    {
+     "name": "CurveStrength",
+     "offset": 1208,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bfc00",
+     "setter": "0x008bfc60"
+    },
+    {
+     "name": "Radius",
+     "offset": 1212,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089aae0",
+     "setter": "0x0089aa50"
+    },
+    {
+     "name": "IsActiveRotating",
+     "offset": 1216,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008bfeb0",
+     "setter": "0x008bff10"
+    },
+    {
+     "name": "RotationDelay",
+     "offset": 1220,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c0230",
+     "setter": "0x008bfe50"
+    },
+    {
+     "name": "RotationDegrees",
+     "offset": 1224,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bfc00",
+     "setter": "0x008bfc60"
+    },
+    {
+     "name": "RotationSpd",
+     "offset": 1228,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bfc00",
+     "setter": "0x008bfc60"
+    },
+    {
+     "name": "MaxDistance",
+     "offset": 1232,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bfc00",
+     "setter": "0x008bfc60"
+    },
+    {
+     "name": "HomingType",
+     "offset": 1236,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008c0290",
+     "setter": "0x008c0320"
+    },
+    {
+     "name": "EndPoint",
+     "offset": 1240,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008bfac0",
+     "setter": "0x008bfb60"
+    },
+    {
+     "name": "DisableFollowParent",
+     "offset": 1252,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008bfeb0",
+     "setter": "0x008bff10"
+    },
+    {
+     "name": "BounceLaser",
+     "offset": 1256,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008c03c0",
+     "setter": "0x008c0460"
+    },
+    {
+     "name": "BlackHpDropChance",
+     "offset": 1268,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bfc00",
+     "setter": "0x008bfc60"
+    },
+    {
+     "name": "OneHit",
+     "offset": 1301,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008bfeb0",
+     "setter": "0x008bff10"
+    },
+    {
+     "name": "GridHit",
+     "offset": 1302,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008bfeb0",
+     "setter": "0x008bff10"
+    },
+    {
+     "name": "TearFlags",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089abf0",
+     "setter": "0x0089ab50"
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "TearFlags"
+   ]
+  },
+  "EntityList": {
+   "size": 16,
+   "fields": [
+    {
+     "name": "Size",
+     "offset": 12,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089e150",
+     "setter": null
+    }
+   ],
+   "complete": true,
+   "unresolved": []
+  },
+  "EntityNPC": {
+   "size": 3200,
+   "fields": [
+    {
+     "name": "StateFrame",
+     "offset": 1040,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bf5b0",
+     "setter": "0x008bf610"
+    },
+    {
+     "name": "Pathfinder",
+     "offset": 1044,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008bf670",
+     "setter": "0x008bf700"
+    },
+    {
+     "name": "State",
+     "offset": 2916,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bf920",
+     "setter": "0x008bf610"
+    },
+    {
+     "name": "ProjectileCooldown",
+     "offset": 2976,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bf5b0",
+     "setter": "0x008bf610"
+    },
+    {
+     "name": "ProjectileDelay",
+     "offset": 2980,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bf5b0",
+     "setter": "0x008bf610"
+    },
+    {
+     "name": "V1",
+     "offset": 2992,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008bf980",
+     "setter": "0x008bfa20"
+    },
+    {
+     "name": "V2",
+     "offset": 3000,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008bf980",
+     "setter": "0x008bfa20"
+    },
+    {
+     "name": "I1",
+     "offset": 3008,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bf5b0",
+     "setter": "0x008bf610"
+    },
+    {
+     "name": "I2",
+     "offset": 3012,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bf5b0",
+     "setter": "0x008bf610"
+    },
+    {
+     "name": "EntityRef",
+     "offset": 3052,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089b140",
+     "setter": "0x0089b090"
+    },
+    {
+     "name": "Scale",
+     "offset": 3128,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089b310",
+     "setter": "0x0089b280"
+    },
+    {
+     "name": "GroupIdx",
+     "offset": 3196,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bf5b0",
+     "setter": "0x008bf610"
+    },
+    {
+     "name": "CanShutDoors",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x0089b5b0",
+     "setter": "0x0089b540"
+    },
+    {
+     "name": "ChildNPC",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089b1e0",
+     "setter": null
+    },
+    {
+     "name": "ParentNPC",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089b1e0",
+     "setter": null
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "CanShutDoors",
+    "ChildNPC",
+    "ParentNPC"
+   ]
+  },
+  "EntityPickup": {
+   "size": 1416,
+   "fields": [
+    {
+     "name": "Charge",
+     "offset": 1316,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089bdb0",
+     "setter": "0x0089bd40"
+    },
+    {
+     "name": "OptionsPickupIndex",
+     "offset": 1320,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089bdb0",
+     "setter": "0x0089bd40"
+    },
+    {
+     "name": "Touched",
+     "offset": 1324,
+     "offset_source": "accessor",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x0089bcd0",
+     "setter": "0x0089bc60"
+    },
+    {
+     "name": "Price",
+     "offset": 1332,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089bdb0",
+     "setter": "0x0089bd40"
+    },
+    {
+     "name": "AutoUpdatePrice",
+     "offset": 1336,
+     "offset_source": "accessor",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x0089bcd0",
+     "setter": "0x0089bc60"
+    },
+    {
+     "name": "ShopItemId",
+     "offset": 1340,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089bdb0",
+     "setter": "0x0089bd40"
+    },
+    {
+     "name": "Timeout",
+     "offset": 1344,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089bdb0",
+     "setter": "0x0089bd40"
+    },
+    {
+     "name": "Wait",
+     "offset": 1348,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089bdb0",
+     "setter": "0x0089bd40"
+    },
+    {
+     "name": "State",
+     "offset": 1412,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bedb0",
+     "setter": "0x008bee10"
+    }
+   ],
+   "complete": true,
+   "unresolved": []
+  },
+  "EntityPlayer": {
+   "size": 6420,
+   "fields": [
+    {
+     "name": "ControlsEnabled",
+     "offset": 1040,
+     "offset_source": "accessor",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x0089c530",
+     "setter": "0x0089c4c0"
+    },
+    {
+     "name": "ControlsCooldown",
+     "offset": 1044,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089c460",
+     "setter": "0x0089c3f0"
+    },
+    {
+     "name": "ControllerIndex",
+     "offset": 5656,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089bf10",
+     "setter": null
+    },
+    {
+     "name": "TearsOffset",
+     "offset": 5708,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089c650",
+     "setter": "0x0089c5a0"
+    },
+    {
+     "name": "FriendBallEnemy",
+     "offset": 6416,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089c350",
+     "setter": "0x0089c2b0"
+    },
+    {
+     "name": "BabySkin",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008bea90",
+     "setter": "0x008beb20"
+    },
+    {
+     "name": "CanFly",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008be9c0",
+     "setter": "0x008bea20"
+    },
+    {
+     "name": "Damage",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008be6b0",
+     "setter": "0x008be710"
+    },
+    {
+     "name": "FireDelay",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089bea0",
+     "setter": "0x0089be10"
+    },
+    {
+     "name": "HeadFrameDelay",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008becf0",
+     "setter": "0x008bed50"
+    },
+    {
+     "name": "IBSCharge",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008be6b0",
+     "setter": "0x008be710"
+    },
+    {
+     "name": "ItemHoldCooldown",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008becf0",
+     "setter": "0x008bed50"
+    },
+    {
+     "name": "LaserColor",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008be8a0",
+     "setter": "0x008be900"
+    },
+    {
+     "name": "Luck",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008be6b0",
+     "setter": "0x008be710"
+    },
+    {
+     "name": "MaxFireDelay",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008be6b0",
+     "setter": "0x008be710"
+    },
+    {
+     "name": "MoveSpeed",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008be6b0",
+     "setter": "0x008be710"
+    },
+    {
+     "name": "QueuedItem",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008bebc0",
+     "setter": "0x008bec60"
+    },
+    {
+     "name": "SamsonBerserkCharge",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008becf0",
+     "setter": "0x008bed50"
+    },
+    {
+     "name": "ShotSpeed",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008be6b0",
+     "setter": "0x008be710"
+    },
+    {
+     "name": "SpriteScale",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089c000",
+     "setter": "0x0089bf70"
+    },
+    {
+     "name": "TearColor",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008be8a0",
+     "setter": "0x008be900"
+    },
+    {
+     "name": "TearFallingAcceleration",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008be6b0",
+     "setter": "0x008be710"
+    },
+    {
+     "name": "TearFallingSpeed",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008be6b0",
+     "setter": "0x008be710"
+    },
+    {
+     "name": "TearFlags",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008be780",
+     "setter": "0x008be810"
+    },
+    {
+     "name": "TearHeight",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008be6b0",
+     "setter": "0x008be710"
+    },
+    {
+     "name": "TearRange",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008be6b0",
+     "setter": "0x008be710"
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "BabySkin",
+    "CanFly",
+    "Damage",
+    "FireDelay",
+    "HeadFrameDelay",
+    "IBSCharge",
+    "ItemHoldCooldown",
+    "LaserColor",
+    "Luck",
+    "MaxFireDelay",
+    "MoveSpeed",
+    "QueuedItem",
+    "SamsonBerserkCharge",
+    "ShotSpeed",
+    "SpriteScale",
+    "TearColor",
+    "TearFallingAcceleration",
+    "TearFallingSpeed",
+    "TearFlags",
+    "TearHeight",
+    "TearRange"
+   ]
+  },
+  "EntityProjectile": {
+   "size": 1120,
+   "fields": [
+    {
+     "name": "DepthOffset",
+     "offset": 856,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089b850",
+     "setter": "0x0089b7c0"
+    },
+    {
+     "name": "Height",
+     "offset": 1040,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089b850",
+     "setter": "0x0089b7c0"
+    },
+    {
+     "name": "FallingSpeed",
+     "offset": 1044,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089b850",
+     "setter": "0x0089b7c0"
+    },
+    {
+     "name": "FallingAccel",
+     "offset": 1048,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089b850",
+     "setter": "0x0089b7c0"
+    },
+    {
+     "name": "Damage",
+     "offset": 1052,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089b850",
+     "setter": "0x0089b7c0"
+    },
+    {
+     "name": "Scale",
+     "offset": 1056,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089b850",
+     "setter": "0x0089b7c0"
+    },
+    {
+     "name": "HomingStrength",
+     "offset": 1060,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089b850",
+     "setter": "0x0089b7c0"
+    },
+    {
+     "name": "CurvingStrength",
+     "offset": 1064,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089b850",
+     "setter": "0x0089b7c0"
+    },
+    {
+     "name": "Acceleration",
+     "offset": 1068,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089b850",
+     "setter": "0x0089b7c0"
+    },
+    {
+     "name": "WiggleFrameOffset",
+     "offset": 1096,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089b760",
+     "setter": "0x0089b6f0"
+    },
+    {
+     "name": "ChangeVelocity",
+     "offset": 1112,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089b850",
+     "setter": "0x0089b7c0"
+    },
+    {
+     "name": "ChangeTimeout",
+     "offset": 1116,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089b760",
+     "setter": "0x0089b6f0"
+    },
+    {
+     "name": "ChangeFlags",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x0089b690",
+     "setter": "0x0089b620"
+    },
+    {
+     "name": "ProjectileFlags",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x0089b690",
+     "setter": "0x0089b620"
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "ChangeFlags",
+    "ProjectileFlags"
+   ]
+  },
+  "EntityPtr": {
+   "size": 4,
+   "fields": [
+    {
+     "name": "Ref",
+     "offset": 0,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008a0600",
+     "setter": null
+    }
+   ],
+   "complete": true,
+   "unresolved": []
+  },
+  "EntityRef": {
+   "size": 40,
+   "fields": [
+    {
+     "name": "Type",
+     "offset": 0,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bb900",
+     "setter": "0x008bb960"
+    },
+    {
+     "name": "Variant",
+     "offset": 4,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bb9c0",
+     "setter": "0x008bb960"
+    },
+    {
+     "name": "SpawnerType",
+     "offset": 8,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bba20",
+     "setter": "0x008bb960"
+    },
+    {
+     "name": "SpawnerVariant",
+     "offset": 12,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bb9c0",
+     "setter": "0x008bb960"
+    },
+    {
+     "name": "Position",
+     "offset": 16,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008bba80",
+     "setter": "0x008bbb20"
+    },
+    {
+     "name": "IsCharmed",
+     "offset": 32,
+     "offset_source": "accessor",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x0089e4c0",
+     "setter": "0x0089e450"
+    },
+    {
+     "name": "Entity",
+     "offset": 36,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008bbbc0",
+     "setter": "0x008bbc60"
+    },
+    {
+     "name": "IsFriendly",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x0089e4c0",
+     "setter": "0x0089e450"
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "IsFriendly"
+   ]
+  },
+  "EntityTear": {
+   "size": 2040,
+   "fields": [
+    {
+     "name": "Height",
+     "offset": 1040,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089c9c0",
+     "setter": "0x0089c930"
+    },
+    {
+     "name": "FallingSpeed",
+     "offset": 1044,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089c9c0",
+     "setter": "0x0089c930"
+    },
+    {
+     "name": "FallingAcceleration",
+     "offset": 1048,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089c9c0",
+     "setter": "0x0089c930"
+    },
+    {
+     "name": "HomingFriction",
+     "offset": 1052,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008be1e0",
+     "setter": "0x008be240"
+    },
+    {
+     "name": "Scale",
+     "offset": 1056,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089c9c0",
+     "setter": "0x0089c930"
+    },
+    {
+     "name": "BaseScale",
+     "offset": 1060,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089c9c0",
+     "setter": null
+    },
+    {
+     "name": "WaitFrames",
+     "offset": 1080,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008be2b0",
+     "setter": "0x008be310"
+    },
+    {
+     "name": "ContinueVelocity",
+     "offset": 1084,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008be370",
+     "setter": "0x008be410"
+    },
+    {
+     "name": "TearIndex",
+     "offset": 1104,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089c790",
+     "setter": null
+    },
+    {
+     "name": "BaseDamage",
+     "offset": 1108,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089c9c0",
+     "setter": null
+    },
+    {
+     "name": "Rotation",
+     "offset": 1112,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089c9c0",
+     "setter": "0x0089c930"
+    },
+    {
+     "name": "KnockbackMultiplier",
+     "offset": 1120,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008be1e0",
+     "setter": "0x008be240"
+    },
+    {
+     "name": "StickTarget",
+     "offset": 1144,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008be4b0",
+     "setter": "0x008be550"
+    },
+    {
+     "name": "StickDiff",
+     "offset": 1148,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008be370",
+     "setter": "0x008be410"
+    },
+    {
+     "name": "StickTimer",
+     "offset": 1156,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008be2b0",
+     "setter": "0x008be310"
+    },
+    {
+     "name": "CanTriggerStreakEnd",
+     "offset": 2024,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008be5e0",
+     "setter": "0x008be640"
+    },
+    {
+     "name": "PosDisplacement",
+     "offset": 2028,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089c6f0",
+     "setter": null
+    },
+    {
+     "name": "ParentOffset",
+     "offset": 2036,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008be370",
+     "setter": "0x008be410"
+    },
+    {
+     "name": "TearFlags",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089c890",
+     "setter": "0x0089c7f0"
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "TearFlags"
+   ]
+  },
+  "Entry": {
+   "size": 12,
+   "fields": [
+    {
+     "name": "Type",
+     "offset": 0,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c1c30",
+     "setter": "0x008c1c90"
+    },
+    {
+     "name": "Variant",
+     "offset": 4,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008c1cf0",
+     "setter": "0x008c1d50"
+    },
+    {
+     "name": "Subtype",
+     "offset": 6,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008c1cf0",
+     "setter": "0x008c1d50"
+    },
+    {
+     "name": "Weight",
+     "offset": 8,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008c1db0",
+     "setter": "0x008c1e10"
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "Subtype",
+    "Variant"
+   ]
+  },
+  "Game": {
+   "size": 158156,
+   "fields": [
+    {
+     "name": "BossRushParTime",
+     "offset": 156928,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x00899140",
+     "setter": "0x008990d0"
+    },
+    {
+     "name": "BlueWombParTime",
+     "offset": 156932,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x00899140",
+     "setter": "0x008990d0"
+    },
+    {
+     "name": "ScreenShakeOffset",
+     "offset": 156940,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x00899030",
+     "setter": "0x00898f80"
+    },
+    {
+     "name": "Challenge",
+     "offset": 157060,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x00899140",
+     "setter": "0x008990d0"
+    },
+    {
+     "name": "Difficulty",
+     "offset": 158152,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x00899140",
+     "setter": null
+    },
+    {
+     "name": "TimeCounter",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c2850",
+     "setter": "0x008c28b0"
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "TimeCounter"
+   ]
+  },
+  "GridEntity": {
+   "size": 64,
+   "fields": [
+    {
+     "name": "Desc",
+     "offset": 4,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008c07b0",
+     "setter": "0x008c0850"
+    },
+    {
+     "name": "State",
+     "offset": 12,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089a570",
+     "setter": "0x0089a4a0"
+    },
+    {
+     "name": "VarData",
+     "offset": 24,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x0089a510",
+     "setter": "0x0089a4a0"
+    },
+    {
+     "name": "CollisionClass",
+     "offset": 60,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c08f0",
+     "setter": "0x008c0950"
+    },
+    {
+     "name": "Position",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089a5d0",
+     "setter": null
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "Position"
+   ]
+  },
+  "GridEntityDesc": {
+   "size": 32,
+   "fields": [
+    {
+     "name": "Type",
+     "offset": 0,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c05c0",
+     "setter": "0x008c0620"
+    },
+    {
+     "name": "Variant",
+     "offset": 4,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c0680",
+     "setter": "0x008c0620"
+    },
+    {
+     "name": "State",
+     "offset": 8,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c05c0",
+     "setter": "0x008c0620"
+    },
+    {
+     "name": "SpawnCount",
+     "offset": 12,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c05c0",
+     "setter": "0x008c0620"
+    },
+    {
+     "name": "SpawnSeed",
+     "offset": 16,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c0680",
+     "setter": "0x008c0620"
+    },
+    {
+     "name": "VarData",
+     "offset": 20,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c05c0",
+     "setter": "0x008c0620"
+    },
+    {
+     "name": "Initialized",
+     "offset": 24,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008c06e0",
+     "setter": "0x008c0740"
+    },
+    {
+     "name": "VariableSeed",
+     "offset": 28,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c0680",
+     "setter": "0x008c0620"
+    }
+   ],
+   "complete": true,
+   "unresolved": []
+  },
+  "GridEntityDoor": {
+   "size": 928,
+   "fields": [
+    {
+     "name": "Slot",
+     "offset": 344,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x00899b70",
+     "setter": "0x00899b00"
+    },
+    {
+     "name": "CurrentRoomType",
+     "offset": 348,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c09b0",
+     "setter": "0x008c0a10"
+    },
+    {
+     "name": "TargetRoomType",
+     "offset": 352,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c09b0",
+     "setter": "0x008c0a10"
+    },
+    {
+     "name": "Direction",
+     "offset": 356,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x00899b70",
+     "setter": "0x00899b00"
+    },
+    {
+     "name": "ExtraSprite",
+     "offset": 636,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008c0a70",
+     "setter": "0x008c0b00"
+    },
+    {
+     "name": "ExtraVisible",
+     "offset": 912,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008c0c10",
+     "setter": "0x008c0c70"
+    },
+    {
+     "name": "Busted",
+     "offset": 913,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008c0c10",
+     "setter": "0x008c0c70"
+    },
+    {
+     "name": "TargetRoomIndex",
+     "offset": 916,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x00899b70",
+     "setter": "0x00899b00"
+    },
+    {
+     "name": "PreviousState",
+     "offset": 920,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008c0ce0",
+     "setter": "0x008c0d70"
+    },
+    {
+     "name": "PreviousVariant",
+     "offset": 924,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008c0e10",
+     "setter": "0x008c0ea0"
+    },
+    {
+     "name": "OpenAnimation",
+     "offset": 932,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008c0f40",
+     "setter": "0x008c0fb0"
+    },
+    {
+     "name": "CloseAnimation",
+     "offset": 956,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008c0f40",
+     "setter": "0x008c0fb0"
+    },
+    {
+     "name": "LockedAnimation",
+     "offset": 980,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008c0f40",
+     "setter": "0x008c0fb0"
+    },
+    {
+     "name": "OpenLockedAnimation",
+     "offset": 1004,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008c0f40",
+     "setter": "0x008c0fb0"
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "CloseAnimation",
+    "LockedAnimation",
+    "OpenAnimation",
+    "OpenLockedAnimation"
+   ]
+  },
+  "GridEntityPit": {
+   "size": 341,
+   "fields": [
+    {
+     "name": "HasLadder",
+     "offset": 340,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008c13d0",
+     "setter": "0x008c1430"
+    }
+   ],
+   "complete": true,
+   "unresolved": []
+  },
+  "GridEntityPoop": {
+   "size": 369,
+   "fields": [
+    {
+     "name": "ReviveTimer",
+     "offset": 340,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c10c0",
+     "setter": "0x008c1120"
+    },
+    {
+     "name": "StateAnimation",
+     "offset": 344,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008c1180",
+     "setter": "0x008c11f0"
+    },
+    {
+     "name": "UnderPlayer",
+     "offset": 368,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008c1300",
+     "setter": "0x008c1360"
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "StateAnimation"
+   ]
+  },
+  "GridEntityPressurePlate": {
+   "size": 624,
+   "fields": [
+    {
+     "name": "TimerPlate",
+     "offset": 340,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008c17a0",
+     "setter": "0x008c1830"
+    },
+    {
+     "name": "NextGreedAnimation",
+     "offset": 616,
+     "offset_source": "upvalue",
+     "type": "string",
+     "size": 4,
+     "getter": "0x008c1940",
+     "setter": "0x008c19c0"
+    },
+    {
+     "name": "GreedModeRNG",
+     "offset": 620,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008c1a50",
+     "setter": "0x008c1ae0"
+    }
+   ],
+   "complete": true,
+   "unresolved": []
+  },
+  "GridEntityRock": {
+   "size": 404,
+   "fields": [
+    {
+     "name": "Anim",
+     "offset": 340,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008c14a0",
+     "setter": "0x008c1510"
+    },
+    {
+     "name": "RubbleAnim",
+     "offset": 364,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008c14a0",
+     "setter": "0x008c1510"
+    },
+    {
+     "name": "FrameCnt",
+     "offset": 400,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c1620",
+     "setter": "0x008c1680"
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "Anim",
+    "RubbleAnim"
+   ]
+  },
+  "GridEntitySpikes": {
+   "size": 344,
+   "fields": [
+    {
+     "name": "Timeout",
+     "offset": 340,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c1b70",
+     "setter": "0x008c1bd0"
+    }
+   ],
+   "complete": true,
+   "unresolved": []
+  },
+  "GridEntityTNT": {
+   "size": 344,
+   "fields": [
+    {
+     "name": "FrameCnt",
+     "offset": 340,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c16e0",
+     "setter": "0x008c1740"
+    }
+   ],
+   "complete": true,
+   "unresolved": []
+  },
+  "Item": {
+   "size": 204,
+   "fields": [
+    {
+     "name": "Type",
+     "offset": 0,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bccf0",
+     "setter": "0x008bcd50"
+    },
+    {
+     "name": "ID",
+     "offset": 4,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bccf0",
+     "setter": "0x008bcd50"
+    },
+    {
+     "name": "Name",
+     "offset": 8,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008bcdb0",
+     "setter": "0x008bce20"
+    },
+    {
+     "name": "Description",
+     "offset": 32,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008bcdb0",
+     "setter": "0x008bce20"
+    },
+    {
+     "name": "GfxFileName",
+     "offset": 56,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008bcdb0",
+     "setter": "0x008bce20"
+    },
+    {
+     "name": "AchievementID",
+     "offset": 80,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bccf0",
+     "setter": "0x008bcd50"
+    },
+    {
+     "name": "CacheFlags",
+     "offset": 84,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bcf30",
+     "setter": "0x008bcd50"
+    },
+    {
+     "name": "AddMaxHearts",
+     "offset": 88,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bccf0",
+     "setter": "0x008bcd50"
+    },
+    {
+     "name": "AddHearts",
+     "offset": 92,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bccf0",
+     "setter": "0x008bcd50"
+    },
+    {
+     "name": "AddSoulHearts",
+     "offset": 96,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bccf0",
+     "setter": "0x008bcd50"
+    },
+    {
+     "name": "AddBlackHearts",
+     "offset": 100,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bccf0",
+     "setter": "0x008bcd50"
+    },
+    {
+     "name": "AddBombs",
+     "offset": 104,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bccf0",
+     "setter": "0x008bcd50"
+    },
+    {
+     "name": "AddKeys",
+     "offset": 108,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bccf0",
+     "setter": "0x008bcd50"
+    },
+    {
+     "name": "AddCoins",
+     "offset": 112,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bccf0",
+     "setter": "0x008bcd50"
+    },
+    {
+     "name": "MaxCharges",
+     "offset": 116,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bccf0",
+     "setter": "0x008bcd50"
+    },
+    {
+     "name": "MaxCooldown",
+     "offset": 120,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bccf0",
+     "setter": "0x008bcd50"
+    },
+    {
+     "name": "DevilPrice",
+     "offset": 124,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bd070",
+     "setter": "0x008bd0d0"
+    },
+    {
+     "name": "ShopPrice",
+     "offset": 126,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bd070",
+     "setter": "0x008bd0d0"
+    },
+    {
+     "name": "Costume",
+     "offset": 128,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089e3b0",
+     "setter": null
+    },
+    {
+     "name": "ChargeType",
+     "offset": 172,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bd130",
+     "setter": "0x008bcd50"
+    },
+    {
+     "name": "Special",
+     "offset": 176,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008bcf90",
+     "setter": "0x008bd000"
+    },
+    {
+     "name": "PassiveCache",
+     "offset": 177,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008bcf90",
+     "setter": "0x008bd000"
+    },
+    {
+     "name": "AddCostumeOnPickup",
+     "offset": 178,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008bcf90",
+     "setter": "0x008bd000"
+    },
+    {
+     "name": "Hidden",
+     "offset": 179,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008bcf90",
+     "setter": "0x008bd000"
+    },
+    {
+     "name": "PersistentEffect",
+     "offset": 180,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008bcf90",
+     "setter": "0x008bd000"
+    },
+    {
+     "name": "ClearEffectsOnRemove",
+     "offset": 181,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008bcf90",
+     "setter": "0x008bd000"
+    },
+    {
+     "name": "Tags",
+     "offset": 184,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008bd190",
+     "setter": "0x008bd1f0"
+    },
+    {
+     "name": "Quality",
+     "offset": 192,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bccf0",
+     "setter": "0x008bcd50"
+    },
+    {
+     "name": "CraftingQuality",
+     "offset": 196,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bccf0",
+     "setter": "0x008bcd50"
+    },
+    {
+     "name": "InitCharge",
+     "offset": 200,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bccf0",
+     "setter": "0x008bcd50"
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "Description",
+    "GfxFileName",
+    "Name",
+    "Tags"
+   ]
+  },
+  "ItemConfigList": {
+   "size": 0,
+   "fields": [
+    {
+     "name": "Size",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c3570",
+     "setter": null
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "Size"
+   ]
+  },
+  "KColor": {
+   "size": 16,
+   "fields": [
+    {
+     "name": "Red",
+     "offset": 0,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bb420",
+     "setter": "0x008bb480"
+    },
+    {
+     "name": "Green",
+     "offset": 4,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bb420",
+     "setter": "0x008bb480"
+    },
+    {
+     "name": "Blue",
+     "offset": 8,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bb420",
+     "setter": "0x008bb480"
+    },
+    {
+     "name": "Alpha",
+     "offset": 12,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bb420",
+     "setter": "0x008bb480"
+    }
+   ],
+   "complete": true,
+   "unresolved": []
+  },
+  "Level": {
+   "size": 99128,
+   "fields": [
+    {
+     "name": "LeaveDoor",
+     "offset": 99096,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x00899710",
+     "setter": "0x008994f0"
+    },
+    {
+     "name": "EnterDoor",
+     "offset": 99100,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x00899710",
+     "setter": "0x008994f0"
+    },
+    {
+     "name": "DungeonReturnRoomIndex",
+     "offset": 99112,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x00899710",
+     "setter": "0x008994f0"
+    },
+    {
+     "name": "GreedModeWave",
+     "offset": 99124,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x00899560",
+     "setter": "0x008994f0"
+    },
+    {
+     "name": "DungeonReturnPosition",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x00899670",
+     "setter": "0x008995c0"
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "DungeonReturnPosition"
+   ]
+  },
+  "PillConfigList": {
+   "size": 0,
+   "fields": [
+    {
+     "name": "Size",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c35d0",
+     "setter": null
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "Size"
+   ]
+  },
+  "PillEffect": {
+   "size": 81,
+   "fields": [
+    {
+     "name": "ID",
+     "offset": 0,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bc850",
+     "setter": "0x008bc8b0"
+    },
+    {
+     "name": "AchievementID",
+     "offset": 4,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bc850",
+     "setter": "0x008bc8b0"
+    },
+    {
+     "name": "Name",
+     "offset": 8,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008bc910",
+     "setter": "0x008bc980"
+    },
+    {
+     "name": "GreedModeAllowed",
+     "offset": 56,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008bca90",
+     "setter": "0x008bcaf0"
+    },
+    {
+     "name": "AnnouncerVoice",
+     "offset": 60,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bcb60",
+     "setter": "0x008bc8b0"
+    },
+    {
+     "name": "AnnouncerVoiceSuper",
+     "offset": 64,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bcb60",
+     "setter": "0x008bc8b0"
+    },
+    {
+     "name": "AnnouncerDelay",
+     "offset": 68,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bc850",
+     "setter": "0x008bc8b0"
+    },
+    {
+     "name": "MimicCharge",
+     "offset": 72,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bc850",
+     "setter": "0x008bc8b0"
+    },
+    {
+     "name": "EffectClass",
+     "offset": 76,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008bcbc0",
+     "setter": "0x008bcc50"
+    },
+    {
+     "name": "EffectSubClass",
+     "offset": 77,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008bcbc0",
+     "setter": "0x008bcc50"
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "Name"
+   ]
+  },
+  "PosVel": {
+   "size": 12,
+   "fields": [
+    {
+     "name": "Position",
+     "offset": 0,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008bde40",
+     "setter": "0x008bdee0"
+    },
+    {
+     "name": "Velocity",
+     "offset": 8,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008bde40",
+     "setter": "0x008bdee0"
+    }
+   ],
+   "complete": true,
+   "unresolved": []
+  },
+  "ProjectileParams": {
+   "size": 152,
+   "fields": [
+    {
+     "name": "GridCollision",
+     "offset": 0,
+     "offset_source": "upvalue",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008bbdb0",
+     "setter": "0x008bbe10"
+    },
+    {
+     "name": "HeightModifier",
+     "offset": 4,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bbe80",
+     "setter": "0x008bbee0"
+    },
+    {
+     "name": "FallingSpeedModifier",
+     "offset": 8,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bbe80",
+     "setter": "0x008bbee0"
+    },
+    {
+     "name": "FallingAccelModifier",
+     "offset": 12,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bbe80",
+     "setter": "0x008bbee0"
+    },
+    {
+     "name": "VelocityMulti",
+     "offset": 16,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bbe80",
+     "setter": "0x008bbee0"
+    },
+    {
+     "name": "Scale",
+     "offset": 20,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bbe80",
+     "setter": "0x008bbee0"
+    },
+    {
+     "name": "CircleAngle",
+     "offset": 24,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bbe80",
+     "setter": "0x008bbee0"
+    },
+    {
+     "name": "HomingStrength",
+     "offset": 28,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bbe80",
+     "setter": "0x008bbee0"
+    },
+    {
+     "name": "CurvingStrength",
+     "offset": 32,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bbe80",
+     "setter": "0x008bbee0"
+    },
+    {
+     "name": "Acceleration",
+     "offset": 36,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bbe80",
+     "setter": "0x008bbee0"
+    },
+    {
+     "name": "Spread",
+     "offset": 40,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bbe80",
+     "setter": "0x008bbee0"
+    },
+    {
+     "name": "Color",
+     "offset": 44,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008bbf50",
+     "setter": "0x008bbfb0"
+    },
+    {
+     "name": "BulletFlags",
+     "offset": 88,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008bc070",
+     "setter": "0x008bc0d0"
+    },
+    {
+     "name": "PositionOffset",
+     "offset": 96,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008bc130",
+     "setter": "0x008bc1d0"
+    },
+    {
+     "name": "TargetPosition",
+     "offset": 104,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008bc130",
+     "setter": "0x008bc1d0"
+    },
+    {
+     "name": "FireDirectionLimit",
+     "offset": 112,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008bc130",
+     "setter": "0x008bc1d0"
+    },
+    {
+     "name": "DotProductLimit",
+     "offset": 120,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bbe80",
+     "setter": "0x008bbee0"
+    },
+    {
+     "name": "WiggleFrameOffset",
+     "offset": 124,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bc270",
+     "setter": "0x008bc2d0"
+    },
+    {
+     "name": "ChangeFlags",
+     "offset": 128,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008bc070",
+     "setter": "0x008bc0d0"
+    },
+    {
+     "name": "ChangeVelocity",
+     "offset": 136,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bbe80",
+     "setter": "0x008bbee0"
+    },
+    {
+     "name": "ChangeTimeout",
+     "offset": 140,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bc270",
+     "setter": "0x008bc2d0"
+    },
+    {
+     "name": "DepthOffset",
+     "offset": 144,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bbe80",
+     "setter": "0x008bbee0"
+    },
+    {
+     "name": "Variant",
+     "offset": 148,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bc270",
+     "setter": "0x008bc2d0"
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "BulletFlags",
+    "ChangeFlags",
+    "Color"
+   ]
+  },
+  "QueueItemData": {
+   "size": 9,
+   "fields": [
+    {
+     "name": "Item",
+     "offset": 0,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008bda60",
+     "setter": "0x008bdb00"
+    },
+    {
+     "name": "Charge",
+     "offset": 4,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bdb90",
+     "setter": "0x008bdbf0"
+    },
+    {
+     "name": "Touched",
+     "offset": 8,
+     "offset_source": "accessor",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x0089e220",
+     "setter": "0x0089e1b0"
+    }
+   ],
+   "complete": true,
+   "unresolved": []
+  },
+  "Room": {
+   "size": 92,
+   "fields": [
+    {
+     "name": "StageID",
+     "offset": 0,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c20d0",
+     "setter": null
+    },
+    {
+     "name": "Mode",
+     "offset": 4,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008c2190",
+     "setter": null
+    },
+    {
+     "name": "Type",
+     "offset": 8,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c20d0",
+     "setter": null
+    },
+    {
+     "name": "Variant",
+     "offset": 12,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c2130",
+     "setter": null
+    },
+    {
+     "name": "Subtype",
+     "offset": 16,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c2130",
+     "setter": null
+    },
+    {
+     "name": "Name",
+     "offset": 20,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008c2220",
+     "setter": null
+    },
+    {
+     "name": "Difficulty",
+     "offset": 44,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c20d0",
+     "setter": null
+    },
+    {
+     "name": "InitialWeight",
+     "offset": 48,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008c2290",
+     "setter": null
+    },
+    {
+     "name": "Weight",
+     "offset": 52,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008c2290",
+     "setter": null
+    },
+    {
+     "name": "Doors",
+     "offset": 56,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008999e0",
+     "setter": null
+    },
+    {
+     "name": "SpawnCount",
+     "offset": 68,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008c22f0",
+     "setter": null
+    },
+    {
+     "name": "Width",
+     "offset": 70,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c2350",
+     "setter": null
+    },
+    {
+     "name": "Height",
+     "offset": 71,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c2350",
+     "setter": null
+    },
+    {
+     "name": "Shape",
+     "offset": 72,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c20d0",
+     "setter": null
+    },
+    {
+     "name": "OriginalVariant",
+     "offset": 88,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c2130",
+     "setter": null
+    },
+    {
+     "name": "Spawns",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x00899930",
+     "setter": null
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "Name",
+    "SpawnCount",
+    "Spawns"
+   ]
+  },
+  "RoomConfigEntries": {
+   "size": 4,
+   "fields": [
+    {
+     "name": "Size",
+     "offset": 0,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c33f0",
+     "setter": null
+    }
+   ],
+   "complete": true,
+   "unresolved": []
+  },
+  "RoomConfigSpawns": {
+   "size": 4,
+   "fields": [
+    {
+     "name": "Size",
+     "offset": 0,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c3390",
+     "setter": null
+    }
+   ],
+   "complete": true,
+   "unresolved": []
+  },
+  "RoomDescriptor": {
+   "size": 180,
+   "fields": [
+    {
+     "name": "GridIndex",
+     "offset": 0,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c23b0",
+     "setter": "0x008c2410"
+    },
+    {
+     "name": "Size",
+     "offset": 0,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c3330",
+     "setter": null
+    },
+    {
+     "name": "SafeGridIndex",
+     "offset": 4,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c23b0",
+     "setter": "0x008c2410"
+    },
+    {
+     "name": "ListIndex",
+     "offset": 8,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c23b0",
+     "setter": "0x008c2410"
+    },
+    {
+     "name": "Data",
+     "offset": 16,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008c2470",
+     "setter": "0x008c2510"
+    },
+    {
+     "name": "OverrideData",
+     "offset": 20,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008c2470",
+     "setter": "0x008c2510"
+    },
+    {
+     "name": "AllowedDoors",
+     "offset": 24,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008c25a0",
+     "setter": "0x008c2630"
+    },
+    {
+     "name": "DisplayFlags",
+     "offset": 60,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c26d0",
+     "setter": "0x008c2410"
+    },
+    {
+     "name": "VisitedCount",
+     "offset": 64,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c26d0",
+     "setter": "0x008c2410"
+    },
+    {
+     "name": "ChallengeDone",
+     "offset": 68,
+     "offset_source": "accessor",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008998c0",
+     "setter": "0x00899850"
+    },
+    {
+     "name": "Clear",
+     "offset": 68,
+     "offset_source": "accessor",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008998c0",
+     "setter": "0x00899850"
+    },
+    {
+     "name": "Flags",
+     "offset": 68,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c26d0",
+     "setter": "0x008c2410"
+    },
+    {
+     "name": "HasWater",
+     "offset": 68,
+     "offset_source": "accessor",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008998c0",
+     "setter": "0x00899850"
+    },
+    {
+     "name": "NoReward",
+     "offset": 68,
+     "offset_source": "accessor",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008998c0",
+     "setter": "0x00899850"
+    },
+    {
+     "name": "PressurePlatesTriggered",
+     "offset": 68,
+     "offset_source": "accessor",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008998c0",
+     "setter": "0x00899850"
+    },
+    {
+     "name": "SacrificeDone",
+     "offset": 68,
+     "offset_source": "accessor",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008998c0",
+     "setter": "0x00899850"
+    },
+    {
+     "name": "SurpriseMiniboss",
+     "offset": 68,
+     "offset_source": "accessor",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x008998c0",
+     "setter": "0x00899850"
+    },
+    {
+     "name": "ClearCount",
+     "offset": 74,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008c2730",
+     "setter": "0x008c2790"
+    },
+    {
+     "name": "PoopCount",
+     "offset": 80,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c27f0",
+     "setter": "0x008c2790"
+    },
+    {
+     "name": "PitsCount",
+     "offset": 84,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c23b0",
+     "setter": "0x008c2410"
+    },
+    {
+     "name": "DecorationSeed",
+     "offset": 88,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c26d0",
+     "setter": "0x008c2410"
+    },
+    {
+     "name": "SpawnSeed",
+     "offset": 92,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c26d0",
+     "setter": "0x008c2410"
+    },
+    {
+     "name": "AwardSeed",
+     "offset": 96,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c26d0",
+     "setter": "0x008c2410"
+    },
+    {
+     "name": "ShopItemIdx",
+     "offset": 172,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c27f0",
+     "setter": "0x008c2790"
+    },
+    {
+     "name": "ShopItemDiscountIdx",
+     "offset": 174,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c27f0",
+     "setter": "0x008c2790"
+    },
+    {
+     "name": "DeliriumDistance",
+     "offset": 176,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c23b0",
+     "setter": "0x008c2410"
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "ClearCount"
+   ]
+  },
+  "Spawn": {
+   "size": 16,
+   "fields": [
+    {
+     "name": "X",
+     "offset": 0,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c1e80",
+     "setter": "0x008c1ee0"
+    },
+    {
+     "name": "Y",
+     "offset": 2,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c1e80",
+     "setter": "0x008c1ee0"
+    },
+    {
+     "name": "EntryCount",
+     "offset": 8,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c1f40",
+     "setter": "0x008c1fa0"
+    },
+    {
+     "name": "SumWeights",
+     "offset": 12,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008c2000",
+     "setter": "0x008c2060"
+    },
+    {
+     "name": "Entries",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x00899a50",
+     "setter": null
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "Entries"
+   ]
+  },
+  "Sprite": {
+   "size": 264,
+   "fields": [
+    {
+     "name": "Offset",
+     "offset": 148,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089e970",
+     "setter": "0x0089e8e0"
+    },
+    {
+     "name": "Scale",
+     "offset": 156,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089e970",
+     "setter": "0x0089e8e0"
+    },
+    {
+     "name": "Rotation",
+     "offset": 164,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089e870",
+     "setter": "0x0089e7e0"
+    },
+    {
+     "name": "Color",
+     "offset": 168,
+     "offset_source": "accessor",
+     "type": "object",
+     "size": 4,
+     "getter": "0x0089e740",
+     "setter": "0x0089e6b0"
+    },
+    {
+     "name": "FlipX",
+     "offset": 256,
+     "offset_source": "accessor",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x0089e5a0",
+     "setter": "0x0089e530"
+    },
+    {
+     "name": "FlipY",
+     "offset": 257,
+     "offset_source": "accessor",
+     "type": "bool",
+     "size": 1,
+     "getter": "0x0089e5a0",
+     "setter": "0x0089e530"
+    },
+    {
+     "name": "PlaybackSpeed",
+     "offset": 260,
+     "offset_source": "accessor",
+     "type": "float",
+     "size": 4,
+     "getter": "0x0089e870",
+     "setter": "0x0089e7e0"
+    }
+   ],
+   "complete": true,
+   "unresolved": []
+  },
+  "TearParams": {
+   "size": 84,
+   "fields": [
+    {
+     "name": "TearVariant",
+     "offset": 0,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bd690",
+     "setter": "0x008bd6f0"
+    },
+    {
+     "name": "BombVariant",
+     "offset": 4,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bd690",
+     "setter": "0x008bd6f0"
+    },
+    {
+     "name": "TearColor",
+     "offset": 8,
+     "offset_source": "upvalue",
+     "type": "unknown",
+     "size": null,
+     "getter": "0x008bd750",
+     "setter": "0x008bd7b0"
+    },
+    {
+     "name": "TearFlags",
+     "offset": 56,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008bd870",
+     "setter": "0x008bd900"
+    },
+    {
+     "name": "TearDamage",
+     "offset": 72,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bd990",
+     "setter": "0x008bd9f0"
+    },
+    {
+     "name": "TearScale",
+     "offset": 76,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bd990",
+     "setter": "0x008bd9f0"
+    },
+    {
+     "name": "TearHeight",
+     "offset": 80,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bd990",
+     "setter": "0x008bd9f0"
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "TearColor"
+   ]
+  },
+  "TemporaryEffect": {
+   "size": 12,
+   "fields": [
+    {
+     "name": "Item",
+     "offset": 0,
+     "offset_source": "upvalue",
+     "type": "object",
+     "size": 4,
+     "getter": "0x008bdc50",
+     "setter": "0x008bdcf0"
+    },
+    {
+     "name": "Count",
+     "offset": 4,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bdd80",
+     "setter": "0x008bdde0"
+    },
+    {
+     "name": "Cooldown",
+     "offset": 8,
+     "offset_source": "upvalue",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008bdd80",
+     "setter": "0x008bdde0"
+    }
+   ],
+   "complete": true,
+   "unresolved": []
+  },
+  "Vector": {
+   "size": 8,
+   "fields": [
+    {
+     "name": "X",
+     "offset": 0,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bb2e0",
+     "setter": "0x008bb340"
+    },
+    {
+     "name": "Y",
+     "offset": 4,
+     "offset_source": "upvalue",
+     "type": "float",
+     "size": 4,
+     "getter": "0x008bb2e0",
+     "setter": "0x008bb340"
+    }
+   ],
+   "complete": true,
+   "unresolved": []
+  },
+  "VectorList": {
+   "size": 0,
+   "fields": [
+    {
+     "name": "Size",
+     "offset": null,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c34b0",
+     "setter": null
+    }
+   ],
+   "complete": false,
+   "unresolved": [
+    "Size"
+   ]
+  },
+  "intValues": {
+   "size": 4,
+   "fields": [
+    {
+     "name": "Size",
+     "offset": 0,
+     "offset_source": "accessor",
+     "type": "int",
+     "size": 4,
+     "getter": "0x008c32d0",
+     "setter": null
+    }
+   ],
+   "complete": true,
+   "unresolved": []
+  }
+ },
+ "incomplete": [
+  "BitSet128",
+  "Card",
+  "CardConfigList",
+  "Costume",
+  "CostumeConfigList",
+  "EffectList",
+  "Entity",
+  "EntityBomb",
+  "EntityKnife",
+  "EntityLaser",
+  "EntityNPC",
+  "EntityPlayer",
+  "EntityProjectile",
+  "EntityRef",
+  "EntityTear",
+  "Entry",
+  "Game",
+  "GridEntity",
+  "GridEntityDoor",
+  "GridEntityPoop",
+  "GridEntityRock",
+  "Item",
+  "ItemConfigList",
+  "Level",
+  "PillConfigList",
+  "PillEffect",
+  "ProjectileParams",
+  "Room",
+  "RoomDescriptor",
+  "Spawn",
+  "TearParams",
+  "VectorList"
+ ]
+}
