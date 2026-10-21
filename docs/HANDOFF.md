@@ -36,12 +36,11 @@ clean-room project cannot be built on a tampered artifact.
 | PNG decoding | from an in-memory buffer, via libpng |
 | Headless binary | reads an archive, decodes, counts draws, exits |
 | Windowed binary | SDL2 window; the renderer **counts calls and draws nothing** |
-| Native binding surface | **441 bodies located and decompiled; 69 named; 0 implemented** |
+| Native binding surface | **911 bodies located, all named; 441 decompiled; 0 implemented** |
 
-The last row is the whole ballgame. The binding surface is the per-frame cost
-centre — `repentogxm` measures its own port and concludes that below 60 FPS the
-cost is *translated code, draws, and Lua* — so until those 441 bodies are
-implemented there is nothing to render. See §13, §14 and §15.
+The last row is the whole ballgame. The binding surface is the per-frame cost centre — `repentogxm` measures its own port and concludes that below 60 FPS the
+cost is *translated code, draws, and Lua* — so until those bodies are
+implemented there is nothing to render. See §13, §14, §15 and §16.
 
 ---
 
@@ -499,6 +498,14 @@ architectures.
 
 ## 13. Method-binding recovery (supersedes the earlier 92)
 
+> **The names in this section are retracted.** They come from a *backwards* scan
+> from the `lua_pushcclosure` call, and the Lua compiler pushes the closure
+> before the name, so the scan lands on the previous registration's literal:
+> 451 of the 524 names here are wrong, and the 441-body figure is not a count
+> of closure bodies at all. See §16 and
+> closure bodies at all. See §16 and
+> `docs/binding-surface-findings.md` §15.
+
 The earlier claim of 92 confirmed bindings was **wrong** and was retracted. The
 correct anchor is the `lua_pushcclosure` call site, not the method name.
 
@@ -527,7 +534,7 @@ instruction-level disassembly are in
 
 ```
 441 / 441 decompiled, 0 failures, ~1.4 s each (kuna standalone)
-434 / 441 begin with a lua_type argument guard
+434 / 441 begin with a lua_type argument guard   <- not reproduced, see §16
 375 / 441 read the bound object through the single constant 0xfff0b9d7
  64       dispatch through vtable slot 0 (60 getters, 4 setters)
  90       construct an 8-byte userdata of { type tag, payload }
@@ -563,7 +570,10 @@ disassembly and reconstruction in `docs/binding-surface-findings.md` §14.6.
 
 ## 15. Next steps, in order
 
-1. Resolve what `0xfff0b9d7` means (see above). Highest leverage.
+0. ~~Resolve what `0xfff0b9d7` means~~ — **done**, see §14 above.
+1. Attach a **class** to each of the 911 named bodies. The name is known; the
+   owning class is not. This is the remaining half of
+   [#4](https://github.com/caos-obliquo/tboi-recomp/issues/4).
 2. Fix CI: `CMakeLists.txt:50` `pkg_check_modules(libpng16)` is a hard
    requirement and no runner has it, so every build job dies in Configure.
    Root cause is a missing dependency, not the runner labels — those are fixed.
@@ -572,3 +582,36 @@ disassembly and reconstruction in `docs/binding-surface-findings.md` §14.6.
    the `runtime_<subsystem>` pattern in `docs/reimplementation-references.md`.
 4. Instrument which Lua methods the game actually calls during boot, and
    implement in that measured order rather than address order.
+
+## 16. Property names are recovered; the earlier names were off by one
+
+`tools/probe_property_names.py` scans **forward** from every `lua_pushcclosure`
+call and recovers the name each closure is registered under, because the Lua
+compiler pushes the closure first and the name afterwards
+(`pushstring` → `rotate` → `rawset`). Full mechanism, hand-checked
+disassembly and the retractions are in
+`docs/binding-surface-findings.md` §15.
+
+```
+1064 lua_pushcclosure call sites
+2010 registration records (one per caller for multi-caller helpers)
+2010 records with a name  ->  0 call sites without a name
+1289 distinct names (1275 property-style + 14 metamethod names)
+ 911 distinct closure bodies, all 911 named
+```
+
+What this retires:
+
+- The 524 names `probe_closures.py` produced by walking backwards. **73 agree
+  with the forward scan, 451 differ** — the backward scan lands on the
+  previous registration's literal, usually a class-name lookup key.
+- The "441 bodies" figure. 441 is the number of bodies the backward scan could
+  *reach* (63 + 417 + 20). There are **911** distinct closure bodies over all
+  1064 call sites; the 441-body seed file covers 48% of them and **470 bodies
+  have never been decompiled**.
+- The "63 one-to-one bindings are type constructors" claim. 45 of them are the
+  class's `__gc` closure; the rest are ordinary methods.
+
+What this does not deliver: no body is implemented, and no body is attached to
+a class. Naming is one of the four states tracked in the `README.md` progress
+table, and it is the only one that moved.

@@ -446,6 +446,13 @@ are properties of several types sharing one name, so they are expected.
 
 ### The 63 one-to-one bindings are type constructors, not methods
 
+> **Retracted — see [§15.9](#15-property-names-are-recovered--and-the-earlier-names-were-off-by-one).
+> The class names in this subsection are class-name *lookup keys*, not closure
+> names: `probe_closures.py` reached them by walking backwards from the
+> `lua_pushcclosure` call and landed on the previous registration's literal.
+> 45 of the bodies labelled with a class name are in fact that class's `__gc`
+> closure; the rest are ordinary methods.
+
 Every one is a class or type name whose body is a small constructor in the band
 `0x008c2c10`–`0x008c3250`: `Entity` -> `0x008c2fb0`, `Color` -> `0x008c3210`,
 `Font` -> `0x008c3230`, `Game` -> `0x008c2c10`, `HUD` -> `0x008c2c30`,
@@ -556,6 +563,13 @@ falls into a known shape — 441 of 441 classified, no residual bucket:
 `lua_type` appears in **434 of 441** bodies — almost every accessor opens with an
 argument type check. That is the dispatch guard, and it is why the bindings are
 safe to call from untyped Lua.
+
+> **Not reproduced at instruction level.** The two constant counts in the next
+> sentence reproduce exactly (375 and 90), but no candidate definition of the
+> type-guard count reaches 434: calling `lua_type` gives 386, having `lua_type`
+> as the first Lua call gives 379, and either gives 392. The definition behind
+> 434 is not written down, so the number is neither confirmed nor retracted
+> here — see [§15.10](#1510-one-documented-number-that-could-not-be-reproduced).
 
 Two constants dominate: `0xfff0b9d7` in 375 bodies, `0xfff0b9d8` in 90 bodies,
 with `lua_rawgetp` in those same 90. They are a constant family, not noise.
@@ -794,3 +808,252 @@ rendered but semantically suspicious. That suspicion was worth checking and the
 check came back clean: the IAT slot really is `lua_touserdata`, and the constant
 really is in the instruction stream. kuna did not invent either. The remaining
 question is the semantics of the constant, not the fidelity of the decompiler.
+
+---
+
+## 15. Property names are recovered — and the earlier names were off by one
+
+§13 named 524 registrations by walking **backwards** from each
+`lua_pushcclosure` call. That method is structurally incapable of finding a
+property name, because the compiler pushes the name *after* the closure. This
+section gives the mechanism that replaces it, the new census, and the two
+retractions that follow from it.
+
+Tool: `tools/probe_property_names.py` (see `tools/README.md`). Every number
+below is its output; the command is in `tools/README.md`.
+
+### 15.1 The registration order, at the instruction level
+
+The Lua 5.1 compiler emits a property registration like this:
+
+```
+    push   0x1              ; nupvalues
+    push   <body>           ; the closure
+    push   L
+    call   lua_pushcclosure ; the closure now exists on the stack
+    push   <name literal>   ; the name arrives AFTER the closure
+    push   L
+    call   lua_pushstring
+    push   0x1
+    push   0xfffffffe
+    push   L
+    call   lua_rotate       ; swap, so the name sits below the value
+    push   <table>
+    push   L
+    call   lua_rawset       ; t[name] = closure
+```
+
+`lua_rawset(L, t)` takes the **key** from the second-from-top slot and the
+**value** from the top, so the compiler emits `pushstring`/`rotate`/`rawset` to
+put the name underneath the value it is about to store. The name literal is
+therefore pushed *after* the closure is created, and a backward scan from the
+`lua_pushcclosure` call can only see the **previous** registration's literal —
+usually a class-name lookup key consumed by `lua_rawget`, or the previous
+property's name.
+
+### 15.2 Two hand-checked examples
+
+Site `0x008a4d28`, body `0x008c2fb0` — the class-name case:
+
+| VA | instruction | meaning |
+|---|---|---|
+| `0x008a4cdb` | `push 0xb706b8` | `"Entity"` — a **class-name lookup key** |
+| `0x008a4ce3` | `call lua_pushstring` | pushed for the lookup |
+| `0x008a4ceb` | `call lua_rawget` | consumed here |
+| `0x008a4d15` | `push 0xb706b8` | pushed again |
+| `0x008a4d1a` | `call 0x0085d040` | consumed by the class-registration call |
+| `0x008a4d28` | `call lua_pushcclosure` | body `0x008c2fb0` is registered here |
+| `0x008a4d3c` | `push 0xb753b4` | `"__gc"` — the **real** name |
+| `0x008a4d44` | `call lua_pushstring` | |
+| `0x008a4d4f` | `call lua_rotate` | name below value |
+| `0x008a4d5d` | `mov ebx,DWORD PTR ds:0xb18408` | `lua_rawset` held in a register |
+| `0x008a4d60` | `call ebx` | `t["__gc"] = closure` |
+
+`probe_closures.py` reports the name at `0x008a4d28` as **"Entity"**. The
+closure is stored under **`__gc`**. The body `0x008c2fb0` is a destructor
+shape — a lookup, one virtual call, then `xor eax,eax; pop ebp; ret` — so
+`__gc` is the correct reading and "Entity" is not.
+
+Site `0x0087a18a`, body `0x008c3630` — the class-name-again case: the literal
+`0x00b6d1ac` (`"Size"`) is pushed at `0x0087a111` and `0x0087a141`, *before*
+the closure is created, and the closure is stored under `0x00b70f1c`
+(`"__len"`) by `pushstring` at `0x0087a1a9` → `rotate` at `0x0087a1b4` →
+`rawset` at `0x0087a1bf`. `probe_closures.py` reports **"Size"**.
+
+### 15.3 The rule that replaces the backward walk
+
+Scan **forward** from the `lua_pushcclosure` call and accept a `lua_pushstring`
+as *this* closure's name only when all of the following hold:
+
+1. a `lua_rotate` follows within 12 instructions, and a `lua_rawset` within 16
+   more. The `rawset` is frequently indirect — `mov ebx,DWORD PTR
+   ds:0xb18408` then `call ebx` — so the tool resolves register-held imports
+   rather than only direct `call DWORD PTR ds:<slot>` forms.
+2. no other `lua_pushcclosure` occurs in between. Without this rule the scan
+   steals the *next* closure's name.
+3. the string argument is a resolvable literal: pushed directly, passed as a
+   stack parameter of the enclosing helper (then the literal comes from the
+   helper's **caller**), or staged into a register by the caller.
+
+Rule 1 alone is not enough — it also matches a name pushed for a lookup — and
+rule 2 alone is not enough — it will happily attribute the next
+registration's name. Both are required, and the tool fails its self-test
+without them.
+
+### 15.4 Three name shapes
+
+| shape | how the literal is found | example |
+|---|---|---|
+| literal in the helper | `push 0x00b73d98` before `lua_pushstring` | `GetRandomTileIndex` |
+| stack parameter | `push DWORD PTR [ebp+0x8]`; the helper's **caller** pushes the literal | `GetType` — caller `0x0086c36d` pushes `0x00b7306c` |
+| register argument | `mov edx,0x00b74cb0` in the caller, `push edx` in the helper | `ResetPitch` — caller `0x0086dc6e` |
+
+The second shape is why one helper can register many properties: helper
+`0x00875230` takes the name and the upvalue as parameters, and each of its
+callers registers a different property. The tool emits one record per caller
+for such helpers, which is why 1064 call sites produce 2010 records.
+
+### 15.5 The upvalue, and why (name, upvalue) is the key
+
+`lua_pushcclosure(L, fn, 1)` pops one upvalue, stored immediately before the
+call as `mov DWORD PTR [eax],<src>`. The source is either a **code pointer** —
+the per-property implementation, e.g. `0x0040c3a0`, which disassembles to
+`mov eax,DWORD PTR [ecx]; ret`, a field reader — or an **integer field
+offset**, e.g. `0` for `Vector.X` and `4` for `Vector.Y`.
+
+One generic body serves several properties: `X` and `Y` both come from the
+registration helper `0x00886840`, distinguished only by the upvalue. The
+discriminating key is therefore **(name, upvalue)**, not the body.
+
+### 15.6 The new census
+
+```
+python -u tools/probe_property_names.py "<isaac-ng.exe>" \
+    --cache disasm.txt --json-out props.json
+```
+
+| quantity | value |
+|---|---:|
+| `lua_pushcclosure` call sites | 1064 |
+| registration records (one per caller for multi-caller helpers) | 2010 |
+| records with a name | 2010 |
+| call sites with no name | **0** |
+| distinct names | 1289 |
+| property-style names | 1885 records / 1275 distinct |
+| metamethod records | 125, over 14 distinct metamethod names |
+| distinct closure bodies | 911 |
+| distinct bodies that carry a name | **911** |
+| bodies serving more than one name | 323 |
+| records with an upvalue | 1870 / 1402 distinct |
+| distinct (name, upvalue) pairs | 1577 |
+
+Metamethod breakdown: `__gc` 98 records over 49 bodies, `__len` 11, `__call`
+3, `__tostring` 2, `__mul` 2, and one each of `__add`, `__sub`, `__div`,
+`__unm`, `__eq`, `__bnot`, `__band`, `__bor`, `__bxor`.
+
+Real Isaac API names are now attached to bodies, not just to classes:
+`Ref`, `X`, `Y`, `GetPlayer`, `FindInRadius`, `FindByType`, `CountEntities`,
+`ShowItemText`, `ShowFortuneText`, `GetType`, `ResetPitch`,
+`GetRandomTileIndex`, `GetGridEntityFromPos`, `TearFlags`, `Language`.
+
+### 15.7 Retraction: the backward names are off by one registration
+
+`probe_closures.py` named 524 sites; the forward scan names all 1064. Of the
+524 sites the two methods both name, **73 agree and 451 differ**:
+
+| | probe_closures (backward) | forward scan |
+|---|---:|---:|
+| sites with a name | 524 | 1064 |
+| sites without | 540 | **0** |
+| names in agreement | 73 | |
+| names in disagreement | **451** | |
+
+The 73 agreements are mostly luck: 49 of them are `__gc`, where the previous
+registration happened to be another `__gc`, and a handful are names that are
+genuinely registered twice in a row (`ToBomb`, `ToFamiliar`, `ToPlayer`,
+`ToPickup`, `ToPoop`, `Get`). The bulk of the 451 disagreements are the
+metatable-key labels: **all 209** sites that `probe_closures.py` labelled
+`__propget` are in fact real property names (**355 distinct**), and **all 173**
+sites it labelled `__propset` are real property names too (**305 distinct**).
+A further 10 were labelled `__len` and are not.
+
+### 15.8 Retraction: there are 911 closure bodies, not 441
+
+The "441" is not a count of closure bodies. It is the number of bodies
+`probe_closures.py` could *reach*: 63 "bound" + 417 metatable-key + 20
+shared-name. Its own categories are a partition of the same 441 the kuna seed
+file uses, which splits them 69 identifier-labelled / 372 generic — two
+different partitions of one set.
+
+Over all 1064 call sites there are **911 distinct bodies**, every one of them
+preceded by a terminator (verified: 911 of 911), and every one of them now
+carries a name. Consequences:
+
+- The 441-body seed file covers **48%** of the bodies; **470 bodies have never
+  been decompiled**.
+- Of the 372 seed bodies that were labelled generically, **368 now carry a real
+  property name** (524 distinct names across them) and 4 remain
+  metamethod-only.
+- Of the 69 seed bodies carrying a real identifier, **45 are `__gc` closures**
+  (the class's destructor) and the other 24 are genuine method names —
+  `Get`, `Language`, and 19 `To*` conversions. The document's claim that the
+  class-named bodies are *type constructors* is therefore wrong: see
+  §15.9.
+
+### 15.9 Retraction: the "63 type constructors" claim
+
+§13 stated that the 63 one-to-one name bindings are type constructors whose
+bodies build a type's metatable. They are not. They are the per-class `__gc`
+closures — destructors — for 45 of them, and ordinary methods for the rest.
+The example §13 gave, `Entity` → `0x008c2fb0`, is a `__gc` closure: the
+disassembly at that address performs a lookup, one virtual call and returns 0.
+
+The metatable-key bodies of §13 are the property accessors, and their
+per-property names are now known — which is what §13 and §14 could not
+distinguish.
+
+### 15.10 One documented number that could not be reproduced
+
+§14.3 states that `lua_type` appears in **434 of 441** bodies. The sibling
+numbers in the same paragraph reproduce exactly at instruction level over the
+same 441 seed addresses, measured with `tools/probe_body_signatures.py`:
+
+```
+tools/probe_body_signatures.py "<isaac-ng.exe>" --cache disasm.txt
+```
+
+| quantity (441 seed bodies) | §14.3 | measured | reproduced |
+|---|---:|---:|:--:|
+| bodies using `0xfff0b9d7` | 375 | 375 | yes |
+| bodies using `0xfff0b9d8` | 90 | 90 | yes |
+| bodies calling `lua_type` | — | 386 | — |
+| bodies whose first Lua call is `lua_type` | — | 379 | — |
+| bodies calling `lua_type` **or** using a pseudo-index | — | 392 | — |
+| bodies whose first Lua call is a type check | — | 391 | — |
+| bodies calling `lua_type` | 434 | 386 | **no** |
+
+No candidate definition reproduces 434. The figure is most likely a
+decompiler-level classification that this document does not define; the
+definition needs to be pinned before the number can be trusted or corrected.
+Recorded as an open question, not as a retraction.
+
+Over all 911 bodies the same measurement gives: `lua_type` called by 800,
+first Lua call is `lua_type` in 783, `0xfff0b9d7` in 825, `0xfff0b9d8` in 238,
+`luaL_check*` in 287.
+
+### 15.11 What this does not establish
+
+- **No body is implemented.** This is naming only. The 911 bodies are located
+  and named; 441 of them are decompiled; 0 of them run.
+- **Names are not per-class attribution.** The tool knows *which name* a
+  closure is registered under, not *which class* it belongs to. Attaching a
+  name to a class still requires the class-registration call to be resolved.
+- **A name is not a signature.** Knowing that `TearFlags` is registered under
+  the upvalue `0x38` says which field it touches; it does not say what it
+  returns.
+- **The 911 is a count of distinct closure bodies**, not of functions in the
+  binary, and not of Lua-visible methods. One body can be registered under
+  several names (323 do), and one name can be registered on many bodies.
+- **Nothing here is cross-checked against an independent source.** The names
+  are self-consistent and hand-verified, but they come from one binary; an
+  independent check against REPENTOGON's `libzhl` is still open.

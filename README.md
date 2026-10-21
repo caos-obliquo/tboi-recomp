@@ -237,12 +237,12 @@ established from the shipped DLL rather than assumed — see
 | Recovered 655-name surface registers and resolves | **done** (as stubs) |
 | Directory-backed data source | **done** |
 | Headless renderer (counts, draws nothing) | **done** |
-| **Closure bodies located** | **441 addresses** of 1064 call sites — accounting complete |
-| **Closure bodies decompiled** | **441 / 441**, 0 failures, classified into 11 shapes |
+| **Closure bodies located** | **911 distinct bodies** of 1064 call sites — accounting complete |
+| **Closure bodies decompiled** | **441 / 911**, 0 failures, classified into 11 shapes |
 | **Property-accessor ABI** | **recovered** — [§14](docs/binding-surface-findings.md) |
 | **Lua binding index space** | **patched Lua identified** — [§14.6](docs/binding-surface-findings.md) |
-| **Closure bodies named** | **69 / 441** — the other 372 are still anonymous |
-| **Closure bodies implemented** | **0 / 441** — all resolve to `not_implemented_trampoline` |
+| **Closure bodies named** | **911 / 911** — every closure body carries a name ([§15](docs/binding-surface-findings.md)) |
+| **Closure bodies implemented** | **0 / 911** — all resolve to `not_implemented_trampoline` |
 | **Packed archive (`ARCH000`) container** | **container solved**, codec open |
 | → `ARCH000` payload codec | **not started** — see [#2](https://github.com/caos-obliquo/tboi-recomp/issues/2) |
 | → `ARCH000` 64-bit name hash | **not started** — see [#1](https://github.com/caos-obliquo/tboi-recomp/issues/1) |
@@ -263,13 +263,21 @@ implementation**, and a decompiled body is not a named one.
 
 ## What "located" means, and what it does not
 
-The 441 addresses come from walking backwards from each of the 1064
+The **911** addresses come from walking forward from each of the 1064
 `lua_pushcclosure` call sites and reading the argument shape, which is fixed:
 `push <nupvalues>`, `push <fn>`, optional upvalue setup, `push L`, `call`. The
-accounting closes exactly — 524 named registrations, 539 closures whose name
-lives in another function, 1 call site with no body.
+accounting closes exactly — 911 distinct bodies over 1064 call sites, every one
+of them named.
 
-All 441 have since been decompiled, with kuna standalone at 1.4 s per body
+That last sentence is new, and the previous version of this file was wrong
+about it. The earlier count of **441** was not a count of bodies: it was the
+number of bodies an earlier probe could *reach*, because that probe walked
+**backwards** from the call site and so landed on the previous registration's
+literal — usually a class-name lookup key rather than the closure's own name.
+451 of its 524 names were wrong, and the difference is now written up, with the
+disproof, in [`docs/binding-surface-findings.md` §15](docs/binding-surface-findings.md).
+
+441 of the 911 have been decompiled, with kuna standalone at 1.4 s per body
 against Ghidra's 607 s on the same address. Every one falls into one of 11
 recognised shapes, and the property-accessor mechanism is now written out in
 full — including the instruction-level disassembly and the PE import directory
@@ -277,14 +285,16 @@ that back it. See [`docs/binding-surface-findings.md` §14](docs/binding-surface
 
 Three numbers are easy to read as more than they are:
 
-- The **63** one-to-one name bindings are *type constructors*, not methods.
-  `Entity`, `Color`, `Font`, `Game` and `HUD` each resolve to a small metatable
-  builder. Counting them as recovered methods would overstate the surface.
+- The **45** class-named bodies are that class's `__gc` closure — a
+  destructor — not a type constructor. Counting them as recovered methods
+  would overstate the surface.
 - The **417** metatable-key bodies are property accessors, so they map onto the
   *field* layer rather than the method layer.
-- The **372** anonymous bodies are real, correctly located functions that simply
-  do not yet have a property name attached. Naming them is
-  [#17](https://github.com/caos-obliquo/tboi-recomp/issues/17).
+- A **name** is not a **class**, and a name is not a **signature**. Every
+  closure now has a name, but which class owns it, and what it returns, are
+  separate questions that are still open
+  ([#4](https://github.com/caos-obliquo/tboi-recomp/issues/4),
+  [#3](https://github.com/caos-obliquo/tboi-recomp/issues/3)).
 
 The 655 figure this project has tracked since the beginning is a count of
 recovered *names*, and it was never shown to equal a count of *bodies*. It is

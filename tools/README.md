@@ -14,6 +14,8 @@ a binary **you** already own, from a path **you** pass in.
 | `probe_metatable_keys.py` | Locates the nine recovered metatable keys in `.rdata`. | yes |
 | `probe_xrefs.py` | Counts `.text` references to each metatable key address. | yes |
 | `probe_iat.py` | Walks the PE import directory, maps every IAT slot to its imported name, and finds each `call dword ptr [slot]` site. | yes |
+| `probe_property_names.py` | Recovers the name and upvalue of every Lua closure registration, by scanning forward from each `lua_pushcclosure` call site. | yes |
+| `probe_body_signatures.py` | Counts the Lua entry points and patched-Lua pseudo-indices each closure body touches. | yes |
 | `negctl-baseline.py` | Negative control for the test suite. Proves a green baseline can go red. | no |
 
 Current findings from these probes are written up in
@@ -91,6 +93,112 @@ This is the tool that removes the guesswork: `isaac-ng.exe` imports Lua from
 semantics. `lua_pushcclosure` (1064 call sites) is where a native method becomes
 a Lua closure; `lua_createtable` (8 call sites) is effectively one function that
 builds the metatables.
+
+## `probe_property_names.py`
+
+```sh
+tools/probe_property_names.py /path/to/isaac-ng.exe
+tools/probe_property_names.py /path/to/isaac-ng.exe --json-out props.json
+tools/probe_property_names.py /path/to/isaac-ng.exe --compare closures.json
+tools/probe_property_names.py /path/to/isaac-ng.exe --self-test
+```
+
+Recovers the **name** each Lua closure is registered under, by scanning
+*forward* from every `lua_pushcclosure` call site.
+
+The reason a forward scan is needed: the Lua 5.1 compiler pushes the closure
+first and the name afterwards —
+
+```
+call lua_pushcclosure   ; the closure exists
+push <name literal>
+call lua_pushstring
+call lua_rotate         ; swap: name below value
+call lua_rawset         ; t[name] = closure
+```
+
+— so `probe_closures.py`, which walks *backwards* from the call, can only see
+the previous registration's literal. `probe_property_names.py` therefore
+accepts a `lua_pushstring` as a site's name only when a `lua_rotate` follows
+within 12 instructions and a `lua_rawset` within 16 more (both resolved through
+register-held imports), and no other `lua_pushcclosure` intervenes.
+
+It also recovers the closure's **upvalue** — the per-property implementation
+staged as `mov DWORD PTR [eax],<src>` before the call — because one generic
+body serves several properties: `Vector.X` and `Vector.Y` come from the same
+registration helper and differ only by the upvalue. The discriminating key is
+`(name, upvalue)`, not the body.
+
+### What it establishes
+
+- A name for every `lua_pushcclosure` call site in the binary (1064 of 1064),
+  plus the metatable key when the name is a metamethod, plus the upvalue.
+- One record per *caller* for registration helpers that take the name as a
+  parameter, because such a helper registers a different property for each
+  caller.
+
+### What it does **not** establish
+
+- **Not a class attribution.** The tool says *which name* a closure is
+  registered under. It does not say *which class* owns it; that still needs the
+  class-registration call to be resolved.
+- **Not a signature.** The upvalue identifies the field a property touches, not
+  what the body returns.
+- **Not an implementation.** It reads the binary; it does not reimplement
+  anything.
+- **Not independent of the binary.** The names come from one binary and are
+  self-consistent; they have not been cross-checked against another source.
+- `--compare` against `probe_closures.json` is a **disagreement report**, not a
+  vote. The forward scan is the one with the mechanism behind it (§15 of
+  `docs/binding-surface-findings.md`); the backward scan cannot find a property
+  name at all.
+
+### Self-test
+
+`--self-test` runs positive and negative controls against known sites and
+exits non-zero if any of them fails: the `Ref` registration must resolve to
+name `Ref` with body `0x008a0600` and upvalue `0x0040c3a0`; the `X`/`Y`
+helper must resolve to two names over four records; the site at `0x008a4d28`
+must resolve to `__gc` and the one at `0x0087a18a` to `__len` — both of which
+the backward scan gets wrong.
+
+## `probe_body_signatures.py`
+
+```sh
+tools/probe_body_signatures.py /path/to/isaac-ng.exe --cache disasm.txt
+tools/probe_body_signatures.py /path/to/isaac-ng.exe \
+    --bodies props.json --json-out sigs.json
+```
+
+Counts, per closure body, which Lua entry points it calls and which patched-Lua
+pseudo-index it uses. This is the measurement behind the shape taxonomy in
+`docs/binding-surface-findings.md` §14.3, and the reproduction attempt for the
+`434/441` figure in §15.10.
+
+By default it measures the 441-body kuna seed file, which is the corpus the
+document's numbers were written against. With `--bodies` it measures the
+distinct bodies of a `probe_property_names.py` dump (911 of them).
+
+The extent rule matters and is easy to get wrong: a function ends where the
+**next** function starts — a `push ebp` whose predecessor is a terminator —
+not at the first `jmp`. A tail `jmp` is followed by more blocks of the same
+function, which are contiguous in `.text`; stopping there truncates the body
+and drops most pseudo-index uses (a run that did so reported 29 of 441 instead
+of 392).
+
+### What it establishes
+
+- Instruction-level counts: bodies calling `lua_type`, bodies whose first Lua
+  call is `lua_type`, bodies using `0xfff0b9d7` / `0xfff0b9d8`, bodies
+  calling `luaL_check*`.
+
+### What it does **not** establish
+
+- **Not a classification.** It counts entry points; it does not decide which
+  of the 11 shapes of §14.3 a body belongs to.
+- **Not a signature.** "Calls `lua_type`" is not "takes a userdata".
+- **Not an argument count.** The Lua-visible argument count needs the stack
+  index actually used, which is a separate measurement.
 
 ## `negctl-baseline.py`
 
