@@ -1457,3 +1457,118 @@ binary at all.
   `argc_measured: false` / `returns_measured: false` for them instead of
   inventing a zero.
 - **No body is implemented.** The census is a table. 0 of 911 bodies run.
+
+## 18. First implementation: the Vector class
+
+Everything up to here was a table. This section is the first part of the
+surface that actually runs.
+
+`Vector` is the natural first class: it is pure arithmetic, it has no
+dependencies on the game's state, and the game itself hands out Vector
+instances to Lua (they come out of `Entity.Position` and friends), so the
+binding only has to recognise them.
+
+### 18.1 What is implemented
+
+15 members of the `Vector` class, plus the five arithmetic metamethods:
+
+| Kind | Members |
+| --- | --- |
+| Methods (13) | `Cross`, `Distance`, `DistanceSquared`, `Dot`, `GetAngleDegrees`, `Length`, `LengthSquared`, `Lerp`, `Normalize`, `Normalized`, `Resize`, `Resized`, `Rotated` |
+| Properties (2) | `X` (get and set), `Y` (get and set) |
+| Metamethods (5) | `__add`, `__sub`, `__mul`, `__div`, `__unm` |
+
+Two members of the class are deliberately **not** implemented: `Clamp` and
+`Clamped`. Section 18.3 says why.
+
+The code is `include/isaec/api/vector.hpp` (the value type and the
+arithmetic), `src/api/vector.cpp` (the arithmetic), and
+`include/isaec/api/vector_lua.hpp` / `src/api/vector_lua.cpp` (the Lua face).
+`tests/test_vector.cpp` drives both halves: the arithmetic on its own, and
+the class from a script through a real `lua_State`.
+
+### 18.2 What came from the binary
+
+| Fact | Source |
+| --- | --- |
+| The member names of the class | the registration code, §15 and §16 |
+| The receiver is the first argument | the closures read index 1, §14 |
+| The visible arguments start at index 2 | the closures, §14 and §17 |
+| A method returns zero or one value | the return count census, §17 |
+| A method that returns a vector allocates a fresh userdata | `lua_newuserdata(L, 0x10)` in the bodies |
+| The userdata is 16 bytes with two floats at offset 0 | `lua_newuserdata(L, 0x10)` and the property upvalue (the field offset) |
+| `X` and `Y` are the same closure body with a different upvalue | the upvalue is the field offset: 0 for X, 4 for Y |
+| `Normalize` and `Resize` mutate the receiver and return nothing | the return count census: `returns = 0` |
+| The class has the five arithmetic metamethods | the metamethod names in the registration code |
+
+The nine closure bodies that these 15 members sit on are known by address:
+
+| Member(s) | Body |
+| --- | --- |
+| `Cross`, `Distance`, `DistanceSquared`, `Dot` | `0x008a8270` |
+| `GetAngleDegrees`, `Length`, `LengthSquared` | `0x008a8510` |
+| `Lerp` | `0x008a8310` |
+| `Normalize` | `0x008a8180` |
+| `Normalized` | `0x008a81d0` |
+| `Resize` | `0x008a8580` |
+| `Resized`, `Rotated` | `0x008a8430` |
+| `X`, `Y` getter | `0x008bb2e0` |
+| `X`, `Y` setter | `0x008bb340` |
+
+One body serves several members: the game reuses a single closure for
+`Cross`, `Distance`, `DistanceSquared` and `Dot`. The recomp implements the
+four separately, because in the original the shared body dispatches on the
+upvalue it was given.
+
+### 18.3 What did not come from the binary
+
+**The arithmetic is not in the binary.** The original's closures do not
+compute anything: they fetch the receiver, push the arguments and call the
+game's C++ `Vector` through a vtable pointer. What that C++ code does is
+outside the Lua surface, and it is not in the closure bodies either. The
+arithmetic in `vector.hpp` is the **documented Isaac API reimplemented from
+scratch** (`Vector:Cross` returns the z component of the 3D cross product,
+`Vector:Rotated` turns counter-clockwise, and so on). A discrepancy against
+the shipped build would show up in `vector.cpp` first.
+
+**Two members stay loud stubs.** The original's `Clamp` and `Clamped`
+closures read **four** numbers from the Lua stack, through the shared helper
+`0x8ba890` (verified in the disassembly: `luaL_checknumber` at indices 2, 3,
+4 and 5), while the public API documents two arguments (a minimum and a
+maximum). The argument count of the original is therefore not the one the
+documentation describes, and the *meaning* of four numbers is unknown. Rather
+than guess, `Clamp` and `Clamped` stay as `not_implemented_trampoline()` and
+raise `isaec: Vector:Clamp is not implemented`. This is tracked as issue
+[#37](https://github.com/caos-obliquo/tboi-recomp/issues/37).
+
+**`Vector.__tostring` is not implemented.** The original's `__tostring`
+closure formats the vector with the game's own text; the format string is not
+recoverable from the closure, so the recomp does not install a `__tostring`.
+
+**`Vector:Lerp`'s fourth argument is ignored.** The original's `Lerp` reads
+a fourth argument, a boolean, and passes it to the game's own vector
+routine. What it means is unknown, so the recomp reads three arguments and
+ignores a fourth if one is given. This is tracked as issue
+[#38](https://github.com/caos-obliquo/tboi-recomp/issues/38).
+
+**The receiver index differs.** The original reaches the receiver through a
+patched pseudo-index (`0xfff0b9d7`) rather than index 1. This port uses the
+standard index 1; the patched slot semantics are issue #12.
+
+### 18.4 The rest of the surface still refuses
+
+The implementation is installed *after* the generated spec is applied, and it
+replaces only the members it implements. Every other member of every other
+class still resolves to `not_implemented_trampoline()` and raises
+`isaec: <Class>:<Member> is not implemented` when a script touches it. A
+script that calls `Vector:Clamp` gets that error, not a wrong answer.
+
+### 18.5 The honest count
+
+- **15 of 1464** members of the recovered surface are implemented, all of
+  them in one class.
+- Those 15 members sit on **9 of the 911** closure bodies.
+- **0 of 911** bodies are *translated*: the implementations are
+  reimplementations of the public API, not ports of the original code. The
+  original's arithmetic is a C++ vtable call that this project does not
+  reproduce.

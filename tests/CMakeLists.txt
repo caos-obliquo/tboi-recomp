@@ -2,6 +2,7 @@ set(ISAEC_TEST_SRC
     test_main.cpp
     test_binding.cpp
     test_spec.cpp
+    test_vector.cpp
     test_codec.cpp
     test_archive.cpp
 )
