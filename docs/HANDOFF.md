@@ -765,3 +765,42 @@ Next steps, in order:
 4. the open issues: #28 (the definition behind the "434/441 lua_type
    guard"), #33 (the class hierarchy is not recoverable from the binary),
    #35 (the other 71 metamethods are not wired).
+
+## 21. The PosVel class is implemented (the first fully recovered class)
+
+`PosVel` is a position and a velocity, both Vectors, and it is the first
+class whose members are *entirely* recoverable from the binary: the property
+upvalues are the field offsets (0 for the position, 8 for the velocity) and
+the closure bodies move eight bytes -- two floats -- to and from them. The
+getter hands out a copy, the setter takes a Vector.
+
+What was added:
+
+* `include/isaec/api/posvel.hpp` -- the value type and the recovered offsets;
+* `include/isaec/api/posvel_lua.hpp`, `src/api/posvel_lua.cpp` -- the Lua
+  face: the two properties, which replace the stubs of the generated spec;
+* `tests/test_posvel.cpp` -- the offsets, the round trip, the write, the copy
+  semantics and the refusal of a value that is not a Vector.
+
+`PosVel` is the first class that uses the shared value-class dispatch
+(`include/isaec/api/lua_value.hpp`) instead of a private metatable, so a
+class that only adds members does not copy the Lua glue any more.
+
+The honest count: 24 of the 1464 registered members do something (Vector 15,
+Color 7, PosVel 2), they cover 13 of the 911 bodies, and still **0 of the 911
+bodies are translated**.
+
+Next steps, in order:
+
+1. the rest of the pure-data classes (`RNG`, the list classes, the config
+   lists) and the classes whose properties are plain fields
+   (`QueueItemData`, `TemporaryEffect`);
+2. the classes that need the game side (`Entity` and its subclasses, `Room`,
+   `Level`), which cannot be implemented before the engine has the state they
+   read;
+3. the #20 cross-check against REPENTOGON's libzhl;
+4. the open issues: #28 (the definition behind the "434/441 lua_type
+   guard"), #33 (the class hierarchy is not recoverable from the binary),
+   #35 (the other 71 metamethods are not wired), #37/#38 (the `Vector`
+   members whose shape does not match the public API), #40 (the `Color`
+   methods that call into C++ that is not in the binary).

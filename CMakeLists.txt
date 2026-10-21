@@ -128,6 +128,7 @@ add_library(isaec_lua STATIC
   src/api/vector_lua.cpp
   src/api/color.cpp
   src/api/color_lua.cpp
+  src/api/posvel_lua.cpp
 )
 target_include_directories(isaec_lua PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
