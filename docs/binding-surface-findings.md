@@ -2077,7 +2077,28 @@ port's own `std::string` is a different size, so a string field cannot be
 stored in the port's payload without changing the layout the offsets come
 from.
 
-### 24.4 What this does not establish
+### 24.4 The string fields are implemented too
+
+Seventeen properties are strings: `Item.Name`, `Item.Description`, `Item.GfxFileName`,
+`Card.Name`, `Card.Description`, `Card.HudAnim`, `PillEffect.Name`, `Costume.Anm2Path`,
+`Room.Name`, `GridEntityRock.Anim`, `GridEntityRock.RubbleAnim`, `GridEntityPoop.StateAnimation`,
+`GridEntityDoor.OpenAnimation`, `GridEntityDoor.CloseAnimation`,
+`GridEntityDoor.LockedAnimation`, `GridEntityDoor.OpenLockedAnimation` and
+`GridEntityPressurePlate.NextGreedAnimation`.
+
+The getter of such a property reads a `std::string` out of the game object: the
+length is at `+0x10`, the small-string check is at `+0x14` and the data pointer
+at `+0`, so the field is 24 bytes wide. The port stores the same shape -- a
+pointer, a length and a capacity -- and owns the bytes it stores: the setter
+copies the string out of Lua into a buffer of its own, and the collector of the
+class releases it when the instance is collected.
+
+The port had to fix one thing to make this work: `lua_newuserdata` does not
+clear the memory it hands out, so an instance started with whatever the
+allocator left behind. The shared value-class support now clears the payload,
+which is what its documentation always claimed.
+
+### 24.5 What this does not establish
 
 * The offsets and the types are recovered; the *values* are the port's own
   bytes. Nothing fills them but the game.
@@ -2090,7 +2111,7 @@ from.
   of the value, both read out of the binary (a `cmp BYTE PTR` read and a
   `mov BYTE PTR` write).
 
-### 24.5 The honest count
+### 24.6 The honest count
 
 | what | before | now |
 | --- | --- | --- |

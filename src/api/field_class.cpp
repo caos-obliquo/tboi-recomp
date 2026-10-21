@@ -173,6 +173,20 @@ int field_get(lua_State* L) {
         case FieldType::Bool:
             lua_pushboolean(L, load_u8(self + field->offset) != 0);
             break;
+        case FieldType::String: {
+            // The field is a std::string in the game's layout: a pointer, a
+            // length and a capacity. The port stores the bytes it owns.
+            const char* data = nullptr;
+            u64 size = 0;
+            std::memcpy(&data, self + field->offset, sizeof(data));
+            std::memcpy(&size, self + field->offset + 8, sizeof(size));
+            if (data == nullptr || size == 0) {
+                lua_pushliteral(L, "");
+            } else {
+                lua_pushlstring(L, data, static_cast<size_t>(size));
+            }
+            break;
+        }
     }
     return 1;
 }
@@ -215,6 +229,49 @@ int field_set(lua_State* L) {
         case FieldType::Bool:
             store_u8(self + field->offset, lua_toboolean(L, 2) ? 1 : 0);
             break;
+        case FieldType::String: {
+            // The port owns the bytes it stores, so the old buffer is
+            // released here and the rest is released by the collector.
+            size_t length = 0;
+            const char* value = luaL_checklstring(L, 2, &length);
+            char* buffer = new char[length + 1];
+            std::memcpy(buffer, value, length);
+            buffer[length] = '\0';
+            char* old = nullptr;
+            std::memcpy(&old, self + field->offset, sizeof(old));
+            delete[] old;
+            const u64 size = static_cast<u64>(length);
+            std::memcpy(self + field->offset, &buffer, sizeof(buffer));
+            std::memcpy(self + field->offset + 8, &size, sizeof(size));
+            std::memcpy(self + field->offset + 16, &size, sizeof(size));
+            break;
+        }
+    }
+    return 0;
+}
+
+// The collector of a field class.
+//
+// The port owns the bytes of the string fields, so they are released when the
+// instance is collected. The other fields are plain numbers.
+int field_gc(lua_State* L) {
+    const std::string class_name = instance_class_name(L, 1);
+    const FieldClassInfo* info =
+        class_name.empty() ? nullptr : find_class(class_name.c_str());
+    if (info != nullptr) {
+        auto* self = static_cast<u8*>(lua_touserdata(L, 1));
+        if (self != nullptr) {
+            for (usize i = 0; i < info->field_count; ++i) {
+                if (info->fields[i].type != FieldType::String) {
+                    continue;
+                }
+                char* data = nullptr;
+                std::memcpy(&data, self + info->fields[i].offset, sizeof(data));
+                delete[] data;
+                data = nullptr;
+                std::memcpy(self + info->fields[i].offset, &data, sizeof(data));
+            }
+        }
     }
     return 0;
 }
@@ -239,6 +296,14 @@ void FieldClass::install(Binding& binding, const char* class_name, usize object_
     // The metatable with the read and the write dispatch is shared with the
     // other value classes.
     ValueClass::install(L, class_name);
+
+    // The collector of the class releases the string fields the port owns.
+    ValueClass::push_metatable(L, class_name);
+    if (lua_istable(L, -1)) {
+        lua_pushcfunction(L, field_gc);
+        lua_setfield(L, -2, "__gc");
+    }
+    lua_pop(L, 1);
 
     // One property per field. The getter and the setter are the same
     // function for every field: the name tells them which field to work on.

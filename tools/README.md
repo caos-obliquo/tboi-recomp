@@ -627,9 +627,11 @@ python3 tools/gen-field-classes.py
   include/isaec/api/generated/field_classes.hpp   the tables
   src/api/field_classes_generated.cpp             the installer
 
-Only the plain fields are emitted (int, int16, int64, uint8, float, bool);
-`object` and `string` fields are skipped, and their members keep the loud stub
-of the generated API spec.
+Only the plain fields are emitted (int, int16, int64, uint8, float, bool and
+string); `object` fields are skipped, and their members keep the loud stub of
+the generated API spec. A string field is a `std::string` in the game's
+layout: the port stores the pointer, the length and the capacity, owns the
+bytes, and releases them in the collector of the class.
 
 **What it establishes:** that the tables in the generated header are exactly
 what the committed layout JSON says, and nothing else. The CI context

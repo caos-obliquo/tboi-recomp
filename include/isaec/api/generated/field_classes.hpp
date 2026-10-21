@@ -40,11 +40,14 @@ inline constexpr FieldSpec kBitSet128Fields[] = {
     {"h", 8, FieldType::Int64},
 };
 
-// Card: 8 plain fields.
+// Card: 11 plain fields.
 inline constexpr usize kCardSize = 104;
 inline constexpr FieldSpec kCardFields[] = {
     {"ID", 0, FieldType::Int},
     {"AchievementID", 4, FieldType::Int},
+    {"Name", 8, FieldType::String},
+    {"Description", 32, FieldType::String},
+    {"HudAnim", 56, FieldType::String},
     {"GreedModeAllowed", 80, FieldType::Bool},
     {"PickupSubtype", 84, FieldType::Int},
     {"CardType", 88, FieldType::Int},
@@ -65,10 +68,11 @@ inline constexpr FieldSpec kColorFields[] = {
     {"BO", 40, FieldType::Float},
 };
 
-// Costume: 6 plain fields.
+// Costume: 7 plain fields.
 inline constexpr usize kCostumeSize = 41;
 inline constexpr FieldSpec kCostumeFields[] = {
     {"ID", 0, FieldType::Int},
+    {"Anm2Path", 4, FieldType::String},
     {"Priority", 28, FieldType::Int},
     {"HasOverlay", 32, FieldType::Bool},
     {"IsFlying", 33, FieldType::Bool},
@@ -310,7 +314,7 @@ inline constexpr FieldSpec kGridEntityDescFields[] = {
     {"VariableSeed", 28, FieldType::Int},
 };
 
-// GridEntityDoor: 7 plain fields.
+// GridEntityDoor: 11 plain fields.
 inline constexpr usize kGridEntityDoorSize = 1028;
 inline constexpr FieldSpec kGridEntityDoorFields[] = {
     {"Slot", 344, FieldType::Int},
@@ -320,6 +324,10 @@ inline constexpr FieldSpec kGridEntityDoorFields[] = {
     {"ExtraVisible", 912, FieldType::Bool},
     {"Busted", 913, FieldType::Bool},
     {"TargetRoomIndex", 916, FieldType::Int},
+    {"OpenAnimation", 932, FieldType::String},
+    {"CloseAnimation", 956, FieldType::String},
+    {"LockedAnimation", 980, FieldType::String},
+    {"OpenLockedAnimation", 1004, FieldType::String},
 };
 
 // GridEntityPit: 1 plain fields.
@@ -328,16 +336,25 @@ inline constexpr FieldSpec kGridEntityPitFields[] = {
     {"HasLadder", 340, FieldType::Bool},
 };
 
-// GridEntityPoop: 2 plain fields.
+// GridEntityPoop: 3 plain fields.
 inline constexpr usize kGridEntityPoopSize = 369;
 inline constexpr FieldSpec kGridEntityPoopFields[] = {
     {"ReviveTimer", 340, FieldType::Int},
+    {"StateAnimation", 344, FieldType::String},
     {"UnderPlayer", 368, FieldType::Bool},
 };
 
-// GridEntityRock: 1 plain fields.
+// GridEntityPressurePlate: 1 plain fields.
+inline constexpr usize kGridEntityPressurePlateSize = 640;
+inline constexpr FieldSpec kGridEntityPressurePlateFields[] = {
+    {"NextGreedAnimation", 616, FieldType::String},
+};
+
+// GridEntityRock: 3 plain fields.
 inline constexpr usize kGridEntityRockSize = 404;
 inline constexpr FieldSpec kGridEntityRockFields[] = {
+    {"Anim", 340, FieldType::String},
+    {"RubbleAnim", 364, FieldType::String},
     {"FrameCnt", 400, FieldType::Int},
 };
 
@@ -353,11 +370,14 @@ inline constexpr FieldSpec kGridEntityTNTFields[] = {
     {"FrameCnt", 340, FieldType::Int},
 };
 
-// Item: 26 plain fields.
+// Item: 29 plain fields.
 inline constexpr usize kItemSize = 204;
 inline constexpr FieldSpec kItemFields[] = {
     {"Type", 0, FieldType::Int},
     {"ID", 4, FieldType::Int},
+    {"Name", 8, FieldType::String},
+    {"Description", 32, FieldType::String},
+    {"GfxFileName", 56, FieldType::String},
     {"AchievementID", 80, FieldType::Int},
     {"CacheFlags", 84, FieldType::Int},
     {"AddMaxHearts", 88, FieldType::Int},
@@ -402,11 +422,12 @@ inline constexpr FieldSpec kLevelFields[] = {
     {"GreedModeWave", 99124, FieldType::Int},
 };
 
-// PillEffect: 7 plain fields.
+// PillEffect: 8 plain fields.
 inline constexpr usize kPillEffectSize = 81;
 inline constexpr FieldSpec kPillEffectFields[] = {
     {"ID", 0, FieldType::Int},
     {"AchievementID", 4, FieldType::Int},
+    {"Name", 8, FieldType::String},
     {"GreedModeAllowed", 56, FieldType::Bool},
     {"AnnouncerVoice", 60, FieldType::Int},
     {"AnnouncerVoiceSuper", 64, FieldType::Int},
@@ -445,13 +466,14 @@ inline constexpr FieldSpec kQueueItemDataFields[] = {
     {"Touched", 8, FieldType::Bool},
 };
 
-// Room: 13 plain fields.
+// Room: 14 plain fields.
 inline constexpr usize kRoomSize = 92;
 inline constexpr FieldSpec kRoomFields[] = {
     {"StageID", 0, FieldType::Int},
     {"Type", 8, FieldType::Int},
     {"Variant", 12, FieldType::Int},
     {"Subtype", 16, FieldType::Int},
+    {"Name", 20, FieldType::String},
     {"Difficulty", 44, FieldType::Int},
     {"InitialWeight", 48, FieldType::Float},
     {"Weight", 52, FieldType::Float},
@@ -562,9 +584,9 @@ struct FieldClassTable {
 inline constexpr FieldClassTable kFieldClassTables[] = {
     {"ActiveItemDesc", kActiveItemDescSize, kActiveItemDescFields, 7},
     {"BitSet128", kBitSet128Size, kBitSet128Fields, 2},
-    {"Card", kCardSize, kCardFields, 8},
+    {"Card", kCardSize, kCardFields, 11},
     {"Color", kColorSize, kColorFields, 7},
-    {"Costume", kCostumeSize, kCostumeFields, 6},
+    {"Costume", kCostumeSize, kCostumeFields, 7},
     {"Entity", kEntitySize, kEntityFields, 23},
     {"EntityBomb", kEntityBombSize, kEntityBombFields, 3},
     {"EntityEffect", kEntityEffectSize, kEntityEffectFields, 12},
@@ -582,19 +604,20 @@ inline constexpr FieldClassTable kFieldClassTables[] = {
     {"Game", kGameSize, kGameFields, 4},
     {"GridEntity", kGridEntitySize, kGridEntityFields, 3},
     {"GridEntityDesc", kGridEntityDescSize, kGridEntityDescFields, 8},
-    {"GridEntityDoor", kGridEntityDoorSize, kGridEntityDoorFields, 7},
+    {"GridEntityDoor", kGridEntityDoorSize, kGridEntityDoorFields, 11},
     {"GridEntityPit", kGridEntityPitSize, kGridEntityPitFields, 1},
-    {"GridEntityPoop", kGridEntityPoopSize, kGridEntityPoopFields, 2},
-    {"GridEntityRock", kGridEntityRockSize, kGridEntityRockFields, 1},
+    {"GridEntityPoop", kGridEntityPoopSize, kGridEntityPoopFields, 3},
+    {"GridEntityPressurePlate", kGridEntityPressurePlateSize, kGridEntityPressurePlateFields, 1},
+    {"GridEntityRock", kGridEntityRockSize, kGridEntityRockFields, 3},
     {"GridEntitySpikes", kGridEntitySpikesSize, kGridEntitySpikesFields, 1},
     {"GridEntityTNT", kGridEntityTNTSize, kGridEntityTNTFields, 1},
-    {"Item", kItemSize, kItemFields, 26},
+    {"Item", kItemSize, kItemFields, 29},
     {"KColor", kKColorSize, kKColorFields, 4},
     {"Level", kLevelSize, kLevelFields, 4},
-    {"PillEffect", kPillEffectSize, kPillEffectFields, 7},
+    {"PillEffect", kPillEffectSize, kPillEffectFields, 8},
     {"ProjectileParams", kProjectileParamsSize, kProjectileParamsFields, 19},
     {"QueueItemData", kQueueItemDataSize, kQueueItemDataFields, 2},
-    {"Room", kRoomSize, kRoomFields, 13},
+    {"Room", kRoomSize, kRoomFields, 14},
     {"RoomConfigEntries", kRoomConfigEntriesSize, kRoomConfigEntriesFields, 1},
     {"RoomConfigSpawns", kRoomConfigSpawnsSize, kRoomConfigSpawnsFields, 1},
     {"RoomDescriptor", kRoomDescriptorSize, kRoomDescriptorFields, 23},
