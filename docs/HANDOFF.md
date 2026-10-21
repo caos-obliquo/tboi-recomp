@@ -724,6 +724,24 @@ ignored.
 is called *after* the generated spec is applied; every other member of every
 other class still raises. See docs/binding-surface-findings.md §18.
 
+
+## 23. The field layout of the game objects is recovered
+
+`tools/probe_field_layout.py` reads, for every property, the offset of the
+field the getter reads and the type it pushes. 53 of the 64 classes have a
+layout, 21 of them complete, 434 fields in total (174 int, 104 float, 48
+bool, 75 object, 1 string, 32 unknown).
+
+Two traps are worth remembering:
+
+* the offset-zero field prints as `[ecx]` without a `+0x0`, so an accessor
+  parser that requires the offset would drop every first field;
+* an accessor that reads two locations is not a field accessor -- the list
+  `Size` accessor computes `(end - begin) / 8` and would be given a
+  meaningless offset.
+
+The `object` typed fields point at the game's own objects. The port cannot
+produce them, so those properties stay loud stubs.
 ### Next steps, in order
 
 1. The remaining `Vector` members (`Clamp`, `Clamped`, `__tostring`) once

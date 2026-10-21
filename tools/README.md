@@ -586,6 +586,32 @@ third-party and are not committed; `--cache` keeps them outside the repo.
   field types (the type is read from the layout, but not yet compared with
   the type the getter body reads).
 
+## `probe_field_layout.py` -- the field layout of the game objects
+
+For every property of the recovered surface, the offset of the field its
+getter reads and the type it pushes. The offset comes from the property
+upvalue (a small constant) or from the per-field accessor the upvalue points
+at; the type comes from the push helper at the end of the getter.
+
+```
+python3 tools/probe_field_layout.py "<exe>" --cache /tmp/opencode/disasm.txt \
+    --surface bindings/code-derived-surface.json --json-out /tmp/field_layout.json
+```
+
+`--self-test` checks six hand-verified fields (`ActiveItemDesc.Item` at 0,
+`ActiveItemDesc.VarData` at 28, `ProjectileParams.DotProductLimit` at 120,
+`Vector.X` at 0, `PosVel.Position` at 0, `KColor.Red` at 0) and the type of
+each.
+
+**What it establishes**: the field offset and the field type of every property
+whose getter reads a field directly -- 434 of them, 21 classes with a
+complete layout.
+
+**What it does NOT establish**: a field the game reaches through a virtual
+call has no offset (the list `Size` properties stay unresolved); an `object`
+field is a pointer into the game's own heap, which the port cannot produce;
+the type comes from the push helper, so a getter that pushes something other
+than it appears to hold would be mistyped.
 ## Conventions for reporting findings
 
 `CONTRIBUTING.md` has the full rules. The short version:

@@ -1845,3 +1845,86 @@ The report is reproducible with
 
 The `.zhl` files are third-party and are not committed; the cache directory
 holds them.
+
+## 22. The field layout of the game objects
+
+The property closures of the shipped build read the game objects through a
+per-property accessor, and the accessor knows the field offset. That gives a
+layout: for every property, the offset of the field it reads and the type the
+getter pushes. `tools/probe_field_layout.py` recovers both.
+
+### 22.1 How the offset is recovered
+
+A property is registered with an upvalue. Two shapes occur:
+
+* the upvalue **is** the offset (a small constant, below `0x1000`) -- for
+  example `ActiveItemDesc.Item` has the upvalue `0x00000000` and the field
+  sits at offset 0;
+* the upvalue is a **code pointer to a per-field accessor** -- the accessor
+  reads the field, for example `fld DWORD PTR [ecx+0x20]`, and the offset is
+  read out of the accessor.
+
+The second shape needs care: an accessor that reads *two* locations is not a
+field accessor. The list `Size` accessor at `0x0042f160` is
+`mov eax,[ecx+0x4]; sub eax,[ecx]; sar eax,0x3` -- it computes
+`(end - begin) / 8`, the element count of a C++ vector. The tool counts every
+`[ecx +/- off]` operand in the accessor and accepts only an accessor with
+exactly one, so the list sizes stay unresolved instead of being given a
+meaningless offset.
+
+### 22.2 How the type is recovered
+
+The getter body ends in the push of the value, and the game pushes it through
+one of a few helpers:
+
+| type | the push in the getter |
+|------|-------------------------|
+| float | a call to `0x0085c050` (the game's number push) |
+| int | a call to `0x0085bfd0` (pushes the integer in `edx`) or `0x0085bff0` (pushes the result of a virtual call) |
+| bool | `lua_pushboolean` |
+| object | `lua_newuserdata` (the game hands out a handle to its own object) |
+
+### 22.3 The result
+
+`python3 tools/probe_field_layout.py "<exe>" --cache /tmp/opencode/disasm.txt \
+    --surface bindings/code-derived-surface.json --json-out /tmp/field_layout.json`
+
+53 of the 64 classes have a layout at all, and **21 of them are complete**
+(every property of the class resolved to an offset and a type). 434 fields in
+total: 174 int, 104 float, 48 bool, 75 object, 1 string, 32 unknown.
+
+The complete layouts:
+
+| class | size | fields | class | size | fields |
+|-------|------|--------|-------|------|--------|
+| ActiveItemDesc | 32 | 7 | GridEntitySpikes | 344 | 1 |
+| Color | 44 | 7 | GridEntityTNT | 344 | 1 |
+| EntityEffect | 1148 | 13 | KColor | 16 | 4 |
+| EntityFamiliar | 3472 | 17 | PosVel | 12 | 2 |
+| EntityList | 16 | 1 | QueueItemData | 9 | 3 |
+| EntityPickup | 1416 | 9 | RoomConfigEntries | 4 | 1 |
+| EntityPtr | 4 | 1 | RoomConfigSpawns | 4 | 1 |
+| GridEntityDesc | 32 | 8 | Sprite | 264 | 7 |
+| GridEntityPit | 341 | 1 | TemporaryEffect | 12 | 3 |
+| GridEntityPressurePlate | 624 | 3 | Vector | 8 | 2 |
+| | | | intValues | 4 | 1 |
+
+`ActiveItemDesc` is the clearest example: `Item` at 0 (int), `Charge` at 8,
+`BatteryCharge` at 12, `SubCharge` at 16, `TimedRechargeCooldown` at 20,
+`PartialCharge` at 24 (float), `VarData` at 28 -- the same layout the
+Repentogon `.zhl` file publishes for that class, including the size of 32.
+
+### 22.4 What this does not establish
+
+* A field that the game reaches through a **virtual call** has no offset. The
+  list `Size` properties are the example; they stay unresolved.
+* An `object` field is a **pointer to the game's own object**. The port cannot
+  produce one: the game owns the object, the pointer is only meaningful
+  inside the game. Such a property stays a loud stub.
+* The layout is the layout of the **shipped build**. The port allocates its
+  own payload, so the offsets are a property of the port's own objects, not
+  of a memory layout the game shares with us.
+* The type is read from the push helper, so a property whose getter pushes
+  something else than it appears to hold would be mistyped. The `.zhl`
+  cross-check (section 21) is the independent check on the offsets; the types
+  have no such second source yet.

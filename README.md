@@ -250,6 +250,7 @@ established from the shipped DLL rather than assumed — see
 | **Generated binding surface** | **64 classes + 3 namespaces, 1003 methods + 461 properties** — generated from the code-derived table, all trampolines |
 | **Implemented classes** | **`Vector`** — 13 methods, the `X`/`Y` properties, 5 arithmetic metamethods; `Clamp`/`Clamped` stay loud stubs ([§18](docs/binding-surface-findings.md)). **`Color`** — the 7 colour properties `R` `G` `B` `A` `RO` `GO` `BO`, with the game's own field offsets; its 4 methods and `__mul` stay loud stubs ([§19](docs/binding-surface-findings.md)). **`PosVel`** — the `Position` and `Velocity` properties, with the game's own field offsets; the first class that is fully recovered from the binary ([§20](docs/binding-surface-findings.md)) |
 | **Field layout cross-check** | **105 recovered field offsets confirmed** against the Repentogon `.zhl` layouts — 11 under another name, 3 moved; **187 method names confirmed** ([§21](docs/binding-surface-findings.md)) |
+| Field layout | **21 classes with a complete layout**, 434 fields with an offset and a type (174 int, 104 float, 48 bool, 75 object) |
 | **Closure bodies implemented** | **0 / 911 translated** — the 24 implemented members cover 13 bodies; the `Vector` arithmetic is reimplemented from the public API, the `Color` and `PosVel` field offsets are recovered from the binary |
 | **Packed archive (`ARCH000`) container** | **container solved**, codec open |
 | → `ARCH000` payload codec | **not started** — see [#2](https://github.com/caos-obliquo/tboi-recomp/issues/2) |
