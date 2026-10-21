@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from collections import Counter
 from pathlib import Path
@@ -75,7 +76,12 @@ class Census:
                             if n.startswith("luaL_check") or n.startswith("luaL_opt"))
 
     def body_insns(self, va: int, limit: int = 600) -> list:
-        """Instructions of the function starting at ``va``, by the extent rule."""
+        """Instructions of the function starting at ``va``, by the extent rule.
+
+        The limit is a guard against a runaway extent. A body that hits it is
+        counted as truncated, so a truncated body is visible in the report
+        instead of silently shortening the measurement.
+        """
         out: list = []
         prev = None
         for insn in self.disasm.forward(va):
@@ -106,18 +112,25 @@ class Census:
                 name = self.called_import(insn)
                 if name is not None:
                     calls.append(name)
-            operands = " ".join(i.operands for i in insns)
+            # Operands are compared as whole tokens: a substring match would
+            # also accept a longer constant that merely starts the same way.
+            tokens = set()
+            for insn in insns:
+                for tok in re.findall(r"0x[0-9a-fA-F]+", insn.operands):
+                    tokens.add(tok.lower())
             c["bodies"] += 1
             c["instructions"] += len(insns)
+            if len(insns) > 600:
+                c["truncated"] += 1
             if "lua_type" in calls:
                 c["calls_lua_type"] += 1
             if calls and calls[0] == "lua_type":
                 c["first_lua_call_is_lua_type"] += 1
             if calls and calls[0] in ("lua_type", "lua_touserdata"):
                 c["first_lua_call_is_a_type_check"] += 1
-            if "0xfff0b9d7" in operands:
+            if "0xfff0b9d7" in tokens:
                 c["uses_pseudo_d7"] += 1
-            if "0xfff0b9d8" in operands:
+            if "0xfff0b9d8" in tokens:
                 c["uses_pseudo_d8"] += 1
             if any(name in calls for name in self.checks):
                 c["uses_luaL_check"] += 1
@@ -130,7 +143,8 @@ def report(label: str, c: Counter) -> None:
     print(f"== {label}")
     for key in ("bodies", "instructions", "calls_lua_type",
                 "first_lua_call_is_lua_type", "first_lua_call_is_a_type_check",
-                "uses_pseudo_d7", "uses_pseudo_d8", "uses_luaL_check", "has_ret"):
+                "uses_pseudo_d7", "uses_pseudo_d8", "uses_luaL_check",
+                "has_ret", "truncated"):
         print(f"   {key:32s} {c[key]}")
 
 
@@ -149,12 +163,14 @@ def main(argv: list[str] | None = None) -> int:
     out: dict = {}
     if a.bodies:
         bodies = load_json_bodies(Path(a.bodies))
-        report(f"{len(bodies)} bodies from {a.bodies}", census.count(bodies))
-        out["bodies"] = census.count(bodies)
+        counts = census.count(bodies)
+        report(f"{len(bodies)} bodies from {a.bodies}", counts)
+        out["bodies"] = counts
     else:
         seeds = load_seed_bodies(Path(a.seeds))
-        report(f"{len(seeds)} seed bodies", census.count(seeds))
-        out["seeds"] = census.count(seeds)
+        counts = census.count(seeds)
+        report(f"{len(seeds)} seed bodies", counts)
+        out["seeds"] = counts
 
     if a.json_out:
         Path(a.json_out).write_text(json.dumps(out, indent=2, default=dict))

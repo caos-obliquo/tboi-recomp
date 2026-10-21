@@ -10,6 +10,7 @@ a binary **you** already own, from a path **you** pass in.
 |---|---|---|
 | `extract-binding-tables.py` | Surveys the native→Lua binding surface from `isaac-ng.exe`. Hard-fails if its class anchors do not validate. | yes |
 | `gen-api-spec.py` | Turns the code-derived surface into `bindings/isaac-api-spec.json` + a generated C++ header (methods, properties, metamethods). | no |
+| `gen_body_seeds.py` | Regenerates the REA/Ghidra seed list of closure bodies (911) from the code-derived attribution table. | no |
 | `pe_vaddr.py` | PE section reader. Translates addresses and **refuses to guess** when a VA is ambiguous. | yes |
 | `probe_metatable_keys.py` | Locates the nine recovered metatable keys in `.rdata`. | yes |
 | `probe_xrefs.py` | Counts `.text` references to each metatable key address. | yes |
@@ -377,6 +378,40 @@ no parent name is recoverable from the binary.
 `bindings/recovered-binding-surface.json` is the earlier, string-adjacency
 surface and is kept as the historical record of the contaminated attempt. It is
 not read by this generator.
+
+## `gen_body_seeds.py`
+
+```sh
+python3 tools/gen_body_seeds.py attrib.json --out seeds.tsv
+```
+
+Regenerates the REA/Ghidra seed list — one line per closure body, with a name:
+
+```
+0x008bb2e0	function	Vector.X
+```
+
+The input is the JSON written by `probe_class_attribution.py --json-out`. The
+old list had 441 lines, because it was built from the bodies the *backward*
+scan could name; the code-derived table knows all **911** bodies, and all 911
+are named.
+
+The name is the first (class, member) that uses the body, with `+N` when more
+than one member shares it. A body address is not an identity: `Vector.X` and
+`Vector.Y` share `0x008bb2e0` and differ only in their upvalue, and one body
+serves up to 36 members.
+
+### What it establishes
+
+- The address set the decompiler is pointed at, and it is reproducible from the
+  committed attribution table.
+
+### What it does **not** establish
+
+- **Not a body inventory.** A body that the attribution cannot place still gets
+  a name here, because the seed file must list every address the decompiler
+  should look at.
+- **Not a signature.** The name is a label, not a claim about behaviour.
 
 ## `decompile_corpus.py`
 

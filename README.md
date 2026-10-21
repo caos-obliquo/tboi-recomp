@@ -18,8 +18,8 @@ of its respective owners and is used here only to identify the game this project
 aims to be compatible with.
 
 > **Status: nothing here plays the game.** The binding surface is fully mapped
-> (64 classes + 3 namespaces, 1003 methods + 461 properties) and 441 of the 911
-> recovered bodies are decompiled, but **0 are implemented**. Read
+> (64 classes + 3 namespaces, 1003 methods + 461 properties) and all 911 recovered
+> bodies are decompiled, but **0 are implemented**. Read
 > [Progress](#progress) before getting excited.
 
 ---
@@ -239,7 +239,7 @@ established from the shipped DLL rather than assumed — see
 | Directory-backed data source | **done** |
 | Headless renderer (counts, draws nothing) | **done** |
 | **Closure bodies located** | **911 distinct bodies** of 1064 call sites — accounting complete |
-| **Closure bodies decompiled** | **441 / 911**, 0 failures, classified into 11 shapes |
+| **Closure bodies decompiled** | **911 / 911**, 0 failures, classified into 11 shapes |
 | **Property-accessor ABI** | **recovered** — [§14](docs/binding-surface-findings.md) |
 | **Lua binding index space** | **patched Lua identified** — [§14.6](docs/binding-surface-findings.md) |
 | **Closure bodies named** | **911 / 911** — every closure body carries a name ([§15](docs/binding-surface-findings.md)) |
@@ -281,7 +281,7 @@ literal — usually a class-name lookup key rather than the closure's own name.
 451 of its 524 names were wrong, and the difference is now written up, with the
 disproof, in [`docs/binding-surface-findings.md` §15](docs/binding-surface-findings.md).
 
-441 of the 911 have been decompiled, with kuna standalone at 1.4 s per body
+all 911 have been decompiled, with kuna standalone at 1.3 s per body
 against Ghidra's 607 s on the same address. Every one falls into one of 11
 recognised shapes, and the property-accessor mechanism is now written out in
 full — including the instruction-level disassembly and the PE import directory
@@ -386,7 +386,7 @@ milestone `M1 Foundation` covers the current blockers.
 |---|---|---|
 | [#1](https://github.com/caos-obliquo/tboi-recomp/issues/1) | Locate the runtime archive loader | **blocked** — enumeration ruled out; approach exhausted |
 | [#2](https://github.com/caos-obliquo/tboi-recomp/issues/2) | `ARCH000` payload codec | **partially advanced** — mode 0x02 is an LCG, constants not recovered |
-| [#3](https://github.com/caos-obliquo/tboi-recomp/issues/3) | Recover bodies and signatures | **partially advanced** — 441/911 decompiled, 0 implemented |
+| [#3](https://github.com/caos-obliquo/tboi-recomp/issues/3) | Recover bodies and signatures | **partially advanced** — 911/911 decompiled, 0 implemented, signatures open |
 | [#4](https://github.com/caos-obliquo/tboi-recomp/issues/4) | Per-class attribution | **largely resolved** — 64 classes + 3 namespaces, code-derived; hierarchy not recoverable |
 | [#5](https://github.com/caos-obliquo/tboi-recomp/issues/5) | Real GPU renderer | **blocked** — nothing to draw yet |
 | [#6](https://github.com/caos-obliquo/tboi-recomp/issues/6) | Repentance+ API surface | **partially advanced** |

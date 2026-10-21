@@ -36,7 +36,7 @@ clean-room project cannot be built on a tampered artifact.
 | PNG decoding | from an in-memory buffer, via libpng |
 | Headless binary | reads an archive, decodes, counts draws, exits |
 | Windowed binary | SDL2 window; the renderer **counts calls and draws nothing** |
-| Native binding surface | **911 bodies located, all named and class-attributed (64 classes); 441 decompiled; 0 implemented** |
+| Native binding surface | **911 bodies located, all named and class-attributed (64 classes); 911 decompiled; 0 implemented** |
 
 The last row is the whole ballgame. The binding surface is the per-frame cost centre — `repentogxm` measures its own port and concludes that below 60 FPS the
 cost is *translated code, draws, and Lua* — so until those bodies are
@@ -459,13 +459,16 @@ Applied in `mcp.rea.environment`:
 ```
 REA_GHIDRA_STARTUP_TIMEOUT_MS=900000     # 330s -> 15min
 GHIDRA_HEADLESS_MAXMEM=6G                # 2G default is tight for 9.3MB
-REA_GHIDRA_SEED_FILE=~/.local/share/rea/seeds/isaac-ng-body-seeds.tsv   # 441 lines
+REA_GHIDRA_SEED_FILE=~/.local/share/rea/seeds/isaac-ng-body-seeds.tsv   # 911 lines
 ```
 
-The seed file is the real lever: it tells Ghidra the 441 body addresses we
+The seed file is the real lever: it tells Ghidra the 911 body addresses we
 already know so it defines those functions instead of searching for them.
 Its digest is part of the analysis profile and a session **fails to open** if the
-seeds differ, so it must be regenerated deliberately.
+seeds differ, so it must be regenerated deliberately. The list is generated:
+`tools/gen_body_seeds.py` rebuilds it from the code-derived attribution table
+(`tools/probe_class_attribution.py --json-out`), and the previous 441-line
+file is kept beside it as `isaac-ng-body-seeds-441.tsv`.
 
 **Not yet demonstrated.** Configuration is verified healthy; no decompilation of
 `isaac-ng.exe` has succeeded. Status is "configured, not proven".
@@ -526,13 +529,13 @@ nothing yet shows it equals a count of *bodies* — [#3](https://github.com/caos
 
 ## 14. The property-accessor ABI is recovered (supersedes "0 of 441 signatures")
 
-All 441 bodies are decompiled and classified. Mechanism, evidence and the
+All 911 bodies are decompiled and classified. Mechanism, evidence and the
 instruction-level disassembly are in
 `docs/binding-surface-findings.md` §14; the toolchain correction is in
 `docs/rea-toolchain.md`.
 
 ```
-441 / 441 decompiled, 0 failures, ~1.4 s each (kuna standalone)
+911 / 911 decompiled, 0 failures, ~1.3 s each (kuna standalone)
 434 / 441 begin with a lua_type argument guard   <- not reproduced, see §16
 375 / 441 read the bound object through the single constant 0xfff0b9d7
  64       dispatch through vtable slot 0 (60 getters, 4 setters)
@@ -609,7 +612,7 @@ What this retires:
   previous registration's literal, usually a class-name lookup key.
 - The "441 bodies" figure. 441 is the number of bodies the backward scan could
   *reach* (63 + 417 + 20). There are **911** distinct closure bodies over all
-  1064 call sites; the 441-body seed file covers 48% of them and **470 bodies
+  1064 call sites; the seed file now covers all 911 of them and **470 bodies
   have never been decompiled**.
 - The "63 one-to-one bindings are type constructors" claim. 45 of them are the
   class's `__gc` closure; the rest are ordinary methods.
