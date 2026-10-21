@@ -50,6 +50,7 @@ PLAIN_TYPES = {
     "uint8": "FieldType::UInt8",
     "float": "FieldType::Float",
     "bool": "FieldType::Bool",
+    "string": "FieldType::String",
 }
 
 

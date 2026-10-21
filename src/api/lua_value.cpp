@@ -2,6 +2,8 @@
 
 #include "isaec/api/lua_value.hpp"
 
+#include <cstring>
+
 #if ISAEC_HAS_LUA
 extern "C" {
 #include <lauxlib.h>
@@ -222,6 +224,11 @@ void* ValueClass::push(void* state, const char* class_name, std::size_t bytes) {
 #if ISAEC_HAS_LUA
     auto* L = as_state(state);
     void* payload = lua_newuserdata(L, bytes);
+    // The payload is the object's bytes; Lua does not clear them, and the
+    // port's fields have to start empty.
+    if (payload != nullptr && bytes > 0) {
+        std::memset(payload, 0, bytes);
+    }
     // The userdata goes on the stack first and the metatable second, so that
     // lua_setmetatable(L, -2) sets the metatable of the instance.
     push_class_metatable(L, class_name);

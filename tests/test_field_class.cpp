@@ -94,6 +94,35 @@ i32 load_i32(const void* payload, usize offset) {
     return value;
 }
 
+// A string field is a std::string in the game's layout: a pointer, a length
+// and a capacity. The port owns the bytes it stores, so the string is
+// copied out of Lua and released when the instance is collected.
+ISAEC_TEST(string_fields_round_trip) {
+    Fixture fixture;
+    lua_State* L = fixture.L;
+
+    void* item = FieldClass::create(L, "Item", isaec::api::generated::kItemSize);
+    REQUIRE(item != nullptr);
+    lua_setglobal(L, "item");
+
+    const char* script = R"lua(
+        assert(item.Name == "", "an unset string field is empty")
+        item.Name = "Bomb"
+        assert(item.Name == "Bomb", "a short string")
+        item.Description = "a description that is longer than the small string buffer"
+        assert(item.Description == "a description that is longer than the small string buffer",
+               "a long string")
+        item.Name = "Bomb"
+        assert(item.Name == "Bomb", "a string that is set twice")
+    )lua";
+
+    const int status = luaL_dostring(L, script);
+    if (status != 0) {
+        std::fprintf(stderr, "lua error: %s\n", lua_tostring(L, -1));
+    }
+    CHECK(status == 0);
+}
+
 #endif  // ISAEC_HAS_LUA
 
 }  // namespace

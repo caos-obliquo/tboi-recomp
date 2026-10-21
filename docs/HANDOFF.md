@@ -888,13 +888,18 @@ The nine field classes of §24 are now generated from the measured layout:
 and writes `include/isaec/api/generated/field_classes.hpp` and
 `src/api/field_classes_generated.cpp`. The hand written tables are gone.
 
-* 44 classes, 310 plain fields, 203 distinct closure bodies.
+* 45 classes, 327 plain fields, 220 distinct closure bodies.
 * The CI context `generated-spec-is-current` regenerates both files and
   diffs them, so the tables cannot drift from the JSON.
 * The JSON still needs the binary and is refreshed by hand with
   `tools/probe_field_layout.py`; that is the one step CI cannot repeat.
-* The honest count: **325 of the 1464 members do something**, they cover
-  **205 of the 911 bodies**, and **0 of the 911 bodies are translated**.
+* The honest count: **342 of the 1464 members do something**, they cover
+  **222 of the 911 bodies**, and **0 of the 911 bodies are translated**.
+* The 17 string fields are implemented as well: a `std::string` in the game's
+  layout (a pointer, a length, a capacity), with the port owning the bytes it
+  stores and the collector of the class releasing them. Making them work
+  exposed a bug in the shared value-class support: `lua_newuserdata` does not
+  clear the memory it hands out, so the payload is now cleared explicitly.
 * The width of a field is recovered from the load in the getter body (a dword,
   a word, a byte, or two dwords for a 64 bit field), not from the push helper:
   the helper that pushes a 16 bit value is also used for a one byte field. The

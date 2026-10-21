@@ -43,6 +43,7 @@ enum class FieldType {
     UInt8,  // a one byte unsigned integer
     Float,  // a 32 bit float
     Bool,   // a byte that is zero or non-zero
+    String, // a std::string: a pointer, a length and a capacity
 };
 
 // One plain field of a game object.
