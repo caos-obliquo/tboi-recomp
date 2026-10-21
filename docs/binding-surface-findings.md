@@ -1637,3 +1637,66 @@ members of §18 and the 7 `Color` properties. They cover 11 of the 911
 bodies. Still 0 of the 911 bodies are translated: the colour *fields* are
 recovered from the binary, but every method of the class is a call into
 code that is not there.
+
+## 20. Third implementation: the PosVel class
+
+`PosVel` is a position and a velocity, both Vectors. It is the first class
+whose members are *entirely* recoverable from the binary: nothing in it
+depends on the game's C++.
+
+### 20.1 What is implemented
+
+| member | kind | body | argc | returns |
+| --- | --- | --- | --- | --- |
+| `PosVel:Position` | property (get) | `0x008bde40` | 0 | 1 |
+| `PosVel:Position` | property (set) | `0x008bdee0` | 1 | 0 |
+| `PosVel:Velocity` | property (get) | `0x008bde40` | 0 | 1 |
+| `PosVel:Velocity` | property (set) | `0x008bdee0` | 1 | 0 |
+
+The getter and the setter are *the same* bodies for both properties; the
+original tells them apart with an upvalue, the field offset.
+
+### 20.2 What came from the binary
+
+The upvalues of the two properties are the field offsets **0** (Position) and
+**8** (Velocity), and the closure bodies move exactly eight bytes -- two 32
+bit floats -- to and from those offsets:
+
+* the getter (`0x008bde40`) reads the receiver, copies the eight bytes at the
+  offset into a **new** 16 byte userdata with the Vector metatable
+  (`0xb73574`) and returns it;
+* the setter (`0x008bdee0`) reads the argument, checks that it is a Vector
+  (the type tag `0xc82980`) and copies the eight bytes of its payload into
+  the field at the offset.
+
+So the class is a struct of two vectors, the getter hands out a **copy**, and
+the setter takes a Vector. The port in `include/isaec/api/posvel.hpp` mirrors
+exactly that: `kPosVelPositionOffset = 0`, `kPosVelVelocityOffset = 8`, a
+16 byte payload, and the getter builds a fresh Vector.
+
+### 20.3 What did not come from the binary
+
+Nothing that matters here, and the difference from `Vector` and `Color` is
+worth stating: the arithmetic of `Vector` is a vtable call and had to be
+reimplemented from the public API, and the four methods of `Color` are vtable
+calls that could not be implemented at all. `PosVel` only moves two vectors
+in and out of a struct, and that is what the binary shows. The one thing that
+is *not* ported is the way the original reaches the receiver -- it reads the
+patched pseudo index `0xfff0b9d7` (issue #12) -- while the port uses the
+first argument, the way a stock Lua port does.
+
+### 20.4 The shared dispatch
+
+`PosVel` is the first class that uses the shared value-class support
+(`include/isaec/api/lua_value.hpp`) instead of a private metatable: the
+`__index` and `__newindex` dispatch, the class-name lookup and the
+metatable registry are implemented once, and a class only adds its members.
+
+### 20.5 The honest count
+
+24 of the 1464 registered members now do something: the 15 `Vector` members
+of §18, the 7 `Color` properties of §19 and the 2 `PosVel` properties. They
+cover 13 of the 911 bodies. Still 0 of the 911 bodies are translated: the
+`Vector` arithmetic is reimplemented from the public API, the `Color` field
+offsets are recovered from the binary, and the `PosVel` offsets are recovered
+from the binary.
