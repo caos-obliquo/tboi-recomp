@@ -75,6 +75,25 @@ f32 load_f32(const u8* bytes) noexcept {
 
 u8 load_u8(const u8* bytes) noexcept { return *bytes; }
 
+i64 load_i64(const u8* bytes) noexcept {
+    // The game stores a 64 bit integer in two halves, low first.
+    u64 low = 0;
+    u64 high = 0;
+    for (usize i = 0; i < 4; ++i) {
+        low |= static_cast<u64>(bytes[i]) << (8 * i);
+        high |= static_cast<u64>(bytes[4 + i]) << (8 * i);
+    }
+    return static_cast<i64>((high << 32) | low);
+}
+
+i16 load_i16(const u8* bytes) noexcept {
+    u16 value = 0;
+    for (usize i = 0; i < 2; ++i) {
+        value |= static_cast<u16>(bytes[i]) << (8 * i);
+    }
+    return static_cast<i16>(value);
+}
+
 void store_i32(u8* bytes, i32 value) noexcept {
     std::memcpy(bytes, &value, sizeof(value));
 }
@@ -84,6 +103,21 @@ void store_f32(u8* bytes, f32 value) noexcept {
 }
 
 void store_u8(u8* bytes, u8 value) noexcept { *bytes = value; }
+
+void store_i64(u8* bytes, i64 value) noexcept {
+    const u64 bits = static_cast<u64>(value);
+    for (usize i = 0; i < 4; ++i) {
+        bytes[i] = static_cast<u8>((bits >> (8 * i)) & 0xff);
+        bytes[4 + i] = static_cast<u8>((bits >> (8 * (4 + i))) & 0xff);
+    }
+}
+
+void store_i16(u8* bytes, i16 value) noexcept {
+    const u16 bits = static_cast<u16>(value);
+    for (usize i = 0; i < 2; ++i) {
+        bytes[i] = static_cast<u8>((bits >> (8 * i)) & 0xff);
+    }
+}
 
 // The class name of the instance at `index`, taken from its metatable.
 std::string instance_class_name(lua_State* L, int index) {
@@ -124,6 +158,15 @@ int field_get(lua_State* L) {
         case FieldType::Int:
             lua_pushinteger(L, load_i32(self + field->offset));
             break;
+        case FieldType::Int64:
+            lua_pushinteger(L, static_cast<lua_Integer>(load_i64(self + field->offset)));
+            break;
+        case FieldType::Int16:
+            lua_pushinteger(L, static_cast<lua_Integer>(load_i16(self + field->offset)));
+            break;
+        case FieldType::UInt8:
+            lua_pushinteger(L, static_cast<lua_Integer>(load_u8(self + field->offset)));
+            break;
         case FieldType::Float:
             lua_pushnumber(L, static_cast<lua_Number>(load_f32(self + field->offset)));
             break;
@@ -156,6 +199,15 @@ int field_set(lua_State* L) {
     switch (field->type) {
         case FieldType::Int:
             store_i32(self + field->offset, static_cast<i32>(luaL_checknumber(L, 2)));
+            break;
+        case FieldType::Int64:
+            store_i64(self + field->offset, static_cast<i64>(luaL_checkinteger(L, 2)));
+            break;
+        case FieldType::Int16:
+            store_i16(self + field->offset, static_cast<i16>(luaL_checkinteger(L, 2)));
+            break;
+        case FieldType::UInt8:
+            store_u8(self + field->offset, static_cast<u8>(luaL_checkinteger(L, 2)));
             break;
         case FieldType::Float:
             store_f32(self + field->offset, static_cast<f32>(luaL_checknumber(L, 2)));

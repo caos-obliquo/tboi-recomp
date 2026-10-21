@@ -33,6 +33,13 @@ inline constexpr FieldSpec kActiveItemDescFields[] = {
     {"VarData", 28, FieldType::Int},
 };
 
+// BitSet128: 2 plain fields.
+inline constexpr usize kBitSet128Size = 16;
+inline constexpr FieldSpec kBitSet128Fields[] = {
+    {"l", 0, FieldType::Int64},
+    {"h", 8, FieldType::Int64},
+};
+
 // Card: 8 plain fields.
 inline constexpr usize kCardSize = 104;
 inline constexpr FieldSpec kCardFields[] = {
@@ -264,10 +271,12 @@ inline constexpr FieldSpec kEntityTearFields[] = {
     {"CanTriggerStreakEnd", 2024, FieldType::Bool},
 };
 
-// Entry: 2 plain fields.
+// Entry: 4 plain fields.
 inline constexpr usize kEntrySize = 12;
 inline constexpr FieldSpec kEntryFields[] = {
     {"Type", 0, FieldType::Int},
+    {"Variant", 4, FieldType::Int16},
+    {"Subtype", 6, FieldType::Int16},
     {"Weight", 8, FieldType::Float},
 };
 
@@ -302,7 +311,7 @@ inline constexpr FieldSpec kGridEntityDescFields[] = {
 };
 
 // GridEntityDoor: 7 plain fields.
-inline constexpr usize kGridEntityDoorSize = 928;
+inline constexpr usize kGridEntityDoorSize = 1028;
 inline constexpr FieldSpec kGridEntityDoorFields[] = {
     {"Slot", 344, FieldType::Int},
     {"CurrentRoomType", 348, FieldType::Int},
@@ -344,7 +353,7 @@ inline constexpr FieldSpec kGridEntityTNTFields[] = {
     {"FrameCnt", 340, FieldType::Int},
 };
 
-// Item: 25 plain fields.
+// Item: 26 plain fields.
 inline constexpr usize kItemSize = 204;
 inline constexpr FieldSpec kItemFields[] = {
     {"Type", 0, FieldType::Int},
@@ -360,8 +369,8 @@ inline constexpr FieldSpec kItemFields[] = {
     {"AddCoins", 112, FieldType::Int},
     {"MaxCharges", 116, FieldType::Int},
     {"MaxCooldown", 120, FieldType::Int},
-    {"DevilPrice", 124, FieldType::Int},
-    {"ShopPrice", 126, FieldType::Int},
+    {"DevilPrice", 124, FieldType::Int16},
+    {"ShopPrice", 126, FieldType::Int16},
     {"ChargeType", 172, FieldType::Int},
     {"Special", 176, FieldType::Bool},
     {"PassiveCache", 177, FieldType::Bool},
@@ -369,6 +378,7 @@ inline constexpr FieldSpec kItemFields[] = {
     {"Hidden", 179, FieldType::Bool},
     {"PersistentEffect", 180, FieldType::Bool},
     {"ClearEffectsOnRemove", 181, FieldType::Bool},
+    {"Tags", 184, FieldType::Int64},
     {"Quality", 192, FieldType::Int},
     {"CraftingQuality", 196, FieldType::Int},
     {"InitCharge", 200, FieldType::Int},
@@ -404,7 +414,7 @@ inline constexpr FieldSpec kPillEffectFields[] = {
     {"MimicCharge", 72, FieldType::Int},
 };
 
-// ProjectileParams: 17 plain fields.
+// ProjectileParams: 19 plain fields.
 inline constexpr usize kProjectileParamsSize = 152;
 inline constexpr FieldSpec kProjectileParamsFields[] = {
     {"GridCollision", 0, FieldType::Bool},
@@ -418,8 +428,10 @@ inline constexpr FieldSpec kProjectileParamsFields[] = {
     {"CurvingStrength", 32, FieldType::Float},
     {"Acceleration", 36, FieldType::Float},
     {"Spread", 40, FieldType::Float},
+    {"BulletFlags", 88, FieldType::Int64},
     {"DotProductLimit", 120, FieldType::Float},
     {"WiggleFrameOffset", 124, FieldType::Int},
+    {"ChangeFlags", 128, FieldType::Int64},
     {"ChangeVelocity", 136, FieldType::Float},
     {"ChangeTimeout", 140, FieldType::Int},
     {"DepthOffset", 144, FieldType::Float},
@@ -433,7 +445,7 @@ inline constexpr FieldSpec kQueueItemDataFields[] = {
     {"Touched", 8, FieldType::Bool},
 };
 
-// Room: 12 plain fields.
+// Room: 13 plain fields.
 inline constexpr usize kRoomSize = 92;
 inline constexpr FieldSpec kRoomFields[] = {
     {"StageID", 0, FieldType::Int},
@@ -444,8 +456,9 @@ inline constexpr FieldSpec kRoomFields[] = {
     {"InitialWeight", 48, FieldType::Float},
     {"Weight", 52, FieldType::Float},
     {"Doors", 56, FieldType::Int},
-    {"Width", 70, FieldType::Int},
-    {"Height", 71, FieldType::Int},
+    {"SpawnCount", 68, FieldType::Int16},
+    {"Width", 70, FieldType::UInt8},
+    {"Height", 71, FieldType::UInt8},
     {"Shape", 72, FieldType::Int},
     {"OriginalVariant", 88, FieldType::Int},
 };
@@ -462,7 +475,7 @@ inline constexpr FieldSpec kRoomConfigSpawnsFields[] = {
     {"Size", 0, FieldType::Int},
 };
 
-// RoomDescriptor: 22 plain fields.
+// RoomDescriptor: 23 plain fields.
 inline constexpr usize kRoomDescriptorSize = 180;
 inline constexpr FieldSpec kRoomDescriptorFields[] = {
     {"GridIndex", 0, FieldType::Int},
@@ -479,22 +492,23 @@ inline constexpr FieldSpec kRoomDescriptorFields[] = {
     {"PressurePlatesTriggered", 68, FieldType::Bool},
     {"SacrificeDone", 68, FieldType::Bool},
     {"SurpriseMiniboss", 68, FieldType::Bool},
-    {"PoopCount", 80, FieldType::Int},
+    {"ClearCount", 74, FieldType::Int16},
+    {"PoopCount", 80, FieldType::Int16},
     {"PitsCount", 84, FieldType::Int},
     {"DecorationSeed", 88, FieldType::Int},
     {"SpawnSeed", 92, FieldType::Int},
     {"AwardSeed", 96, FieldType::Int},
-    {"ShopItemIdx", 172, FieldType::Int},
-    {"ShopItemDiscountIdx", 174, FieldType::Int},
+    {"ShopItemIdx", 172, FieldType::Int16},
+    {"ShopItemDiscountIdx", 174, FieldType::Int16},
     {"DeliriumDistance", 176, FieldType::Int},
 };
 
 // Spawn: 4 plain fields.
 inline constexpr usize kSpawnSize = 16;
 inline constexpr FieldSpec kSpawnFields[] = {
-    {"X", 0, FieldType::Int},
-    {"Y", 2, FieldType::Int},
-    {"EntryCount", 8, FieldType::Int},
+    {"X", 0, FieldType::Int16},
+    {"Y", 2, FieldType::Int16},
+    {"EntryCount", 8, FieldType::UInt8},
     {"SumWeights", 12, FieldType::Float},
 };
 
@@ -547,6 +561,7 @@ struct FieldClassTable {
 
 inline constexpr FieldClassTable kFieldClassTables[] = {
     {"ActiveItemDesc", kActiveItemDescSize, kActiveItemDescFields, 7},
+    {"BitSet128", kBitSet128Size, kBitSet128Fields, 2},
     {"Card", kCardSize, kCardFields, 8},
     {"Color", kColorSize, kColorFields, 7},
     {"Costume", kCostumeSize, kCostumeFields, 6},
@@ -563,7 +578,7 @@ inline constexpr FieldClassTable kFieldClassTables[] = {
     {"EntityProjectile", kEntityProjectileSize, kEntityProjectileFields, 12},
     {"EntityRef", kEntityRefSize, kEntityRefFields, 5},
     {"EntityTear", kEntityTearSize, kEntityTearFields, 13},
-    {"Entry", kEntrySize, kEntryFields, 2},
+    {"Entry", kEntrySize, kEntryFields, 4},
     {"Game", kGameSize, kGameFields, 4},
     {"GridEntity", kGridEntitySize, kGridEntityFields, 3},
     {"GridEntityDesc", kGridEntityDescSize, kGridEntityDescFields, 8},
@@ -573,16 +588,16 @@ inline constexpr FieldClassTable kFieldClassTables[] = {
     {"GridEntityRock", kGridEntityRockSize, kGridEntityRockFields, 1},
     {"GridEntitySpikes", kGridEntitySpikesSize, kGridEntitySpikesFields, 1},
     {"GridEntityTNT", kGridEntityTNTSize, kGridEntityTNTFields, 1},
-    {"Item", kItemSize, kItemFields, 25},
+    {"Item", kItemSize, kItemFields, 26},
     {"KColor", kKColorSize, kKColorFields, 4},
     {"Level", kLevelSize, kLevelFields, 4},
     {"PillEffect", kPillEffectSize, kPillEffectFields, 7},
-    {"ProjectileParams", kProjectileParamsSize, kProjectileParamsFields, 17},
+    {"ProjectileParams", kProjectileParamsSize, kProjectileParamsFields, 19},
     {"QueueItemData", kQueueItemDataSize, kQueueItemDataFields, 2},
-    {"Room", kRoomSize, kRoomFields, 12},
+    {"Room", kRoomSize, kRoomFields, 13},
     {"RoomConfigEntries", kRoomConfigEntriesSize, kRoomConfigEntriesFields, 1},
     {"RoomConfigSpawns", kRoomConfigSpawnsSize, kRoomConfigSpawnsFields, 1},
-    {"RoomDescriptor", kRoomDescriptorSize, kRoomDescriptorFields, 22},
+    {"RoomDescriptor", kRoomDescriptorSize, kRoomDescriptorFields, 23},
     {"Spawn", kSpawnSize, kSpawnFields, 4},
     {"Sprite", kSpriteSize, kSpriteFields, 4},
     {"TearParams", kTearParamsSize, kTearParamsFields, 5},

@@ -68,7 +68,24 @@ from pe_vaddr import PEImage  # noqa: E402
 
 # The size of a field of each type, in bytes.  A bool is one byte in the
 # game's objects; the getter pushes a Lua boolean, which is a whole int.
-FIELD_SIZES = {"int": 4, "float": 4, "bool": 1, "object": 4, "string": 4}
+# The size of a field of each type, in bytes, as the game stores it:
+#   int      4      a 32 bit integer
+#   int64    8      a 64 bit integer (the game pushes it in two halves)
+#   int16    2      a 16 bit integer
+#   float    4      a 32 bit float
+#   bool     1      a byte
+#   object   4      a pointer into the game's heap
+#   string  24      a std::string (pointer, size, capacity)
+FIELD_SIZES = {
+    "int": 4,
+    "int64": 8,
+    "int16": 2,
+    "uint8": 1,
+    "float": 4,
+    "bool": 1,
+    "object": 4,
+    "string": 24,
+}
 
 # The push helpers of the game, read by hand in the disassembly:
 #   0x85c050  push a float (movss; the game's own number push)
@@ -84,6 +101,10 @@ OFFSET_LIMIT = 0x1000
 # `fld DWORD PTR [ecx+0x1c]` -- and `[ecx]` for the offset zero.
 ACCESSOR_RE = re.compile(r"\[e[a-z]x([+-]0x[0-9a-f]+)?\]")
 
+# `[ecx+edi*1]` -- a memory operand with an index, the way the game
+# loads a field out of the game object.
+INDEXED_RE = re.compile(r"\[[a-z]+[a-z0-9]*\+[a-z]+[a-z0-9]*\*1(\+0x[0-9a-f]+)?\]")
+
 
 class LayoutProbe:
     """Reads the field offsets and types out of the property getters."""
@@ -94,13 +115,19 @@ class LayoutProbe:
         self.slot_va = {name: va for va, name in slots.items()}
         self.d = Disasm(exe, cache)
 
+        # The Lua entry points that push a value of a known type.  A getter
+        # is classified by the call that pushes its result, and a call to one
+        # of the game's own helpers is classified by the Lua entry point that
+        # helper ends up calling.
         self.marks: dict[str, set[int]] = {
             "int": set(PUSH_INT_HELPERS) | {self.slot_va["lua_pushinteger"]},
             "float": set(PUSH_FLOAT_HELPERS) | {self.slot_va["lua_pushnumber"]},
             "bool": {self.slot_va["lua_pushboolean"]},
             "object": {self.slot_va["lua_newuserdata"]},
-            "string": {self.slot_va["lua_pushstring"]},
+            "string": {self.slot_va["lua_pushstring"], self.slot_va["lua_pushlstring"]},
         }
+        # The helper cache: the type of a game helper, by its address.
+        self._helper_type: dict[int, str] = {}
 
     # -- the disassembly -----------------------------------------------------
 
@@ -126,19 +153,89 @@ class LayoutProbe:
 
     # -- the layout -----------------------------------------------------------
 
-    def field_type(self, getter: int) -> str:
-        """The type the getter pushes, or "unknown"."""
-        found = set()
-        for insn in self.body(getter):
+    def width_of(self, body: list) -> str:
+        """The width of the integer field a body loads.
+
+        The load is the interesting instruction: `mov eax, DWORD PTR [ecx+edi*1]`
+        is a 32 bit field, `movzx eax, BYTE PTR [ecx+edi*1]` a one byte one
+        and `mov dx, WORD PTR [ecx+edi*1]` a two byte one.  A 64 bit field is
+        loaded as two dwords.
+        """
+        dwords = 0
+        word = False
+        byte = False
+        for insn in body:
+            operands = insn.operands
+            if not INDEXED_RE.search(operands):
+                continue
+            if "DWORD PTR [" in operands:
+                dwords += 1
+            elif "WORD PTR [" in operands:
+                word = True
+            elif "BYTE PTR [" in operands:
+                byte = True
+        if dwords >= 2:
+            return "int64"
+        if word:
+            return "int16"
+        if byte:
+            return "uint8"
+        return "int"
+
+    def helper_type(self, target: int, depth: int = 0) -> str:
+        """The type a game helper pushes, or "unknown".
+
+        A helper is classified by the Lua entry point it calls: a helper that
+        ends in `lua_newuserdata` hands out an object, one that ends in
+        `lua_pushlstring` a string, and so on.  The helper of a helper is
+        followed one more level, which covers the game's own push wrappers.
+        """
+        if target in self._helper_type:
+            return self._helper_type[target]
+        if depth > 2:
+            return "unknown"
+        body = self.body(target, limit=40)
+        result = self._classify(body, depth)
+        self._helper_type[target] = result
+        return result
+
+    def _classify(self, body: list, depth: int) -> str:
+        """The type the body pushes, or "unknown"."""
+        found: set[str] = set()
+        for insn in body:
+            if insn.mnemonic != "call":
+                continue
+            hit = None
             for name, targets in self.marks.items():
                 if any(self.calls(insn, t) for t in targets):
-                    found.add(name)
-        # The order matters: a getter that hands out an object also pushes
+                    hit = name
+                    break
+            if hit is not None:
+                found.add(hit)
+                continue
+            try:
+                inner = int(insn.operands.strip(), 16)
+            except ValueError:
+                continue  # an indirect call: no static target
+            kind = self.helper_type(inner, depth + 1)
+            if kind != "unknown":
+                found.add(kind)
+        # The order matters: a getter that hands out an object also touches
         # numbers while building it, so the object wins.
-        for name in ("object", "string", "bool", "float", "int"):
+        for name in ("object", "string", "bool", "float", "int64", "int16", "int"):
             if name in found:
                 return name
         return "unknown"
+
+    def field_type(self, getter: int) -> str:
+        """The type the getter pushes, or "unknown"."""
+        body = self.body(getter)
+        kind = self._classify(body, 0)
+        if kind == "int":
+            # The helper only pushes an integer; the getter says how wide
+            # the field is.
+            return self.width_of(body)
+        return kind
 
     def accessor_offset(self, code: int) -> int | None:
         """The offset a code-pointer upvalue reads.

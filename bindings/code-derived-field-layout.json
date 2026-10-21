@@ -2,15 +2,17 @@
  "source": "bindings/code-derived-surface.json",
  "summary": {
   "classes": 53,
-  "complete_classes": 21,
+  "complete_classes": 33,
   "fields": 434,
   "types": {
-   "int": 174,
+   "int": 166,
    "float": 104,
-   "unknown": 32,
+   "int64": 5,
+   "string": 17,
    "bool": 48,
-   "object": 75,
-   "string": 1
+   "object": 80,
+   "int16": 11,
+   "uint8": 3
   }
  },
  "classes": {
@@ -85,14 +87,14 @@
    "unresolved": []
   },
   "BitSet128": {
-   "size": 0,
+   "size": 16,
    "fields": [
     {
      "name": "l",
      "offset": 0,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "int64",
+     "size": 8,
      "getter": "0x008bc3c0",
      "setter": "0x008bc420"
     },
@@ -100,17 +102,14 @@
      "name": "h",
      "offset": 8,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "int64",
+     "size": 8,
      "getter": "0x008bc3c0",
      "setter": "0x008bc420"
     }
    ],
-   "complete": false,
-   "unresolved": [
-    "h",
-    "l"
-   ]
+   "complete": true,
+   "unresolved": []
   },
   "Card": {
    "size": 104,
@@ -137,8 +136,8 @@
      "name": "Name",
      "offset": 8,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "string",
+     "size": 24,
      "getter": "0x008bc540",
      "setter": "0x008bc5b0"
     },
@@ -146,8 +145,8 @@
      "name": "Description",
      "offset": 32,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "string",
+     "size": 24,
      "getter": "0x008bc540",
      "setter": "0x008bc5b0"
     },
@@ -155,8 +154,8 @@
      "name": "HudAnim",
      "offset": 56,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "string",
+     "size": 24,
      "getter": "0x008bc540",
      "setter": "0x008bc5b0"
     },
@@ -215,12 +214,8 @@
      "setter": "0x008bc4e0"
     }
    ],
-   "complete": false,
-   "unresolved": [
-    "Description",
-    "HudAnim",
-    "Name"
-   ]
+   "complete": true,
+   "unresolved": []
   },
   "CardConfigList": {
    "size": 0,
@@ -326,8 +321,8 @@
      "name": "Anm2Path",
      "offset": 4,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "string",
+     "size": 24,
      "getter": "0x008bd310",
      "setter": "0x008bd380"
     },
@@ -386,10 +381,8 @@
      "setter": "0x008bd4f0"
     }
    ],
-   "complete": false,
-   "unresolved": [
-    "Anm2Path"
-   ]
+   "complete": true,
+   "unresolved": []
   },
   "CostumeConfigList": {
    "size": 0,
@@ -551,8 +544,8 @@
      "name": "Color",
      "offset": 440,
      "offset_source": "accessor",
-     "type": "unknown",
-     "size": null,
+     "type": "object",
+     "size": 4,
      "getter": "0x0089df90",
      "setter": "0x0089def0"
     },
@@ -766,7 +759,6 @@
    ],
    "complete": false,
    "unresolved": [
-    "Color",
     "FrameCount",
     "Position",
     "SizeMulti",
@@ -1791,8 +1783,8 @@
      "name": "LaserColor",
      "offset": null,
      "offset_source": "accessor",
-     "type": "unknown",
-     "size": null,
+     "type": "object",
+     "size": 4,
      "getter": "0x008be8a0",
      "setter": "0x008be900"
     },
@@ -1863,8 +1855,8 @@
      "name": "TearColor",
      "offset": null,
      "offset_source": "accessor",
-     "type": "unknown",
-     "size": null,
+     "type": "object",
+     "size": 4,
      "getter": "0x008be8a0",
      "setter": "0x008be900"
     },
@@ -2054,8 +2046,8 @@
      "name": "ChangeFlags",
      "offset": null,
      "offset_source": "accessor",
-     "type": "unknown",
-     "size": null,
+     "type": "int",
+     "size": 4,
      "getter": "0x0089b690",
      "setter": "0x0089b620"
     },
@@ -2063,8 +2055,8 @@
      "name": "ProjectileFlags",
      "offset": null,
      "offset_source": "accessor",
-     "type": "unknown",
-     "size": null,
+     "type": "int",
+     "size": 4,
      "getter": "0x0089b690",
      "setter": "0x0089b620"
     }
@@ -2368,8 +2360,8 @@
      "name": "Variant",
      "offset": 4,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "int16",
+     "size": 2,
      "getter": "0x008c1cf0",
      "setter": "0x008c1d50"
     },
@@ -2377,8 +2369,8 @@
      "name": "Subtype",
      "offset": 6,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "int16",
+     "size": 2,
      "getter": "0x008c1cf0",
      "setter": "0x008c1d50"
     },
@@ -2392,11 +2384,8 @@
      "setter": "0x008c1e10"
     }
    ],
-   "complete": false,
-   "unresolved": [
-    "Subtype",
-    "Variant"
-   ]
+   "complete": true,
+   "unresolved": []
   },
   "Game": {
    "size": 158156,
@@ -2595,7 +2584,7 @@
    "unresolved": []
   },
   "GridEntityDoor": {
-   "size": 928,
+   "size": 1028,
    "fields": [
     {
      "name": "Slot",
@@ -2691,8 +2680,8 @@
      "name": "OpenAnimation",
      "offset": 932,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "string",
+     "size": 24,
      "getter": "0x008c0f40",
      "setter": "0x008c0fb0"
     },
@@ -2700,8 +2689,8 @@
      "name": "CloseAnimation",
      "offset": 956,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "string",
+     "size": 24,
      "getter": "0x008c0f40",
      "setter": "0x008c0fb0"
     },
@@ -2709,8 +2698,8 @@
      "name": "LockedAnimation",
      "offset": 980,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "string",
+     "size": 24,
      "getter": "0x008c0f40",
      "setter": "0x008c0fb0"
     },
@@ -2718,19 +2707,14 @@
      "name": "OpenLockedAnimation",
      "offset": 1004,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "string",
+     "size": 24,
      "getter": "0x008c0f40",
      "setter": "0x008c0fb0"
     }
    ],
-   "complete": false,
-   "unresolved": [
-    "CloseAnimation",
-    "LockedAnimation",
-    "OpenAnimation",
-    "OpenLockedAnimation"
-   ]
+   "complete": true,
+   "unresolved": []
   },
   "GridEntityPit": {
    "size": 341,
@@ -2764,8 +2748,8 @@
      "name": "StateAnimation",
      "offset": 344,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "string",
+     "size": 24,
      "getter": "0x008c1180",
      "setter": "0x008c11f0"
     },
@@ -2779,13 +2763,11 @@
      "setter": "0x008c1360"
     }
    ],
-   "complete": false,
-   "unresolved": [
-    "StateAnimation"
-   ]
+   "complete": true,
+   "unresolved": []
   },
   "GridEntityPressurePlate": {
-   "size": 624,
+   "size": 640,
    "fields": [
     {
      "name": "TimerPlate",
@@ -2801,7 +2783,7 @@
      "offset": 616,
      "offset_source": "upvalue",
      "type": "string",
-     "size": 4,
+     "size": 24,
      "getter": "0x008c1940",
      "setter": "0x008c19c0"
     },
@@ -2825,8 +2807,8 @@
      "name": "Anim",
      "offset": 340,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "string",
+     "size": 24,
      "getter": "0x008c14a0",
      "setter": "0x008c1510"
     },
@@ -2834,8 +2816,8 @@
      "name": "RubbleAnim",
      "offset": 364,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "string",
+     "size": 24,
      "getter": "0x008c14a0",
      "setter": "0x008c1510"
     },
@@ -2849,11 +2831,8 @@
      "setter": "0x008c1680"
     }
    ],
-   "complete": false,
-   "unresolved": [
-    "Anim",
-    "RubbleAnim"
-   ]
+   "complete": true,
+   "unresolved": []
   },
   "GridEntitySpikes": {
    "size": 344,
@@ -2912,8 +2891,8 @@
      "name": "Name",
      "offset": 8,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "string",
+     "size": 24,
      "getter": "0x008bcdb0",
      "setter": "0x008bce20"
     },
@@ -2921,8 +2900,8 @@
      "name": "Description",
      "offset": 32,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "string",
+     "size": 24,
      "getter": "0x008bcdb0",
      "setter": "0x008bce20"
     },
@@ -2930,8 +2909,8 @@
      "name": "GfxFileName",
      "offset": 56,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "string",
+     "size": 24,
      "getter": "0x008bcdb0",
      "setter": "0x008bce20"
     },
@@ -3038,8 +3017,8 @@
      "name": "DevilPrice",
      "offset": 124,
      "offset_source": "upvalue",
-     "type": "int",
-     "size": 4,
+     "type": "int16",
+     "size": 2,
      "getter": "0x008bd070",
      "setter": "0x008bd0d0"
     },
@@ -3047,8 +3026,8 @@
      "name": "ShopPrice",
      "offset": 126,
      "offset_source": "upvalue",
-     "type": "int",
-     "size": 4,
+     "type": "int16",
+     "size": 2,
      "getter": "0x008bd070",
      "setter": "0x008bd0d0"
     },
@@ -3128,8 +3107,8 @@
      "name": "Tags",
      "offset": 184,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "int64",
+     "size": 8,
      "getter": "0x008bd190",
      "setter": "0x008bd1f0"
     },
@@ -3161,13 +3140,8 @@
      "setter": "0x008bcd50"
     }
    ],
-   "complete": false,
-   "unresolved": [
-    "Description",
-    "GfxFileName",
-    "Name",
-    "Tags"
-   ]
+   "complete": true,
+   "unresolved": []
   },
   "ItemConfigList": {
    "size": 0,
@@ -3327,8 +3301,8 @@
      "name": "Name",
      "offset": 8,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "string",
+     "size": 24,
      "getter": "0x008bc910",
      "setter": "0x008bc980"
     },
@@ -3396,10 +3370,8 @@
      "setter": "0x008bcc50"
     }
    ],
-   "complete": false,
-   "unresolved": [
-    "Name"
-   ]
+   "complete": true,
+   "unresolved": []
   },
   "PosVel": {
    "size": 12,
@@ -3532,8 +3504,8 @@
      "name": "Color",
      "offset": 44,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "object",
+     "size": 4,
      "getter": "0x008bbf50",
      "setter": "0x008bbfb0"
     },
@@ -3541,8 +3513,8 @@
      "name": "BulletFlags",
      "offset": 88,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "int64",
+     "size": 8,
      "getter": "0x008bc070",
      "setter": "0x008bc0d0"
     },
@@ -3595,8 +3567,8 @@
      "name": "ChangeFlags",
      "offset": 128,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "int64",
+     "size": 8,
      "getter": "0x008bc070",
      "setter": "0x008bc0d0"
     },
@@ -3637,12 +3609,8 @@
      "setter": "0x008bc2d0"
     }
    ],
-   "complete": false,
-   "unresolved": [
-    "BulletFlags",
-    "ChangeFlags",
-    "Color"
-   ]
+   "complete": true,
+   "unresolved": []
   },
   "QueueItemData": {
    "size": 9,
@@ -3730,8 +3698,8 @@
      "name": "Name",
      "offset": 20,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "string",
+     "size": 24,
      "getter": "0x008c2220",
      "setter": null
     },
@@ -3775,8 +3743,8 @@
      "name": "SpawnCount",
      "offset": 68,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "int16",
+     "size": 2,
      "getter": "0x008c22f0",
      "setter": null
     },
@@ -3784,8 +3752,8 @@
      "name": "Width",
      "offset": 70,
      "offset_source": "upvalue",
-     "type": "int",
-     "size": 4,
+     "type": "uint8",
+     "size": 1,
      "getter": "0x008c2350",
      "setter": null
     },
@@ -3793,8 +3761,8 @@
      "name": "Height",
      "offset": 71,
      "offset_source": "upvalue",
-     "type": "int",
-     "size": 4,
+     "type": "uint8",
+     "size": 1,
      "getter": "0x008c2350",
      "setter": null
     },
@@ -3828,8 +3796,6 @@
    ],
    "complete": false,
    "unresolved": [
-    "Name",
-    "SpawnCount",
     "Spawns"
    ]
   },
@@ -4025,8 +3991,8 @@
      "name": "ClearCount",
      "offset": 74,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "int16",
+     "size": 2,
      "getter": "0x008c2730",
      "setter": "0x008c2790"
     },
@@ -4034,8 +4000,8 @@
      "name": "PoopCount",
      "offset": 80,
      "offset_source": "upvalue",
-     "type": "int",
-     "size": 4,
+     "type": "int16",
+     "size": 2,
      "getter": "0x008c27f0",
      "setter": "0x008c2790"
     },
@@ -4079,8 +4045,8 @@
      "name": "ShopItemIdx",
      "offset": 172,
      "offset_source": "upvalue",
-     "type": "int",
-     "size": 4,
+     "type": "int16",
+     "size": 2,
      "getter": "0x008c27f0",
      "setter": "0x008c2790"
     },
@@ -4088,8 +4054,8 @@
      "name": "ShopItemDiscountIdx",
      "offset": 174,
      "offset_source": "upvalue",
-     "type": "int",
-     "size": 4,
+     "type": "int16",
+     "size": 2,
      "getter": "0x008c27f0",
      "setter": "0x008c2790"
     },
@@ -4103,10 +4069,8 @@
      "setter": "0x008c2410"
     }
    ],
-   "complete": false,
-   "unresolved": [
-    "ClearCount"
-   ]
+   "complete": true,
+   "unresolved": []
   },
   "Spawn": {
    "size": 16,
@@ -4115,8 +4079,8 @@
      "name": "X",
      "offset": 0,
      "offset_source": "upvalue",
-     "type": "int",
-     "size": 4,
+     "type": "int16",
+     "size": 2,
      "getter": "0x008c1e80",
      "setter": "0x008c1ee0"
     },
@@ -4124,8 +4088,8 @@
      "name": "Y",
      "offset": 2,
      "offset_source": "upvalue",
-     "type": "int",
-     "size": 4,
+     "type": "int16",
+     "size": 2,
      "getter": "0x008c1e80",
      "setter": "0x008c1ee0"
     },
@@ -4133,8 +4097,8 @@
      "name": "EntryCount",
      "offset": 8,
      "offset_source": "upvalue",
-     "type": "int",
-     "size": 4,
+     "type": "uint8",
+     "size": 1,
      "getter": "0x008c1f40",
      "setter": "0x008c1fa0"
     },
@@ -4257,8 +4221,8 @@
      "name": "TearColor",
      "offset": 8,
      "offset_source": "upvalue",
-     "type": "unknown",
-     "size": null,
+     "type": "object",
+     "size": 4,
      "getter": "0x008bd750",
      "setter": "0x008bd7b0"
     },
@@ -4299,10 +4263,8 @@
      "setter": "0x008bd9f0"
     }
    ],
-   "complete": false,
-   "unresolved": [
-    "TearColor"
-   ]
+   "complete": true,
+   "unresolved": []
   },
   "TemporaryEffect": {
    "size": 12,
@@ -4399,10 +4361,7 @@
   }
  },
  "incomplete": [
-  "BitSet128",
-  "Card",
   "CardConfigList",
-  "Costume",
   "CostumeConfigList",
   "EffectList",
   "Entity",
@@ -4414,22 +4373,13 @@
   "EntityProjectile",
   "EntityRef",
   "EntityTear",
-  "Entry",
   "Game",
   "GridEntity",
-  "GridEntityDoor",
-  "GridEntityPoop",
-  "GridEntityRock",
-  "Item",
   "ItemConfigList",
   "Level",
   "PillConfigList",
-  "PillEffect",
-  "ProjectileParams",
   "Room",
-  "RoomDescriptor",
   "Spawn",
-  "TearParams",
   "VectorList"
  ]
 }

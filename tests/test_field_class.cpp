@@ -32,7 +32,9 @@ namespace {
 using isaec::api::FieldClass;
 using isaec::api::FieldType;
 using isaec::f32;
+using isaec::i16;
 using isaec::i32;
+using isaec::i64;
 using isaec::u8;
 using isaec::usize;
 
@@ -72,6 +74,18 @@ void store_f32(void* payload, usize offset, f32 value) {
 
 void store_u8(void* payload, usize offset, u8 value) {
     static_cast<u8*>(payload)[offset] = value;
+}
+
+// A 64 bit field: the low half first, the high half second, the way the
+// game's own push helper reads it.
+void store_i64(void* payload, usize offset, i64 value) {
+    store_i32(payload, offset, static_cast<i32>(value & 0xffffffffLL));
+    store_i32(payload, offset + 4, static_cast<i32>((value >> 32) & 0xffffffffLL));
+}
+
+// A 16 bit field.
+void store_i16(void* payload, usize offset, i16 value) {
+    std::memcpy(static_cast<u8*>(payload) + offset, &value, sizeof(value));
 }
 
 i32 load_i32(const void* payload, usize offset) {
@@ -265,6 +279,43 @@ ISAEC_TEST(generated_classes_work_without_a_hand_written_table) {
     const char* script = R"lua(
         assert(t.TearVariant == 12, "TearVariant")
         assert(t.TearDamage == 3.5, "TearDamage")
+    )lua";
+
+    const int status = luaL_dostring(L, script);
+    if (status != 0) {
+        std::fprintf(stderr, "lua error: %s\n", lua_tostring(L, -1));
+    }
+    CHECK(status == 0);
+}
+
+// The width of a field matters: the game packs a 64 bit counter, a 16 bit
+// variant and two one byte dimensions into the same objects. The widths come
+// from the load in the getter body, not from the push helper.
+ISAEC_TEST(wide_fields_keep_their_width) {
+    Fixture fixture;
+    lua_State* L = fixture.L;
+
+    void* bits = FieldClass::create(L, "BitSet128", isaec::api::generated::kBitSet128Size);
+    REQUIRE(bits != nullptr);
+    store_i64(bits, 0, 0x0123456789abcdefLL);
+    lua_setglobal(L, "bits");
+
+    void* entry = FieldClass::create(L, "Entry", isaec::api::generated::kEntrySize);
+    REQUIRE(entry != nullptr);
+    store_i16(entry, 4, 300);
+    lua_setglobal(L, "entry");
+
+    void* room = FieldClass::create(L, "Room", isaec::api::generated::kRoomSize);
+    REQUIRE(room != nullptr);
+    store_u8(room, 70, 13);
+    store_u8(room, 71, 7);
+    lua_setglobal(L, "room");
+
+    const char* script = R"lua(
+        assert(bits.l == 0x0123456789abcdef, "the 64 bit field")
+        assert(entry.Variant == 300, "the 16 bit field")
+        assert(room.Width == 13, "the one byte field")
+        assert(room.Height == 7, "the second one byte field")
     )lua";
 
     const int status = luaL_dostring(L, script);

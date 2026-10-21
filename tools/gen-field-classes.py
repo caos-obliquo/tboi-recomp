@@ -45,6 +45,9 @@ SOURCE_OUT = os.path.join(ROOT, "src", "api", "field_classes_generated.cpp")
 # push helper was not recognised.
 PLAIN_TYPES = {
     "int": "FieldType::Int",
+    "int64": "FieldType::Int64",
+    "int16": "FieldType::Int16",
+    "uint8": "FieldType::UInt8",
     "float": "FieldType::Float",
     "bool": "FieldType::Bool",
 }
