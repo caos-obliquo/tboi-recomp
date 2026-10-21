@@ -888,13 +888,18 @@ The nine field classes of §24 are now generated from the measured layout:
 and writes `include/isaec/api/generated/field_classes.hpp` and
 `src/api/field_classes_generated.cpp`. The hand written tables are gone.
 
-* 43 classes, 301 plain fields, 193 distinct closure bodies.
+* 44 classes, 310 plain fields, 203 distinct closure bodies.
 * The CI context `generated-spec-is-current` regenerates both files and
   diffs them, so the tables cannot drift from the JSON.
 * The JSON still needs the binary and is refreshed by hand with
   `tools/probe_field_layout.py`; that is the one step CI cannot repeat.
-* The honest count: **316 of the 1464 members do something**, they cover
-  **202 of the 911 bodies**, and **0 of the 911 bodies are translated**.
+* The honest count: **325 of the 1464 members do something**, they cover
+  **205 of the 911 bodies**, and **0 of the 911 bodies are translated**.
+* The width of a field is recovered from the load in the getter body (a dword,
+  a word, a byte, or two dwords for a 64 bit field), not from the push helper:
+  the helper that pushes a 16 bit value is also used for a one byte field. The
+  census has no unknown type left (166 int, 104 float, 11 int16, 5 int64,
+  3 uint8, 48 bool, 80 object, 17 string).
 
 The next steps, in order:
 

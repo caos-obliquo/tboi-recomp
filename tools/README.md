@@ -591,7 +591,10 @@ third-party and are not committed; `--cache` keeps them outside the repo.
 For every property of the recovered surface, the offset of the field its
 getter reads and the type it pushes. The offset comes from the property
 upvalue (a small constant) or from the per-field accessor the upvalue points
-at; the type comes from the push helper at the end of the getter.
+at; the type comes from the push at the end of the getter, and the *width* of
+an integer field from the load in the getter body (a dword, a word, a byte or
+two dwords). A call to one of the game's own push helpers is classified by
+the Lua entry point that helper ends up calling.
 
 ```
 python3 tools/probe_field_layout.py "<exe>" --cache /tmp/opencode/disasm.txt \
@@ -603,9 +606,9 @@ python3 tools/probe_field_layout.py "<exe>" --cache /tmp/opencode/disasm.txt \
 `Vector.X` at 0, `PosVel.Position` at 0, `KColor.Red` at 0) and the type of
 each.
 
-**What it establishes**: the field offset and the field type of every property
-whose getter reads a field directly -- 434 of them, 21 classes with a
-complete layout.
+**What it establishes**: the field offset, the field type and the width of every
+property whose getter reads a field directly -- 434 of them over 53 classes,
+33 of them with a complete layout, and no unknown type left.
 
 **What it does NOT establish**: a field the game reaches through a virtual
 call has no offset (the list `Size` properties stay unresolved); an `object`
@@ -624,9 +627,9 @@ python3 tools/gen-field-classes.py
   include/isaec/api/generated/field_classes.hpp   the tables
   src/api/field_classes_generated.cpp             the installer
 
-Only the plain fields (int, float, bool) are emitted; `object`, `string` and
-unrecovered types are skipped, and their members keep the loud stub of the
-generated API spec.
+Only the plain fields are emitted (int, int16, int64, uint8, float, bool);
+`object` and `string` fields are skipped, and their members keep the loud stub
+of the generated API spec.
 
 **What it establishes:** that the tables in the generated header are exactly
 what the committed layout JSON says, and nothing else. The CI context

@@ -1991,7 +1991,7 @@ classes reproduce the *layout* the binary shows, not the code it runs.
 
 The nine field classes of §23 were written by hand. That does not scale: the
 layout census knows **434 fields over 53 classes**, and 43 of those classes
-have at least one plain field (int, float or bool) — 301 fields in total,
+have at least one plain field (int, float, bool or a wide integer) — 310 fields in total,
 covering 193 distinct closure bodies. The tables are therefore *generated*.
 
 ### 24.1 The generator
@@ -2022,7 +2022,7 @@ The C++ tables come out of that JSON alone, so the CI context
 
 ### 24.2 What the tables contain
 
-43 classes, 301 plain fields, 193 distinct closure bodies. A few of the
+44 classes, 310 plain fields, 203 distinct closure bodies. A few of the
 classes the port now covers:
 
 | class | size | plain fields |
@@ -2041,7 +2041,43 @@ the generated tables do not replace them. The generated tables do cover
 `Vector.X`, `Vector.Y` and the seven `Color` members with the same offsets,
 which is why the counts below subtract the overlap.
 
-### 24.3 What this does not establish
+### 24.3 The width of a field is recovered too
+
+The first version of the tool knew four types: an integer, a float, a boolean
+and an object. Reading the getters by hand showed that the game packs more
+than one width into the same objects, so the tool now reads the *load* in the
+getter body as well:
+
+| the load in the getter | the field is |
+| --- | --- |
+| `mov eax, DWORD PTR [ecx+edi*1]` | a 32 bit integer |
+| `movzx eax, BYTE PTR [ecx+edi*1]` | a one byte integer |
+| `mov dx, WORD PTR [ecx+edi*1]` | a 16 bit integer |
+| two dword loads | a 64 bit integer |
+| `movss xmm1, [edx+edi]` | a float |
+| `cmp BYTE PTR [edi+ecx*1], dl` | a boolean |
+| `lua_pushlstring` on a `std::string` | a string (24 bytes) |
+| `lua_newuserdata` | an object (a pointer into the game's heap) |
+
+The width has to come from the getter, not from the push helper: the helper
+that pushes a 16 bit value is also used for a one byte field, and a first
+attempt that read the width from the helper claimed that `Room.Width` (offset
+70) and `Room.Height` (offset 71) were two byte fields. Two two byte fields
+cannot overlap, so the claim was impossible; the getters show
+`movzx eax, BYTE PTR [ecx+edi*1]`, one byte each.
+
+With the widths known the census has no unknown left: 434 fields over 53
+classes, 33 of them complete -- 166 int, 104 float, 11 int16, 5 int64,
+3 uint8, 48 bool, 80 object and 17 string.
+
+The port implements the scalar widths (int, int16, int64, uint8, float,
+bool). The string fields stay stubs: the game's `std::string` is 24 bytes
+with the pointer at 0, the length at 16 and the capacity at 24, and the
+port's own `std::string` is a different size, so a string field cannot be
+stored in the port's payload without changing the layout the offsets come
+from.
+
+### 24.4 What this does not establish
 
 * The offsets and the types are recovered; the *values* are the port's own
   bytes. Nothing fills them but the game.
@@ -2054,11 +2090,11 @@ which is why the counts below subtract the overlap.
   of the value, both read out of the binary (a `cmp BYTE PTR` read and a
   `mov BYTE PTR` write).
 
-### 24.4 The honest count
+### 24.5 The honest count
 
 | what | before | now |
 | --- | --- | --- |
-| members of the surface that do something | 54 | **316** of 1464 |
+| members of the surface that do something | 54 | **325** of 1464 |
 | closure bodies covered by those members | 40 | **202** of 911 |
 | closure bodies translated from the binary | 0 | **0** of 911 |
 

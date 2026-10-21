@@ -38,6 +38,9 @@ class Binding;
 // The type of a plain field.
 enum class FieldType {
     Int,    // a 32 bit signed integer
+    Int64,  // a 64 bit signed integer
+    Int16,  // a 16 bit signed integer
+    UInt8,  // a one byte unsigned integer
     Float,  // a 32 bit float
     Bool,   // a byte that is zero or non-zero
 };
