@@ -16,6 +16,7 @@ a binary **you** already own, from a path **you** pass in.
 | `probe_iat.py` | Walks the PE import directory, maps every IAT slot to its imported name, and finds each `call dword ptr [slot]` site. | yes |
 | `probe_property_names.py` | Recovers the name and upvalue of every Lua closure registration, by scanning forward from each `lua_pushcclosure` call site. | yes |
 | `probe_body_signatures.py` | Counts the Lua entry points and patched-Lua pseudo-indices each closure body touches. | yes |
+| `probe_class_attribution.py` | Attributes every closure registration to the game class that owns it. | yes |
 | `negctl-baseline.py` | Negative control for the test suite. Proves a green baseline can go red. | no |
 
 Current findings from these probes are written up in
@@ -199,6 +200,53 @@ of 392).
 - **Not a signature.** "Calls `lua_type`" is not "takes a userdata".
 - **Not an argument count.** The Lua-visible argument count needs the stack
   index actually used, which is a separate measurement.
+
+## `probe_class_attribution.py`
+
+```sh
+tools/probe_class_attribution.py /path/to/isaac-ng.exe
+tools/probe_class_attribution.py /path/to/isaac-ng.exe --json-out attrib.json
+tools/probe_class_attribution.py /path/to/isaac-ng.exe --self-test
+```
+
+Attributes each closure registration to the game class that owns it.
+
+The mechanism: every class is registered by a routine that takes the class
+name as an argument and installs the class metatable (`0x0085d040` in this
+build). Its 66 call sites all live in one master function, in class order, and
+each passes the class name as a `.rdata` literal. The registrar routine for a
+class hardcodes that class's own name, so the name is in the code, not only
+at the call site.
+
+A scope is opened by the table constructor (`0x0085dab0`) and the class of a
+registration is the last class-registration call before it. A construct with
+no class-registration call after it opens a *namespace* scope instead, which
+is how the game's Lua globals (`Isaac`, `Input`, `Options`) are kept out of
+the classes -- without that rule the 56 global functions land on
+`MusicManager`, the class that happens to precede them.
+
+A property registered by a shared helper belongs to the scope that holds the
+*call site* of that helper.
+
+Result: **64 classes** and 3 global namespaces, 2011 attributed records,
+**1537 (class, property) pairs**, 907 distinct bodies attributed.
+
+### What it establishes
+
+- The class list, from the code: 64 classes, not the 9 the string-adjacency
+  surface claimed.
+- The class/property table: 1537 pairs. `HUD` has 13 properties, not the 42
+  the adjacency surface claimed; `Isaac` does not exist as a class, so the
+  documented HUD/Isaac contamination is resolved.
+
+### What it does **not** establish
+
+- **Not an implementation.** It is a table.
+- **Not the class hierarchy.** A property a class inherits is registered on
+  its parent's table, so it is attributed to the parent.
+- **Not a signature.** Which field a property touches is a separate question.
+- **Not a method count.** A property with a getter and a setter is two
+  registrations but one member.
 
 ## `negctl-baseline.py`
 

@@ -282,6 +282,18 @@ class Fns:
         return out
 
 
+def hex_or_none(value: int | None) -> str:
+    """Format an address for a report, tolerating a missing value.
+
+    The self-test must report a *failed control* as a failed control, not as
+    a `TypeError` from formatting `None` -- a crash would hide the failure
+    behind a traceback.
+    """
+    if value is None:
+        return "None"
+    return f"0x{value:x}"
+
+
 def read_c_string(image: PEImage, va: int, lo: int, hi: int) -> str | None:
     """A printable ASCII C string at `va`, or None.
 
@@ -562,6 +574,11 @@ class Probe:
             rotate_va = rot.va
             rawset_va = raws.va
             name_va = ins.va
+            # The address of the string literal itself, when the name is a
+            # literal. This is the address of the bytes in .rdata, not the
+            # address of the `lua_pushstring` call site: the call site is
+            # reported separately as `name_call_va`.
+            name_literal = None
             # The argument of the pushstring.
             #
             # `lua_pushstring(L, s)` is a cdecl call, so the arguments are
@@ -584,6 +601,7 @@ class Probe:
                 if imm is not None:
                     name = self.cstring(imm)
                     name_src = "literal" if name else None
+                    name_literal = imm if name else None
                 else:
                     mp = PARAM_RE.search(cand.operands)
                     if mp:
@@ -608,6 +626,7 @@ class Probe:
                                 else:
                                     name = self.cstring(val)
                                     name_src = "literal" if name else None
+                                    name_literal = val if name else None
             break
 
         common = {
@@ -654,6 +673,9 @@ class Probe:
                 rec["name"] = s
                 rec["name_source"] = "caller"
                 rec["caller"] = cs
+                # The literal is the string the *caller* pushed, so its
+                # address is the caller's literal address.
+                rec["name_literal_va"] = imm
                 if upvalue_param is not None:
                     uidx = (upvalue_param - 8) // 4
                     if 0 <= uidx < len(args):
@@ -671,7 +693,8 @@ class Probe:
         rec = dict(common)
         rec["name"] = name
         rec["name_source"] = name_src
-        rec["name_literal_va"] = name_va
+        rec["name_literal_va"] = name_literal
+        rec["name_call_va"] = name_va
         return [rec]
 
     def rows(self) -> list[dict]:
@@ -791,17 +814,18 @@ def self_test(exe: str, cache: str | None) -> int:
         fail(f"no record for helper 0x{CONTROL_REF_HELPER:x}")
     else:
         r = ref[0]
-        print(f"control Ref: name={r['name']!r} body=0x{r['body']:x} "
-              f"upvalue=0x{r['upvalue']:x} dunder={r['preceding_dunder']!r}")
+        print(f"control Ref: name={r['name']!r} body={hex_or_none(r['body'])} "
+              f"upvalue={hex_or_none(r['upvalue'])} "
+              f"dunder={r['preceding_dunder']!r}")
         if r["name"] != CONTROL_REF_NAME:
             fail(f"helper 0x{CONTROL_REF_HELPER:x} name {r['name']!r} "
                  f"!= {CONTROL_REF_NAME!r}")
         if r["body"] != CONTROL_REF_BODY:
             fail(f"helper 0x{CONTROL_REF_HELPER:x} body "
-                 f"0x{r['body']:x} != 0x{CONTROL_REF_BODY:x}")
+                 f"{hex_or_none(r['body'])} != 0x{CONTROL_REF_BODY:x}")
         if r["upvalue"] != CONTROL_REF_UPVALUE:
             fail(f"helper 0x{CONTROL_REF_HELPER:x} upvalue "
-                 f"0x{r['upvalue']:x} != 0x{CONTROL_REF_UPVALUE:x}")
+                 f"{hex_or_none(r['upvalue'])} != 0x{CONTROL_REF_UPVALUE:x}")
 
     # positive control 2: the "X"/"Y" helper, two callers, two names.
     xy = [r for r in rows if r["func"] == CONTROL_XY_HELPER]

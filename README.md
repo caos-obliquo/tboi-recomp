@@ -242,6 +242,7 @@ established from the shipped DLL rather than assumed — see
 | **Property-accessor ABI** | **recovered** — [§14](docs/binding-surface-findings.md) |
 | **Lua binding index space** | **patched Lua identified** — [§14.6](docs/binding-surface-findings.md) |
 | **Closure bodies named** | **911 / 911** — every closure body carries a name ([§15](docs/binding-surface-findings.md)) |
+| **Closures attributed to a class** | **2011 records over 64 classes** (+ 3 global namespaces) — 1537 (class, property) pairs ([§16](docs/binding-surface-findings.md)) |
 | **Closure bodies implemented** | **0 / 911** — all resolve to `not_implemented_trampoline` |
 | **Packed archive (`ARCH000`) container** | **container solved**, codec open |
 | → `ARCH000` payload codec | **not started** — see [#2](https://github.com/caos-obliquo/tboi-recomp/issues/2) |
@@ -290,11 +291,10 @@ Three numbers are easy to read as more than they are:
   would overstate the surface.
 - The **417** metatable-key bodies are property accessors, so they map onto the
   *field* layer rather than the method layer.
-- A **name** is not a **class**, and a name is not a **signature**. Every
-  closure now has a name, but which class owns it, and what it returns, are
-  separate questions that are still open
-  ([#4](https://github.com/caos-obliquo/tboi-recomp/issues/4),
-  [#3](https://github.com/caos-obliquo/tboi-recomp/issues/3)).
+- A **name** is not a **signature**. Every closure now has a name *and* a
+  class ([§16](docs/binding-surface-findings.md)) — 64 classes, 1537
+  (class, property) pairs — but what a property returns is still open
+  ([#3](https://github.com/caos-obliquo/tboi-recomp/issues/3)).
 
 The 655 figure this project has tracked since the beginning is a count of
 recovered *names*, and it was never shown to equal a count of *bodies*. It is
