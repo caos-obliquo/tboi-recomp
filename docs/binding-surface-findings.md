@@ -816,7 +816,7 @@ question is the semantics of the constant, not the fidelity of the decompiler.
 §13 named 524 registrations by walking **backwards** from each
 `lua_pushcclosure` call. That method is structurally incapable of finding a
 property name, because the compiler pushes the name *after* the closure. This
-section gives the mechanism that replaces it, the new census, and the two
+section gives the mechanism that replaces it, the new census, and the
 retractions that follow from it.
 
 Tool: `tools/probe_property_names.py` (see `tools/README.md`). Every number
