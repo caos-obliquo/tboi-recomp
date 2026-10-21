@@ -489,10 +489,13 @@ found at all.
 
 ## 14. The property-accessor ABI — how a bound feature actually runs
 
-§13 ended with "0 of 441 signatures". That is no longer true. All 441 recovered
-closure bodies have now been decompiled, and they are not 441 unrelated
-functions: they are instances of a small number of shapes, and one of those
-shapes is the mechanism that binds C++ objects to Lua properties.
+§13 ended with "0 of 441 signatures". That is no longer true, and 441 was not
+the right denominator either: §15.8 shows there are 911 closure bodies in
+this binary. **All 911 are now decompiled** (441 in the first sweep, the 470
+that the corrected census added in a second sweep, 0 failures in both). They
+are not 911 unrelated functions: they are instances of a small number of
+shapes, and one of those shapes is the mechanism that binds C++ objects to
+Lua properties.
 
 ### 14.1 Corpus provenance
 
@@ -509,12 +512,12 @@ the mistake this section exists to prevent.
 
 | | |
 |---|---|
-| bodies decompiled | 441 / 441 |
+| bodies decompiled | **911 / 911** (441 in the first sweep, 470 in the second) |
 | failures | 0 |
 | address set vs `isaac-ng-body-seeds.tsv` | identical (asserted, not assumed) |
-| headers present in `kuna-all.c` | 441, all unique |
-| wall clock | ~1.4 s per body, ~10 min total |
-| output | `~/.omo/evidence/pseudocode/kuna-all.c` (9600 lines), `kuna-index.jsonl` |
+| headers present in `kuna-all.c` | 911, all unique |
+| wall clock | ~1.3 s per body, ~11 min for the second sweep |
+| output | `~/.omo/evidence/pseudocode/kuna-all.c` (23765 lines), `kuna-index.jsonl` |
 
 The first attempt at this sweep buffered the composed file and was aborted at
 400/441, which left a **0-byte output** — the work was lost even though every
@@ -990,8 +993,9 @@ Over all 1064 call sites there are **911 distinct bodies**, every one of them
 preceded by a terminator (verified: 911 of 911), and every one of them now
 carries a name. Consequences:
 
-- The 441-body seed file covers **48%** of the bodies; **470 bodies have never
-  been decompiled**.
+- The seed file now covers **all 911** bodies: it was regenerated from the
+  code-derived attribution table (`tools/gen_body_seeds.py`) and the 470
+  bodies it added have been decompiled, 0 failures.
 - Of the 372 seed bodies that were labelled generically, **368 now carry a real
   property name** (524 distinct names across them) and 4 remain
   metamethod-only.
@@ -1030,6 +1034,21 @@ tools/probe_body_signatures.py "<isaac-ng.exe>" --cache disasm.txt
 | bodies calling `lua_type` | — | 386 | — |
 | bodies whose first Lua call is `lua_type` | — | 379 | — |
 | bodies calling `lua_type` **or** using a pseudo-index | — | 392 | — |
+
+The same measurement over the **whole** corpus, now that the seed file
+covers all 911 bodies (the counts are over every body, and every one of
+them has a `ret`):
+
+| quantity (911 bodies) | measured |
+|---|---:|
+| bodies calling `lua_type` | 800 |
+| bodies whose first Lua call is `lua_type` | 783 |
+| bodies whose first Lua call is a type check | 858 |
+| bodies using `0xfff0b9d7` | 825 |
+| bodies using `0xfff0b9d8` | 238 |
+| bodies calling `luaL_check*` | 287 |
+| bodies with a `ret` | 911 |
+| bodies truncated by the extent guard | 0 |
 | bodies whose first Lua call is a type check | — | 391 | — |
 | bodies calling `lua_type` | 434 | 386 | **no** |
 

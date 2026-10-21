@@ -726,14 +726,27 @@ def summarize(rows: list[dict]) -> dict:
     }
 
 
-def main() -> int:
+def build_parser() -> argparse.ArgumentParser:
+    """One parser for the tool, so the flags cannot drift apart."""
     ap = argparse.ArgumentParser(
         description="Recover Lua property names and their implementations.")
-    ap.add_argument("exe")
+    ap.add_argument("exe", nargs="?")
     ap.add_argument("--cache")
     ap.add_argument("--json-out")
     ap.add_argument("--compare", help="probe_closures.json to compare against")
-    args = ap.parse_args()
+    ap.add_argument("--self-test", action="store_true",
+                    help="run the positive and negative controls and exit")
+    return ap
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+
+    if args.self_test:
+        return self_test(args.exe, args.cache)
+    if not args.exe:
+        build_parser().print_help()
+        return 2
 
     p = Probe(args.exe, args.cache)
     rows = p.rows()
@@ -747,7 +760,7 @@ def main() -> int:
           f"  ({s['distinct_property_names']} distinct)")
     print(f"  metamethod names          : {s['metamethod_names']}")
     print(f"distinct names               : {s['distinct_names']}")
-    print(f"distinct bodies named        : {s['distinct_bodies']}")
+    print(f"distinct bodies named       : {s['distinct_bodies']}")
     print(f"records with an upvalue      : {s['with_upvalue']}"
           f"  ({s['distinct_upvalues']} distinct)")
     print(f"blocked by a later closure   : {s['blocked_by_next_closure']}")
@@ -868,16 +881,4 @@ def self_test(exe: str, cache: str | None) -> int:
 
 
 if __name__ == "__main__":
-    ap = argparse.ArgumentParser()
-    ap.add_argument("exe", nargs="?")
-    ap.add_argument("--cache")
-    ap.add_argument("--json-out")
-    ap.add_argument("--compare")
-    ap.add_argument("--self-test", action="store_true")
-    a = ap.parse_args()
-    if a.self_test:
-        sys.exit(self_test(a.exe, a.cache))
-    if not a.exe:
-        ap.print_help()
-        sys.exit(2)
     sys.exit(main())
