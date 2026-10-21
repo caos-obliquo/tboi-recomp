@@ -687,3 +687,50 @@ Still not established: the *meaning* of the arguments (the bodies call the
 game's C++ virtuals, so the semantics are not in the binary), and the number
 of arguments the game actually passes. See
 docs/binding-surface-findings.md §17.
+
+## 19. The Vector class is implemented (first bodies that run)
+
+The first slice of Phase 5 is in: the `Vector` class has real
+implementations instead of `not_implemented_trampoline()` stubs.
+
+- `include/isaec/api/vector.hpp` + `src/api/vector.cpp`: the value type (two
+  32 bit floats) and the arithmetic.
+- `include/isaec/api/vector_lua.hpp` + `src/api/vector_lua.cpp`: the Lua
+  face — the metatable, the `__index` / `__newindex` dispatch, 13 methods,
+  the `X` and `Y` properties and the five arithmetic metamethods.
+- `tests/test_vector.cpp`: the arithmetic on its own, and the class driven
+  from a script through a real `lua_State`.
+
+Implemented: 15 of the 1464 members (13 methods, `X`, `Y`), on 9 of the 911
+closure bodies, plus `__add`, `__sub`, `__mul`, `__div` and `__unm`.
+
+**What is recovered and what is not.** The names, the ABI (receiver at index
+1, visible arguments from index 2, 0 or 1 return values, a 16 byte userdata
+with the payload at offset 0, the property roles, the metamethod set) come
+from the binary. **The arithmetic does not**: the original's closures call
+the game's C++ `Vector` through a vtable pointer, so the maths in
+`vector.cpp` is the documented Isaac API reimplemented from scratch.
+
+Two members of the class stay loud stubs on purpose: `Vector:Clamp` and
+`Vector:Clamped` read **four** numbers in the original (the shared helper
+`0x8ba890` does `luaL_checknumber` at indices 2, 3, 4 and 5) while the
+public API documents two. The semantics of four numbers are unknown, so
+those two members still raise `isaec: Vector:Clamp is not implemented`.
+`Vector.__tostring` is not implemented either, and `Vector:Lerp`'s fourth
+argument (a boolean the original forwards to the game's own routine) is
+ignored.
+
+`install_vector_class(binding)` replaces only the members it implements and
+is called *after* the generated spec is applied; every other member of every
+other class still raises. See docs/binding-surface-findings.md §18.
+
+### Next steps, in order
+
+1. The remaining `Vector` members (`Clamp`, `Clamped`, `__tostring`) once
+   the argument discrepancy is settled.
+2. The next class group: the pure-math and container classes that need no
+   game state (`Color`, `PosVel`, `RNG`, the list classes).
+3. The classes that need the game's C++ objects (`Entity`, `Player`) are a
+   different problem: their closures call game virtuals, so they need the
+   game side, not just the binding.
+4. The REPENTOGON `libzhl` cross-check (#20) for the names and the arities.

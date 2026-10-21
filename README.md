@@ -19,7 +19,8 @@ aims to be compatible with.
 
 > **Status: nothing here plays the game.** The binding surface is fully mapped
 > (64 classes + 3 namespaces, 1003 methods + 461 properties) and all 911 recovered
-> bodies are decompiled, but **0 are implemented**. Read
+> bodies are decompiled. **15 members of one class** -- the `Vector` class -- are
+> implemented; the other 1449 still refuse loudly. Read
 > [Progress](#progress) before getting excited.
 
 ---
@@ -163,7 +164,7 @@ from it is used here.
 | Technique | **clean-room reimplementation** | **static recompilation** via ReXGlue | **runtime injection** into the shipping game |
 | Reads the original by | recovering the interface, writing fresh behaviour | translating the code ahead of time | leaving the code alone |
 | You must own | your own Steam copy | your own Xbox 360 disc dump | your own Steam copy |
-| Scale | 441 bodies mapped, **0 implemented** | 1.6k stars, playable end to end | 1.2k stars, GPL-3.0 |
+| Scale | 911 bodies mapped, **15 members implemented** | 1.6k stars, playable end to end | 1.2k stars, GPL-3.0 |
 | Renderer | `NullRenderer` — counts calls, draws nothing | native D3D12/Vulkan, **>2x fps at ~¼ GPU power** | inherits the original's |
 
 ### What skate3recomp proves is possible
@@ -235,7 +236,7 @@ established from the shipped DLL rather than assumed — see
 |---|---|
 | Class registry, metatable model, inheritance | **done** — 16 tests green |
 | Declarative `ApiSpec` → `Binding` codegen | **done** |
-| Recovered surface registers and resolves | **done** (as stubs) — 64 classes + 3 namespaces, 1003 methods + 461 properties, all behind `not_implemented_trampoline` |
+| Recovered surface registers and resolves | **done** (as stubs) — 64 classes + 3 namespaces, 1003 methods + 461 properties, all behind `not_implemented_trampoline` except the 15 implemented `Vector` members |
 | Directory-backed data source | **done** |
 | Headless renderer (counts, draws nothing) | **done** |
 | **Closure bodies located** | **911 distinct bodies** of 1064 call sites — accounting complete |
@@ -247,7 +248,8 @@ established from the shipped DLL rather than assumed — see
 | → method / property / metamethod split | **method 1026 · property 861 · metamethod 125** — read off the helper that performs each registration ([§16.5](docs/binding-surface-findings.md)) |
 | **Body shape census** | **911 bodies measured** — `argc` bound 0…8 (52 unmeasured), `returns` 0 → 359 · 1 → 534 · unknown → 18 ([§17](docs/binding-surface-findings.md)) |
 | **Generated binding surface** | **64 classes + 3 namespaces, 1003 methods + 461 properties** — generated from the code-derived table, all trampolines |
-| **Closure bodies implemented** | **0 / 911** — all resolve to `not_implemented_trampoline` |
+| **First implemented class** | **`Vector`** — 13 methods, the `X`/`Y` properties, 5 arithmetic metamethods; `Clamp`/`Clamped` stay loud stubs ([§18](docs/binding-surface-findings.md)) |
+| **Closure bodies implemented** | **0 / 911 translated** — the 15 implemented members cover 9 bodies, reimplemented from the public API, not ported from the original |
 | **Packed archive (`ARCH000`) container** | **container solved**, codec open |
 | → `ARCH000` payload codec | **not started** — see [#2](https://github.com/caos-obliquo/tboi-recomp/issues/2) |
 | → `ARCH000` 64-bit name hash | **not started** — see [#1](https://github.com/caos-obliquo/tboi-recomp/issues/1) |
@@ -256,9 +258,10 @@ established from the shipped DLL rather than assumed — see
 | **Class coverage** | 64 classes + 3 global namespaces, every name code-derived |
 | **Repentance+ (2024 co-op update) API** | **not examined at all** — see [#6](https://github.com/caos-obliquo/tboi-recomp/issues/6) |
 
-Every recovered method currently resolves to a `not_implemented_trampoline`.
-That is the honest state: the *names* are recovered, the *dispatch* works, the
-*bodies* are read — and no function does anything yet.
+Every recovered member resolves to a `not_implemented_trampoline` unless it is
+one of the 15 implemented `Vector` members. That is the honest state: the
+*names* are recovered, the *dispatch* works, the *bodies* are read — and almost
+nothing does anything yet.
 
 The last three rows of the "located / decompiled / named / implemented" block are
 four different states and are deliberately not collapsed. **An address is not an
@@ -362,7 +365,7 @@ tools/                     research + codegen scripts; see tools/README.md
   inspect-archive.py       ARCH000 reader; asserts the index arithmetic
   disasm.py                objdump-backed aligned instruction stream
   probe_closures.py        name -> closure body, anchored on the call site
-  decompile_corpus.py      resumable batch decompiler for the 441 bodies
+  decompile_corpus.py      resumable batch decompiler for the 911 bodies
 docs/                      measured findings; see docs/binding-surface-findings.md
 bindings/                  recovered surface + generated spec
 tests/                     62 cases with PNG, 57 without, ctest
@@ -387,7 +390,7 @@ milestone `M1 Foundation` covers the current blockers.
 |---|---|---|
 | [#1](https://github.com/caos-obliquo/tboi-recomp/issues/1) | Locate the runtime archive loader | **blocked** — enumeration ruled out; approach exhausted |
 | [#2](https://github.com/caos-obliquo/tboi-recomp/issues/2) | `ARCH000` payload codec | **partially advanced** — mode 0x02 is an LCG, constants not recovered |
-| [#3](https://github.com/caos-obliquo/tboi-recomp/issues/3) | Recover bodies and signatures | **partially advanced** — 911/911 decompiled, 0 implemented, signatures open |
+| [#3](https://github.com/caos-obliquo/tboi-recomp/issues/3) | Recover bodies and signatures | **partially advanced** — 911/911 decompiled, the shape census done, 15 members implemented, **0 of 911 bodies translated** |
 | [#4](https://github.com/caos-obliquo/tboi-recomp/issues/4) | Per-class attribution | **largely resolved** — 64 classes + 3 namespaces, code-derived; hierarchy not recoverable |
 | [#5](https://github.com/caos-obliquo/tboi-recomp/issues/5) | Real GPU renderer | **blocked** — nothing to draw yet |
 | [#6](https://github.com/caos-obliquo/tboi-recomp/issues/6) | Repentance+ API surface | **partially advanced** |
