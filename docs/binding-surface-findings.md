@@ -1928,3 +1928,61 @@ Repentogon `.zhl` file publishes for that class, including the size of 32.
   something else than it appears to hold would be mistyped. The `.zhl`
   cross-check (section 21) is the independent check on the offsets; the types
   have no such second source yet.
+
+## 23. The field classes: plain fields as properties
+
+### 23.1 The mechanism
+
+Section 22 recovered the field layout of the game objects: for every property
+whose closure is a plain field accessor, the offset and the type of the field
+are known. Nine classes have *only* such properties (or have the object-valued
+ones left aside), and they can be implemented as they are.
+
+The port implements them with one shared helper, `FieldClass`
+(`include/isaec/api/field_class.hpp`):
+
+* the class installs a table of `{name, offset, type}` entries;
+* every entry becomes a property of the class, so the generated spec's stub is
+  replaced by a real getter and setter;
+* the getter reads the field out of the instance's payload and pushes it as an
+  integer, a float or a boolean; the setter writes it back.
+
+The instance is a userdata with a flat payload of the game's own size, so the
+offsets are the game's offsets. One difference from the original: the original
+has one closure per property, with the offset in an upvalue, while the port has
+one getter for the whole class and passes the property name as a second
+argument. The shared dispatch in `src/api/lua_value.cpp` does that.
+
+### 23.2 The nine classes
+
+| class | size | fields implemented | fields left alone |
+|---|---|---|---|
+| `ActiveItemDesc` | 32 | `Item` 0 int, `Charge` 8 int, `BatteryCharge` 12 int, `SubCharge` 16 int, `TimedRechargeCooldown` 20 int, `PartialCharge` 24 float, `VarData` 28 int | — |
+| `KColor` | 16 | `Red` 0, `Green` 4, `Blue` 8, `Alpha` 12 (float) | — |
+| `GridEntityDesc` | 32 | `Type` 0, `Variant` 4, `State` 8, `SpawnCount` 12, `SpawnSeed` 16, `VarData` 20 int, `Initialized` 24 bool, `VariableSeed` 28 int | — |
+| `TemporaryEffect` | 12 | `Count` 4 int, `Cooldown` 8 int | `Item` 0 (an object) |
+| `QueueItemData` | 9 | `Charge` 4 int, `Touched` 8 bool | `Item` 0 (an object) |
+| `GridEntityPit` | 341 | `HasLadder` 340 bool | — |
+| `GridEntitySpikes` | 344 | `Timeout` 340 int | — |
+| `GridEntityTNT` | 344 | `FrameCnt` 340 int | — |
+| `Sprite` | 264 | `Rotation` 164 float, `FlipX` 256 bool, `FlipY` 257 bool, `PlaybackSpeed` 260 float | `Offset` 148, `Scale` 156, `Color` 168 (objects) |
+
+30 members over 27 distinct closure bodies. The `ActiveItemDesc` layout is
+confirmed by the Repentogon `.zhl` file (section 21).
+
+### 23.3 What did not come from the binary
+
+* The *object* members stay loud stubs: an object field points into the game's
+  own heap, and the port has no such object to point at.
+* The *values* are not the game's: the port allocates its own payload and
+  fills it from the game side, which does not exist yet. Reading a field gives
+  the port's own bytes, not the original's.
+* The *type* comes from the push helper the getter uses, so a field whose
+  getter pushes something else would be mis-typed. The section 22 census found
+  one such case (`string`).
+
+### 23.4 The honest count
+
+54 of the 1464 members now do something (24 before this section), covering 40
+of the 911 closure bodies. **0 of 911 bodies are translated**: the field
+classes reproduce the *layout* the binary shows, not the code it runs.

@@ -742,6 +742,26 @@ Two traps are worth remembering:
 
 The `object` typed fields point at the game's own objects. The port cannot
 produce them, so those properties stay loud stubs.
+## 24. The field classes are implemented
+
+The layout of the game objects is recovered (section 22 of the findings), so
+the classes whose properties are plain fields can be implemented as they are.
+`FieldClass` (`include/isaec/api/field_class.hpp`) is the shared helper: a
+table of `{name, offset, type}` per class, one getter and one setter for the
+whole class, and the property name passed as a second argument by the shared
+dispatch.
+
+Nine classes are implemented: `ActiveItemDesc` (7 fields), `KColor` (4),
+`GridEntityDesc` (8), `TemporaryEffect` (2), `QueueItemData` (2),
+`GridEntityPit` (1), `GridEntitySpikes` (1), `GridEntityTNT` (1) and `Sprite`
+(4) -- 30 members over 27 closure bodies. The object-valued members stay loud
+stubs, because an object field points into the game's heap.
+
+The state of the port: 54 of the 1464 members do something, 40 of the 911
+bodies are covered, and **0 of 911 bodies are translated**. What the port
+reproduces is the *interface* the binary shows; the behaviour behind the
+interface is the documented Isaac API, reimplemented.
+
 ### Next steps, in order
 
 1. The remaining `Vector` members (`Clamp`, `Clamped`, `__tostring`) once
