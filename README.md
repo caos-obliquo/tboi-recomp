@@ -245,6 +245,7 @@ established from the shipped DLL rather than assumed — see
 | **Closure bodies named** | **911 / 911** — every closure body carries a name ([§15](docs/binding-surface-findings.md)) |
 | **Closures attributed to a class** | **2012 records over 64 classes** (+ 3 global namespaces) — 1538 (class, property) pairs ([§16](docs/binding-surface-findings.md)) |
 | → method / property / metamethod split | **method 1026 · property 861 · metamethod 125** — read off the helper that performs each registration ([§16.5](docs/binding-surface-findings.md)) |
+| **Body shape census** | **911 bodies measured** — `argc` bound 0…8 (52 unmeasured), `returns` 0 → 359 · 1 → 534 · unknown → 18 ([§17](docs/binding-surface-findings.md)) |
 | **Generated binding surface** | **64 classes + 3 namespaces, 1003 methods + 461 properties** — generated from the code-derived table, all trampolines |
 | **Closure bodies implemented** | **0 / 911** — all resolve to `not_implemented_trampoline` |
 | **Packed archive (`ARCH000`) container** | **container solved**, codec open |

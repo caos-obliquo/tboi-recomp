@@ -1348,3 +1348,112 @@ bodies).
   the extent rule.
 - **One binary.** No independent cross-check yet.
 
+## 17. Shape census: how many arguments a body sees, and what it returns
+
+Phase 4 of the plan in `~/.omo/plans/tboi-655-bodies.md`. A closure body
+carries no prototype, but it does touch the Lua stack, and the slots it
+touches say how many arguments it can see and how many values it hands back.
+
+### 17.1 What is measured, and what the number is
+
+`tools/probe_body_arity.py` walks every one of the 911 bodies and reports two
+numbers per body:
+
+- **`argc`** — the highest Lua stack index the body touches, minus one (the
+  receiver lives at index 1). It is an **upper bound** on the number of
+  arguments the member can see, not a count of the arguments it uses: the body
+  may ignore the values it reads, and the game may pass arguments the body
+  never looks at.
+- **`returns`** — the number of values the body leaves on the Lua stack, read
+  as the value in `eax` at the `ret` (`mov eax,1` → 1, `xor eax,eax` → 0).
+
+`argc_evidence` says where the number came from: `index` (the body reads the
+slot itself), `helper` (a helper the body calls reads it — the helper's own
+reads are followed recursively), `receiver-only` (the body touches only the
+receiver) or `none`. `argc_evidence: none` means nothing was measured, and
+`argc` is then 0 with `argc_measured` false in the generated spec.
+
+### 17.2 Why the recursion matters
+
+The first version of the census looked only at the body itself and reported
+`Vector:Clamped` as taking no argument. The body is:
+
+```
+0x008a8680: ... call 0x8ba890 ...
+```
+
+and `0x8ba890` reads four numbers out of the stack:
+
+```
+0x8ba890: push 0x5; push edi; call luaL_checknumber
+          push 0x4; push edi; call luaL_checknumber
+          push 0x3; push edi; call luaL_checknumber
+          push 0x2; push edi; call luaL_checknumber
+```
+
+so the body can see four arguments even though it passes only `L`. The census
+now follows helper calls — recursively, to depth 3, and only into helpers
+shorter than 200 instructions — and reports the bound. That is the difference
+between "the body reads no argument" and "the body can see four arguments".
+
+### 17.3 The census over all 911 bodies
+
+```
+$ python3 tools/probe_body_arity.py isaac-ng.exe --cache disasm.txt --json-out arity.json
+== 911 seed bodies
+   argc_0                       465
+   argc_1                       297
+   argc_2                        60
+   argc_3                        39
+   argc_4                        21
+   argc_5                        14
+   argc_6                         8
+   argc_7                         4
+   argc_8                         3
+   argc_without_evidence         52
+   returns_0                    359
+   returns_1                    534
+   returns_unknown               18
+   bodies                       911
+```
+
+Read through the class attribution, the same census gives the shape of every
+member of the surface: **1003 methods** — argc 0 → 539, 1 → 273, 2 → 85,
+3 → 46, 4 → 28, 5 → 14, 6 → 7, 7 → 4, 8 → 3, unmeasured → 4; returns 1 → 587,
+0 → 395, unmeasured → 21. **461 properties**: the getter reads no argument in
+459 cases and returns one value in 453.
+
+### 17.4 Hand-checked members
+
+| member | body | argc | returns | why |
+| --- | --- | --- | --- | --- |
+| `Vector:Cross` | `0x008a8270` | 1 | 1 | takes the other vector |
+| `Vector:Lerp` | `0x008a8310` | 3 | 1 | factor plus two bounds |
+| `Vector:Length` | `0x008a8510` | 0 | 1 | reads only the receiver |
+| `Vector:Normalize` | `0x008a8180` | 0 | 0 | mutates in place, returns nothing |
+| `Vector:Resized` | `0x008a8430` | 1 | 1 | returns a new vector |
+| `Vector:Clamped` | `0x008a8680` | 4 (`helper`) | 1 | the helper reads four numbers |
+| `Vector.X` getter | `0x008bb2e0` | 0 | 1 | reads the receiver's field |
+| `Vector.X` setter | `0x008bb340` | 1 | 0 | takes the new value |
+
+`Vector:Lerp` reading three numbers and `Vector:Normalize` reading none match
+the argument counts the game documents for those members. That is a
+consistency check on the measurement, not a proof of the semantics: the bodies
+call the game's own C++ virtuals, so what the numbers *mean* is not in the
+binary at all.
+
+### 17.5 What this does not establish
+
+- **A bound is not a signature.** `argc` is the number of arguments the body
+  can *see*. The number of arguments the game passes, and the number the
+  member uses, can both be smaller: `Vector:Clamped` is documented with two
+  arguments, and the body reaches four slots because a shared helper reads
+  four numbers.
+- **The body does not say what the arguments mean.** The census measures the
+  ABI, not the semantics. A body that reads one number and a body that reads
+  one table look the same here.
+- **Unmeasured stays unmeasured.** 52 of the 911 bodies have no index
+  evidence and 18 have an unmeasurable return; the generated spec keeps
+  `argc_measured: false` / `returns_measured: false` for them instead of
+  inventing a zero.
+- **No body is implemented.** The census is a table. 0 of 911 bodies run.

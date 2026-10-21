@@ -21,10 +21,14 @@ Two artifacts come out of here:
   include/isaec/api/generated/isaac_api_spec.hpp   compiled into isaec_lua
 
 The header form exists so the build never needs a JSON parser at runtime.
-Signatures are not recovered yet, so argc and returns are 0 and documented is
-false throughout; the body addresses travel as strings because they are
-provenance, not something the runtime can call yet. Filling in the signatures
-is a separate pass over the disassembly (see issue #3).
+The argc and returns fields come from the shape census in
+tools/probe_body_arity.py: how many Lua stack slots the closure body touches
+and how many values it returns. `argc` is an upper bound on the arguments the
+member can see, not a verified argument count -- the body may ignore the
+arguments it reads, and the game may pass arguments the body never looks at.
+`documented` stays false because the member semantics have not been written
+from scratch yet, and the body addresses travel as strings because they are
+provenance, not something the runtime can call yet.
 """
 
 import json
@@ -85,7 +89,13 @@ def collect(raw):
     def bucket(name, data, is_namespace):
         methods = []
         for m in data.get("methods", []):
-            methods.append({"name": m["name"], "body": body_of(m)})
+            methods.append({
+                "name": m["name"],
+                "body": body_of(m),
+                "argc": m.get("argc"),
+                "returns": m.get("returns"),
+                "argc_evidence": m.get("argc_evidence"),
+            })
         properties = []
         for p in data.get("properties", []):
             properties.append(
@@ -93,11 +103,20 @@ def collect(raw):
                     "name": p["name"],
                     "getter": p.get("getter") or "",
                     "setter": p.get("setter") or "",
+                    "argc": p.get("argc"),
+                    "returns": p.get("returns"),
+                    "setter_argc": p.get("setter_argc"),
+                    "setter_returns": p.get("setter_returns"),
                 }
             )
         metamethods = []
         for mm in data.get("metamethods", []):
-            metamethods.append({"name": mm["name"], "body": body_of(mm)})
+            metamethods.append({
+                "name": mm["name"],
+                "body": body_of(mm),
+                "argc": mm.get("argc"),
+                "returns": mm.get("returns"),
+            })
         entry = {
             "name": name,
             "parent": PARENTS.get(name, ""),
@@ -127,14 +146,38 @@ def emit_json(source, classes, namespaces):
             "kind": c["kind"],
             "parent": c["parent"],
             "methods": [
-                {"name": m["name"], "argc": 0, "returns": 0, "documented": False}
+                {
+                    "name": m["name"],
+                    "argc": m["argc"] if m["argc"] is not None else 0,
+                    "returns": m["returns"] if m["returns"] is not None else 0,
+                    "argc_measured": m["argc"] is not None,
+                    "returns_measured": m["returns"] is not None,
+                    "argc_evidence": m["argc_evidence"],
+                    "documented": False,
+                }
                 for m in c["methods"]
             ],
             "properties": [
-                {"name": p["name"], "getter": p["getter"], "setter": p["setter"]}
+                {
+                    "name": p["name"],
+                    "getter": p["getter"],
+                    "setter": p["setter"],
+                    "argc": p["argc"] if p["argc"] is not None else 0,
+                    "returns": p["returns"] if p["returns"] is not None else 0,
+                    "setter_argc": p["setter_argc"] if p["setter_argc"] is not None else 0,
+                    "setter_returns": (p["setter_returns"]
+                                       if p["setter_returns"] is not None else 0),
+                }
                 for p in c["properties"]
             ],
-            "metamethods": c["metamethods"],
+            "metamethods": [
+                {
+                    "name": mm["name"],
+                    "argc": mm["argc"] if mm["argc"] is not None else 0,
+                    "returns": mm["returns"] if mm["returns"] is not None else 0,
+                }
+                for mm in c["metamethods"]
+            ],
         }
 
     spec = {
@@ -156,9 +199,11 @@ def emit_header(source, classes, namespaces):
         "// Source: " + source,
         "//",
         "// Every name below was recovered from isaac-ng.exe's own registration",
-        "// code. Signatures are not recovered yet, so argc and returns are 0 and",
-        "// documented is false. Property bodies are carried as address strings:",
-        "// they are provenance, not callable code yet.",
+        "// code. argc and returns come from the shape census: argc is an upper",
+        "// bound on the arguments the body can see, not a verified argument",
+        "// count, and documented is false because the member semantics have not",
+        "// been written from scratch yet. Property bodies are carried as address",
+        "// strings: they are provenance, not callable code yet.",
         "",
         "#ifndef ISAEC_API_GENERATED_ISAAC_API_SPEC_HPP",
         "#define ISAEC_API_GENERATED_ISAAC_API_SPEC_HPP",
@@ -180,7 +225,14 @@ def emit_header(source, classes, namespaces):
         if cls["methods"]:
             lines.append("            {")
             for m in cls["methods"]:
-                lines.append('                MethodSpec{"%s"},' % cxx_escape(m["name"]))
+                lines.append(
+                    '                MethodSpec{"%s", %d, %d, false},'
+                    % (
+                        cxx_escape(m["name"]),
+                        m["argc"] if m["argc"] is not None else 0,
+                        m["returns"] if m["returns"] is not None else 0,
+                    )
+                )
             lines.append("            },")
         else:
             lines.append("            {},")

@@ -70,6 +70,68 @@ ISAEC_TEST(spec_preserves_recovered_inheritance) {
     CHECK(inherited.front() < inherited.back());
 }
 
+ISAEC_TEST(spec_carries_the_measured_shape_census) {
+    const auto classes = isaec::api::generated::isaac_api_spec();
+    const isaec::api::ClassSpec* vector = nullptr;
+    for (const auto& cls : classes) {
+        if (cls.name == "Vector") {
+            vector = &cls;
+            break;
+        }
+    }
+    CHECK(vector != nullptr);
+    if (vector == nullptr) return;
+
+    // The shape census (tools/probe_body_arity.py) measures how many Lua stack
+    // slots a closure body touches. argc is an upper bound on the arguments
+    // the member can see, not a verified argument count, but the numbers below
+    // were read out of the binary by hand and are the census's own values.
+    auto argc_of = [&vector](const char* name) -> int {
+        for (const auto& m : vector->methods) {
+            if (m.name == name) return m.argc;
+        }
+        return -1;
+    };
+    auto returns_of = [&vector](const char* name) -> int {
+        for (const auto& m : vector->methods) {
+            if (m.name == name) return m.returns;
+        }
+        return -1;
+    };
+
+    // Cross, Distance and Dot take the other vector: one visible argument.
+    CHECK(argc_of("Cross") == 1);
+    CHECK(returns_of("Cross") == 1);
+    // Lerp reads three numbers (the factor and the two bounds).
+    CHECK(argc_of("Lerp") == 3);
+    // Normalize mutates the receiver and returns nothing; Length reads no
+    // argument and returns a number.
+    CHECK(argc_of("Normalize") == 0);
+    CHECK(returns_of("Normalize") == 0);
+    CHECK(argc_of("Length") == 0);
+    CHECK(returns_of("Length") == 1);
+    // Resized allocates a new vector and returns it.
+    CHECK(argc_of("Resized") == 1);
+    CHECK(returns_of("Resized") == 1);
+
+    // The trampoline table carries the measured shape of each method.
+    Binding binding;
+    ApiSpec spec;
+    spec.source = "isaac-ng.exe registration code";
+    spec.classes = classes;
+    isaec::api::reset_trampoline_table();
+    isaec::api::apply(spec, binding);
+    bool found = false;
+    for (const auto& info : isaec::api::trampoline_table()) {
+        if (info.class_name == "Vector" && info.method_name == "Lerp") {
+            found = true;
+            CHECK(info.argc == 3);
+            CHECK(info.returns == 1);
+        }
+    }
+    CHECK(found);
+}
+
 ISAEC_TEST(spec_registers_every_method_and_property_as_resolvable) {
     Binding binding;
     ApiSpec spec;
