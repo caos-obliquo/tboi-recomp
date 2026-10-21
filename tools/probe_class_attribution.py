@@ -353,6 +353,12 @@ class Attributor:
         self.constructs = self._constructs()
         self.timeline = self._build_scope_timeline()
 
+        # Optional: the shape census from tools/probe_body_arity.py, keyed by
+        # body address.  It is a separate measurement with its own controls,
+        # so the attribution does not depend on it and it is loaded only when
+        # the caller asks for it.
+        self.arity: dict[int, dict] = {}
+
         # Per-host indexes for the scope lookup: "the last class registrar
         # before this address", "the last scope construct", "the last
         # namespace registration". The host is resolved with the leaf-aware
@@ -380,6 +386,28 @@ class Attributor:
                     self.ns_by_host):
             for v in lst.values():
                 v.sort()
+
+    def load_arity(self, path: str) -> int:
+        """Load the per-body shape census written by probe_body_arity.py.
+
+        The census answers two questions per body: how many visible arguments
+        the body reads, and how many values it returns to Lua.  Both are
+        properties of the body, not of the member that uses it, so one body
+        shared by several members keeps one shape.
+        """
+        data = json.loads(Path(path).read_text())
+        rows = data["shapes"] if isinstance(data, dict) and "shapes" in data else data
+        for row in rows:
+            body = row.get("body")
+            if body is None:
+                continue
+            self.arity[int(body)] = {
+                "argc": row.get("argc"),
+                "returns": row.get("returns"),
+                "argc_evidence": row.get("argc_evidence"),
+                "argc_bound": row.get("argc_bound"),
+            }
+        return len(self.arity)
 
     # -- discovery ------------------------------------------------------
 
@@ -729,6 +757,7 @@ class Attributor:
                 continue
             kind = self.kind_of(rec)
             role = self.prop_role(rec)
+            shape = self.arity.get(rec.get("body"), {})
             for cls in classes:
                 out.append({
                     "class": cls,
@@ -740,6 +769,9 @@ class Attributor:
                     "call": rec.get("call"),
                     "func": rec.get("func"),
                     "caller": rec.get("caller"),
+                    "argc": shape.get("argc"),
+                    "returns": shape.get("returns"),
+                    "argc_evidence": shape.get("argc_evidence"),
                 })
         return out
 
@@ -827,16 +859,26 @@ def build_surface(attr: Attributor, attributed: list[dict]) -> dict:
                 prop["getter"] = body
                 if prop["upvalue"] is None:
                     prop["upvalue"] = upvalue
+                prop["argc"] = rec.get("argc")
+                prop["returns"] = rec.get("returns")
+                prop["argc_evidence"] = rec.get("argc_evidence")
             elif role == "set" and prop["setter"] is None:
                 prop["setter"] = body
                 if prop["upvalue"] is None:
                     prop["upvalue"] = upvalue
+                prop["setter_argc"] = rec.get("argc")
+                prop["setter_returns"] = rec.get("returns")
+                prop["setter_argc_evidence"] = rec.get("argc_evidence")
         elif kind == "metamethod":
-            entry = {"name": name, "body": body, "upvalue": upvalue}
+            entry = {"name": name, "body": body, "upvalue": upvalue,
+                     "argc": rec.get("argc"), "returns": rec.get("returns"),
+                     "argc_evidence": rec.get("argc_evidence")}
             if entry not in bucket["metamethods"]:
                 bucket["metamethods"].append(entry)
         else:
-            entry = {"name": name, "body": body, "upvalue": upvalue}
+            entry = {"name": name, "body": body, "upvalue": upvalue,
+                     "argc": rec.get("argc"), "returns": rec.get("returns"),
+                     "argc_evidence": rec.get("argc_evidence")}
             if not any(m["name"] == name for m in bucket["methods"]):
                 bucket["methods"].append(entry)
 
@@ -860,6 +902,14 @@ def build_surface(attr: Attributor, attributed: list[dict]) -> dict:
             "recoverable from the registration code.",
             "The three global namespaces (Isaac, Input, Options) are Lua "
             "globals, not classes.",
+            "The 'argc' and 'returns' fields come from the shape census in "
+            "tools/probe_body_arity.py: the number of visible arguments the "
+            "body reads and the number of values it returns to Lua. They are "
+            "null where the census did not measure the body.",
+            "'argc' is an upper bound, not a verified argument count: it is the "
+            "highest Lua stack index the body (or a helper it calls) touches, "
+            "so it can exceed the number of arguments the member actually "
+            "uses. 'argc_evidence' says where the number came from.",
             "A body address is provenance, not identity: the binary reuses one "
             "closure body for several members (Vector.X and Vector.Y share "
             "0x008bb2e0, because the field offset travels as an upvalue), so "
@@ -971,6 +1021,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--json-out", help="write the attributed records as JSON")
     ap.add_argument("--surface-out",
                     help="write the binding surface (methods, properties) as JSON")
+    ap.add_argument("--arity", help="JSON dump from probe_body_arity.py; adds "
+                                    "argc and returns to every member")
     ap.add_argument("--self-test", action="store_true")
     a = ap.parse_args(argv)
 
@@ -978,6 +1030,9 @@ def main(argv: list[str] | None = None) -> int:
         return self_test(a.exe, a.cache)
 
     attr = Attributor(a.exe, a.cache)
+    if a.arity:
+        loaded = attr.load_arity(a.arity)
+        print(f"shape census loaded     : {loaded} bodies")
     attributed = attr.attribute()
     s = attr.summary(attributed)
 

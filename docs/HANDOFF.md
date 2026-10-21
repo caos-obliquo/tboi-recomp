@@ -576,6 +576,8 @@ disassembly and reconstruction in `docs/binding-surface-findings.md` §14.6.
 1. ~~Attach a **class** to each of the 911 named bodies~~ — **done**, see §17.
 1b. ~~Split the surface into methods / properties / metamethods~~ — **done**,
     §17; `bindings/code-derived-surface.json` is the generated table.
+1c. ~~Measure the shape of every body (arguments seen, values returned)~~ —
+    **done**, §18; `tools/probe_body_arity.py`, carried into the generated spec.
 2. Fix CI: `CMakeLists.txt:50` `pkg_check_modules(libpng16)` is a hard
    requirement and no runner has it, so every build job dies in Configure.
    Root cause is a missing dependency, not the runner labels — those are fixed.
@@ -656,3 +658,32 @@ What this does not deliver: no body is implemented, metamethods are recorded
 in the spec but have no runtime registration path, and the class hierarchy
 (the `__parent` link) is not recoverable -- it is a Lua table taken from the
 stack, never a name literal.
+
+## 18. Shape census: argc and returns per body (Phase 4)
+
+`tools/probe_body_arity.py` measures, for all 911 bodies, the highest Lua
+stack index the body touches (the receiver lives at index 1, so `argc` is that
+index minus one) and the number of values the body returns to Lua. Helper
+calls are followed recursively, so a body whose arguments are read inside a
+helper still gets a number.
+
+**`argc` is an upper bound, not a verified argument count.** The body may
+ignore the arguments it reads, and the game may pass arguments the body never
+looks at. `argc_evidence` records where the number came from (`index`,
+`helper`, `receiver-only`, `none`).
+
+Census over the 911 bodies: argc 0 → 465, 1 → 297, 2 → 60, 3 → 39, 4 → 21,
+5 → 14, 6 → 8, 7 → 4, 8 → 3, no evidence → 52; returns 0 → 359, 1 → 534,
+unknown → 18. Over the 1003 methods of the surface: argc 0 → 539, 1 → 273,
+2 → 85, 3 → 46, 4 → 28, 5 → 14, 6 → 7, 7 → 4, 8 → 3, unmeasured → 4; returns
+1 → 587, 0 → 395, unmeasured → 21.
+
+The numbers are now carried in `bindings/code-derived-surface.json`,
+`bindings/isaac-api-spec.json` and the generated header, and the C++ test
+`spec_carries_the_measured_shape_census` pins the hand-checked `Vector`
+members.
+
+Still not established: the *meaning* of the arguments (the bodies call the
+game's C++ virtuals, so the semantics are not in the binary), and the number
+of arguments the game actually passes. See
+docs/binding-surface-findings.md §17.

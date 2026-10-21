@@ -521,6 +521,38 @@ actually executed and measured.
    `--start-address` aims at unrelated code and produces a plausible-looking
    disassembly of the wrong function. Convert through `tools/pe_vaddr.py`.
 
+## `tools/probe_body_arity.py` — the shape census of every closure body
+
+Reads all 911 closure bodies and reports, per body, how many Lua stack slots
+the body touches and how many values it returns to Lua.
+
+```
+python3 tools/probe_body_arity.py isaac-ng.exe --cache disasm.txt \
+    --json-out arity.json
+```
+
+**What it establishes**
+
+- `argc` — the highest Lua stack index the body touches, minus one. It is an
+  **upper bound** on the number of arguments the member can see.
+- `returns` — the number of values the body leaves on the Lua stack, read from
+  the value in `eax` at the `ret`.
+- `argc_evidence` — where the number came from: `index` (the body reads the
+  slot), `helper` (a helper it calls reads the slot, followed recursively),
+  `receiver-only` or `none`.
+
+**What it does NOT establish**
+
+- The number of arguments the game actually passes, or the number the member
+  uses: a body can read slots it ignores, and a shared helper can read more
+  slots than the member needs. `Vector:Clamped` is documented with two
+  arguments and the body reaches four slots because `0x8ba890` reads four
+  numbers.
+- What the arguments mean. The bodies call the game's own C++ virtuals, so the
+  semantics of the API are not in the binary.
+- That every body was measured: 52 bodies have no index evidence and 18 have
+  an unmeasurable return; those stay unmeasured in the generated spec.
+
 ## Conventions for reporting findings
 
 `CONTRIBUTING.md` has the full rules. The short version:
