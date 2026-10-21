@@ -1801,6 +1801,43 @@ file does not list.
   through `0x85bfd0`, a float through `lua_pushnumber`, a boolean through
   `lua_pushboolean`, an object through `lua_newuserdata`).
 
+### 21.4 The method names
+
+The `.zhl` files also carry the method signatures of the class, in a header
+block before the struct:
+
+    __thiscall void SFXManager::Play(int ID, float Volume, int FrameDelay, bool Loop, float Pitch, float Pan);
+
+so the method names can be compared the same way the field offsets are. The
+tool parses `Class::Method(` and compares the names case-insensitively and
+without the leading underscore.
+
+| methods confirmed | methods only in the binary | methods only in the layout |
+| --- | --- | --- |
+| 187 | 639 | 410 |
+
+`Game` confirms 17 method names (`GetPlayer`, `Spawn`, `Render`, `Update`,
+`ShakeScreen`, ...), `SFXManager` confirms `Play`, `Vector` confirms `Lerp`.
+
+The two unmatched buckets are mostly a property of the source, not of the
+recovery:
+
+- **The `.zhl` files are hand-written and incomplete.** `SFXManager.zhl`
+  declares the fields of the class and two of its methods; the other eight
+  Lua-visible methods are simply not in the file. `Vector2.zhl` describes the
+  native vector struct and lists one method (`Lerp`); the arithmetic
+  (`Cross`, `Dot`, `Length`, ...) is added by the Lua layer of the game and
+  has no native counterpart.
+- **The layouts describe a later release.** 639 recovered method names are
+  absent from the `Repentance+` files: some are new in that release, some
+  were removed, and many are simply not listed.
+
+So the method comparison is a *name* check, not a signature check: it
+confirms that the recovered names exist in an independent source, and it
+shows where the independent source is silent. It does not confirm the
+argument lists -- the `.zhl` files do give the parameter lists of the methods
+they declare, and comparing those is the obvious next step.
+
 The report is reproducible with
 
     python3 tools/crosscheck_libzhl.py --surface bindings/code-derived-surface.json \
