@@ -553,7 +553,7 @@ python3 tools/probe_body_arity.py isaac-ng.exe --cache disasm.txt \
 - That every body was measured: 52 bodies have no index evidence and 18 have
   an unmeasurable return; those stay unmeasured in the generated spec.
 
-## `crosscheck_libzhl.py` — the field layout against an independent source
+## `crosscheck_libzhl.py` — the field layout and the method names against an independent source
 
 Compares the field offsets recovered from the closure bodies with the
 `.zhl` class layouts the Repentogon project publishes

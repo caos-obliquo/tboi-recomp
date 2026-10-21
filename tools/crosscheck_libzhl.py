@@ -98,6 +98,12 @@ SIZE_RE = re.compile(r"\}\s*:\s*0x(?P<size>[0-9a-fA-F]+)\s*;")
 # A name with its offset, inside a field list.
 PAIR_RE = re.compile(r"(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s*:\s*0x(?P<offset>[0-9a-fA-F]+)")
 
+# A method signature: the class and the method name, e.g.
+# "__thiscall void SFXManager::Play(int ID, float Volume);"
+METHOD_RE = re.compile(
+    r"(?P<class>[A-Za-z_][A-Za-z0-9_]*)\s*::\s*(?P<method>[A-Za-z_][A-Za-z0-9_]*)\s*\("
+)
+
 # An upvalue below this value is a field offset inside a game object; the
 # larger ones are code pointers (a per-field accessor) in the game's text.
 OFFSET_LIMIT = 0x1000
@@ -120,6 +126,7 @@ class ZhlClass:
     file: str
     size: int | None = None
     fields: list[ZhlField] = field(default_factory=list)
+    methods: list[str] = field(default_factory=list)
 
     def field_at(self, offset: int) -> ZhlField | None:
         for f in self.fields:
@@ -148,6 +155,9 @@ class ClassReport:
     moved: list[tuple[str, int, int, str]] = field(default_factory=list)
     binary_only: list[tuple[str, int]] = field(default_factory=list)
     zhl_only: list[tuple[str, int, str]] = field(default_factory=list)
+    methods_confirmed: list[str] = field(default_factory=list)
+    methods_binary_only: list[str] = field(default_factory=list)
+    methods_zhl_only: list[str] = field(default_factory=list)
     note: str = ""
 
 
@@ -171,6 +181,9 @@ def parse_zhl(text: str, name: str, file_name: str) -> ZhlClass:
                     type_name=type_name,
                 )
             )
+
+    # The method signatures live in a header block before the struct.
+    out.methods = sorted({match.group("method") for match in METHOD_RE.finditer(text)})
 
     sizes = SIZE_RE.findall(text)
     if sizes:
@@ -226,7 +239,8 @@ def surface_classes(surface: dict) -> dict[str, dict]:
             # pointer of a per-field accessor (the Color class).
             if value < OFFSET_LIMIT:
                 fields.append((prop["name"], value))
-        out[name] = {"fields": fields, "entry": entry}
+        methods = [m["name"] for m in entry.get("methods", []) if m.get("name")]
+        out[name] = {"fields": fields, "methods": methods, "entry": entry}
     return out
 
 
@@ -241,6 +255,20 @@ def compare_class(name: str, data: dict, zhl: ZhlClass | None) -> ClassReport:
 
     report.zhl_file = zhl.file
     report.zhl_size = zhl.size
+
+    # The method names. The Lua names and the C++ names are compared the same
+    # way the field names are.
+    zhl_methods = {normalize(name) for name in zhl.methods}
+    binary_methods = [name for name in data.get("methods", [])]
+    binary_method_keys = {normalize(name) for name in binary_methods}
+    report.methods_confirmed = [name for name in binary_methods if normalize(name) in zhl_methods]
+    report.methods_binary_only = [
+        name for name in binary_methods if normalize(name) not in zhl_methods
+    ]
+    report.methods_zhl_only = [
+        name for name in zhl.methods if normalize(name) not in binary_method_keys
+    ]
+
 
     if not zhl.fields:
         # Some layouts only declare the size: the fields live in a base class
@@ -293,6 +321,9 @@ def render_report(reports: list[ClassReport], surface_path: str) -> str:
     total_moved = sum(len(r.moved) for r in reports)
     total_binary_only = sum(len(r.binary_only) for r in reports)
     total_zhl_only = sum(len(r.zhl_only) for r in reports)
+    total_methods_confirmed = sum(len(r.methods_confirmed) for r in reports)
+    total_methods_binary_only = sum(len(r.methods_binary_only) for r in reports)
+    total_methods_zhl_only = sum(len(r.methods_zhl_only) for r in reports)
     compared = [r for r in reports if r.zhl_file]
 
     lines.append("## Totals")
@@ -305,6 +336,13 @@ def render_report(reports: list[ClassReport], surface_path: str) -> str:
     lines.append("| --- | --- | --- | --- |")
     lines.append(
         f"| {total_name_differs} | {total_moved} | {total_binary_only} | {total_zhl_only} |"
+    )
+    lines.append("")
+
+    lines.append("| methods confirmed | methods only in the binary | methods only in the layout |")
+    lines.append("| --- | --- | --- |")
+    lines.append(
+        f"| {total_methods_confirmed} | {total_methods_binary_only} | {total_methods_zhl_only} |"
     )
     lines.append("")
 
@@ -347,6 +385,17 @@ def render_report(reports: list[ClassReport], surface_path: str) -> str:
         if report.note:
             lines.append(f"note: {report.note}")
             lines.append("")
+        if report.methods_confirmed or report.methods_binary_only or report.methods_zhl_only:
+            lines.append(
+                f"methods: {len(report.methods_confirmed)} confirmed, "
+                f"{len(report.methods_binary_only)} only in the binary, "
+                f"{len(report.methods_zhl_only)} only in the layout"
+            )
+            if report.methods_binary_only:
+                lines.append("  only in the binary: " + ", ".join(report.methods_binary_only))
+            if report.methods_zhl_only:
+                lines.append("  only in the layout: " + ", ".join(report.methods_zhl_only))
+            lines.append("")
         if report.zhl_only:
             lines.append("in the layout but not recovered as a property:")
             for zhl_name, offset, type_name in report.zhl_only:
@@ -364,6 +413,9 @@ struct Sample
     int _charge : 0x8;
     float x : 0x4, y : 0xC;
 } : 0x10;
+
+__thiscall void Sample::Use(int count);
+__thiscall void Sample::Other(void);
 """
     parsed = parse_zhl(sample, "Sample", "Sample.zhl")
     failures = 0
@@ -376,9 +428,16 @@ struct Sample
         print(f"FAIL: fields are {offsets}, expected {expected}", file=sys.stderr)
         failures += 1
 
+    if sorted(parsed.methods) != ["Other", "Use"]:
+        print(f"FAIL: methods are {parsed.methods}, expected ['Other', 'Use']", file=sys.stderr)
+        failures += 1
+
     report = compare_class(
         "Sample",
-        {"fields": [("Item", 0x0), ("Charge", 0x8), ("Only", 0x14)]},
+        {
+            "fields": [("Item", 0x0), ("Charge", 0x8), ("Only", 0x14)],
+            "methods": ["Use", "Extra"],
+        },
         parsed,
     )
     if len(report.confirmed) != 2:
@@ -389,6 +448,15 @@ struct Sample
         failures += 1
     if len(report.zhl_only) != 2:
         print(f"FAIL: {len(report.zhl_only)} layout-only, expected 2", file=sys.stderr)
+        failures += 1
+    if report.methods_confirmed != ["Use"]:
+        print(f"FAIL: confirmed methods are {report.methods_confirmed}", file=sys.stderr)
+        failures += 1
+    if report.methods_binary_only != ["Extra"]:
+        print(f"FAIL: binary-only methods are {report.methods_binary_only}", file=sys.stderr)
+        failures += 1
+    if report.methods_zhl_only != ["Other"]:
+        print(f"FAIL: layout-only methods are {report.methods_zhl_only}", file=sys.stderr)
         failures += 1
 
     print("SELF-TEST PASSED" if not failures else f"{failures} CONTROL FAILURES")
@@ -422,6 +490,9 @@ def main(argv: list[str] | None = None) -> int:
     total_moved = sum(len(r.moved) for r in reports)
     total_binary_only = sum(len(r.binary_only) for r in reports)
     total_zhl_only = sum(len(r.zhl_only) for r in reports)
+    total_methods_confirmed = sum(len(r.methods_confirmed) for r in reports)
+    total_methods_binary_only = sum(len(r.methods_binary_only) for r in reports)
+    total_methods_zhl_only = sum(len(r.methods_zhl_only) for r in reports)
     compared = [r for r in reports if r.zhl_file]
 
     print(f"classes in the surface : {len(reports)}")
@@ -431,6 +502,9 @@ def main(argv: list[str] | None = None) -> int:
     print(f"same name, other offset: {total_moved}")
     print(f"only in the binary     : {total_binary_only}")
     print(f"only in the layout     : {total_zhl_only}")
+    print(f"methods confirmed      : {total_methods_confirmed}")
+    print(f"methods only in binary : {total_methods_binary_only}")
+    print(f"methods only in layout : {total_methods_zhl_only}")
 
     if args.report:
         Path(args.report).write_text(render_report(reports, args.surface), encoding="utf-8")
@@ -446,6 +520,9 @@ def main(argv: list[str] | None = None) -> int:
             "fields_moved": total_moved,
             "fields_binary_only": total_binary_only,
             "fields_layout_only": total_zhl_only,
+            "methods_confirmed": total_methods_confirmed,
+            "methods_binary_only": total_methods_binary_only,
+            "methods_layout_only": total_methods_zhl_only,
             "per_class": [
                 {
                     "class": r.name,
@@ -462,6 +539,9 @@ def main(argv: list[str] | None = None) -> int:
                     ],
                     "binary_only": [{"name": n, "offset": o} for n, o in r.binary_only],
                     "layout_only": [{"name": n, "offset": o, "type": t} for n, o, t in r.zhl_only],
+                    "methods_confirmed": r.methods_confirmed,
+                    "methods_binary_only": r.methods_binary_only,
+                    "methods_layout_only": r.methods_zhl_only,
                 }
                 for r in reports
             ],

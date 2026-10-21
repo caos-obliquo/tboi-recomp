@@ -807,6 +807,8 @@ Next steps, in order:
 
 ## 22. The field layout is cross-checked against an independent source
 
+The cross-check now also compares the **method names**: 187 confirmed, 639 only in the binary, 410 only in the layout. The `.zhl` files are hand-written and incomplete, so the two unmatched buckets mostly measure the source, not the recovery. The parameter lists of the declared methods are not compared yet.
+
 `tools/crosscheck_libzhl.py` compares the field offsets recovered from the
 closure bodies with the `.zhl` class layouts the Repentogon project
 publishes (`TeamREPENTOGON/REPENTOGON`, `libzhl/functions/`). The tool
