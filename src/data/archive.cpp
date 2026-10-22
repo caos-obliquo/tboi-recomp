@@ -152,21 +152,8 @@ bool Archive::decode(usize index, std::vector<u8>& out) {
     }
 
     if (mode_ == kModeLzw) {
-        // Mode 0x01: the payload at entry.offset is an LZW stream; the entry's
-        // recorded size is the length of that stream. The stream decodes to the
-        // entry's content, so the decoded output is NOT truncated back to a
-        // separate "asset size" -- the recorded size already is the stream length.
-        const usize at = entry.offset;
-        if (at + size > blob_.size()) {
-            return fail("entry " + std::to_string(index) + " runs past the end of the file");
-        }
-        std::vector<u8> buffer(blob_.begin() + static_cast<std::ptrdiff_t>(at),
-                               blob_.begin() + static_cast<std::ptrdiff_t>(at + size));
-        if (!ArchiveCodec::decode(buffer, mode_, entry.special, 0)) {
-            return fail("codec rejected entry " + std::to_string(index));
-        }
-        out = std::move(buffer);
-        return true;
+        return fail("mode 0x01 LZW diverges on real archives; refusing to return a "
+                    "partial decode");
     }
     if (mode_ == kModePrng) {
         return fail("mode 0x02 PRNG keystream is unverified against real archives; "

@@ -380,20 +380,18 @@ ISAEC_TEST(archive_decode_returns_a_stored_payload_verbatim) {
     CHECK(second[3] == 0xEF);
 }
 
-ISAEC_TEST(archive_decode_refuses_only_the_modes_this_build_cannot_verify) {
-    // Mode 0x01 (LZW) is now verified: the codec decodes real archives
-    // (config.a, fonts.a) to valid XML/BMF, so the reader does not refuse it.
-    // The 64-byte 0x7B stream is a valid LZW input that decodes to an empty
-    // payload, so decoding must succeed.
+ISAEC_TEST(archive_decode_refuses_the_modes_this_build_cannot_verify) {
+    // Mode 0x01 decodes real XML and then diverges in length; mode 0x02's PRNG
+    // keystream is indistinguishable from noise on real archives. Returning
+    // either would hand the renderer garbage, so the reader refuses.
     std::vector<Slot> lzw(1);
     lzw[0].payload = std::vector<u8>(64, 0x7B);
     Archive lzw_archive;
     REQUIRE(lzw_archive.open(scratch("lzw.a", build(0x01, lzw))));
     std::vector<u8> lzw_out;
-    CHECK(lzw_archive.decode(0, lzw_out));
+    CHECK(!lzw_archive.decode(0, lzw_out));
+    CHECK(lzw_archive.error().find("0x01") != std::string::npos);
 
-    // Mode 0x02's PRNG keystream is indistinguishable from noise on real
-    // archives and is still unverified, so the reader refuses it.
     std::vector<Slot> prng(1);
     prng[0].payload = std::vector<u8>(64, 0x3C);
     Archive prng_archive;

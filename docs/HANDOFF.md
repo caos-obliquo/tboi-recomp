@@ -197,25 +197,29 @@ of the same disassembly reading. That was flagged as the available check in §9.
 the format doc, and §9.5 now records that the stronger check — a real packed archive —
 was run and failed.
 
-`Archive::decode` therefore **refuses** non-stored mode 0x02 with an error naming
-the mode (0x02), instead of returning bytes known to be wrong. `isaec_window` on
-`videos.a 0` exits 1 with `not a decodable PNG: entry 0
+`Archive::decode` therefore **refuses** mode 0x01 and non-stored mode 0x02 with an
+error naming the mode, instead of returning bytes known to be wrong. `isaec_window`
+on `videos.a 0` exits 1 with `not a decodable PNG: entry 0
 resources/gfx/cutscenes/001_epilogue.ogv`. A renderer that draws noise is worse than
 one that reports it cannot decode the entry.
 
-Mode 0x01 (LZW) is no longer refused: a probe (`/tmp/opencode/lzw_probe.py`) ran
-`tools/isaac-archive.py`'s `decode_entry` over `config.a` (24 entries) and `fonts.a`
-(10 entries) and the Python LZW decoder — byte-identical in logic to the C++ codec
-— produced valid XML (`achievements`, `ambushRoom`, `babies`, `backdrops`, …,
-`entities`) and valid BMF fonts ("PF Tempesta Seven Condensed", "Team Meat font",
-"Droid Sans", "Terminus"). The framing is sound and the codec was right all along;
-the defect was in the C++ layer, which never called it. `Archive::decode` now
-calls `ArchiveCodec::decode(buffer, mode_, entry.special, 0)` and moves the
-decoded buffer into `out` (the recorded `size` is the stream length, so `out` is
-not truncated). The earlier "diverges in length" observation was a measurement
-artifact of the probe, not a codec defect.
+### 5.2 mode 0x01 LZW has a real defect
 
-### 5.2 mode 0x01 LZW: resolved (the C++ layer was refusing)
+Decodes **genuine** content — `config.a` yields XML (`<achievements gfxroot=...>`),
+`fonts.a` yields BMF with real font names — then diverges in length. Both
+over- and under-producing:
+
+```
+config.a e0       got 45575   size 25894
+fonts.a  e0       got  7408   size  4147
+rooms.a  e0       got 190901  size 113413
+animations.a e0   got 1099332 size 4049421
+```
+
+Tails are garbage, but content *at* the `size` cut point is still coherent
+mid-XML. So `size` is the true plaintext length and the LZW stream is correct for a
+while (dictionary warm-up) and then breaks. Looks like a dictionary-reset or
+code-width bug. Not yet found.
 
 ### 5.3 `repentance.a` is 0/4180 named
 
@@ -420,8 +424,8 @@ that made it.
 - **`archive_decode_of_a_xor_entry_matches_the_reference_decoder`** — every
   `bogocrypt1_fixtures.inc` case laid out as entry 0 of a two-entry container so
   `cipher_span(0) == input_size` exactly.
-- **`archive_decode_refuses_only_the_modes_this_build_cannot_verify`** — the honesty lock
-  on §5.1 and §5.2 (LZW decodes; only non-stored PRNG is refused).
+- **`archive_decode_refuses_the_modes_this_build_cannot_verify`** — the honesty lock
+  on §5.1 and §5.2.
 - **`archive_cipher_span_reaches_the_next_entry_not_the_asset_length`** — pins the
   span rule, including the last-entry behaviour that sweeps in the entry table.
 
