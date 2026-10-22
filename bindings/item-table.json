@@ -1,0 +1,63 @@
+{
+  "source": "/home/caos/.local/share/Steam/steamapps/common/The Binding of Isaac Rebirth/resources/packed/config.a",
+  "decoded_bytes": 36690,
+  "valid_prefix_bytes": 1024,
+  "items": [
+    {
+      "kind": "passive",
+      "id": "1",
+      "name": "The Sad Onion",
+      "description": "Tears up",
+      "gfx": "Collectibles_001_TheSadOnion.png",
+      "cache": "firedelay"
+    },
+    {
+      "kind": "passive",
+      "id": "2",
+      "name": "The Inner Eye",
+      "description": "Triple shot",
+      "gfx": "Collectibles_002_TheInnerEye.png",
+      "cache": "firedelay"
+    },
+    {
+      "kind": "passive",
+      "id": "3",
+      "name": "Spoon Bender",
+      "description": "Homing shots",
+      "gfx": "Collectibles_003_SpoonBender.png",
+      "cache": "speed tearcolor tearflag"
+    },
+    {
+      "kind": "passive",
+      "id": "4",
+      "name": "Cricket's Head",
+      "description": "DMG up",
+      "gfx": "Collectibles_004_CricketsHead.png",
+      "cache": "damage shotspeed"
+    },
+    {
+      "kind": "passive",
+      "id": "5",
+      "name": "My Reflection",
+      "description": "Boomerang tears",
+      "gfx": "Collectibles_005_MyReflection.png",
+      "cache": "tearflag shotspeed range"
+    },
+    {
+      "kind": "passive",
+      "id": "6",
+      "name": "Number One",
+      "description": "Tears up",
+      "gfx": "Collectibles_006_NumberOne.png",
+      "cache": "firedelay range tearcolor"
+    },
+    {
+      "kind": "passive",
+      "id": "7",
+      "name": "Blood of the Martyr",
+      "description": "DMG up",
+      "gfx": "Collectibles_007_BloodOfTheMartyr.png",
+      "cache": "damage"
+    }
+  ]
+}
