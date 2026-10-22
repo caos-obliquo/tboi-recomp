@@ -101,7 +101,6 @@ public:
     // the game install. An unreadable source is not an error; it just leaves
     // the table empty and reports the count that was loaded.
     bool load_names(const std::filesystem::path& source);
-
     // The resolved path for this entry, or an empty string when no table is
     // loaded or the hash is unknown. In the shipped archives 18.6% of entries
     // have no known name, so callers must handle the empty case.
@@ -115,9 +114,11 @@ public:
     // Materialise one entry into `out`, exactly `size` bytes long.
     //
     // Mode 0x02 entries whose header validates are returned verbatim. Mode
-    // 0x01 LZW and non-stored mode 0x02 are known to diverge on real data, so
-    // they fail with a reason instead of handing back noise for a renderer to
-    // draw.
+    // 0x01 LZW streams decode through the codec (the recorded size is the
+    // LZW stream length, and the decoded output is not truncated back to a
+    // separate asset size). Non-stored mode 0x02 is still refused: the PRNG
+    // keystream is unverified against real archives, and returning it would
+    // hand a renderer noise instead of failing.
     //
     // Returns false and fills error() with the reason on any failure.
     bool decode(usize index, std::vector<u8>& out);
