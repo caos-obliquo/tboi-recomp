@@ -139,6 +139,30 @@ Also includes the HANDOFF rewrite, the README warning/comparison/hyperlinks, and
 - `docs/rea-toolchain.md` — one sentence of throat-clearing removed.
 
 
+## [0.1.4] - 2026-10-23
+
+### Merged: [#60](https://github.com/caos-obliquo/tboi-recomp/pull/60) — chore(ci): temporary probe for Actions PR-create permission
+
+**Author:** @caos-obliquo  **Merged:** 2026-10-23  **Files:** 1 changed, +21/-0.
+
+<details>
+<summary>Pull request body</summary>
+
+Probe only, will be removed after the measurement. Tests whether GITHUB_TOKEN may call createPullRequest (REST) — the release bump step fails with 'GitHub Actions is not permitted to create or approve pull requests' even after setting can_create_pull_requests=true via API (204).
+
+</details>
+
+#### Commits
+
+- `a00855c9` chore(ci): temporary probe for Actions PR-create permission
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `.github/workflows/test-pr-create.yml` | 21 | 0 |
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
