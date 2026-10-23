@@ -139,6 +139,34 @@ Also includes the HANDOFF rewrite, the README warning/comparison/hyperlinks, and
 - `docs/rea-toolchain.md` — one sentence of throat-clearing removed.
 
 
+## [0.1.5] - 2026-10-23
+
+### Merged: [#61](https://github.com/caos-obliquo/tboi-recomp/pull/61) — chore(release): bump version to 0.1.4
+
+**Author:** @caos-obliquo  **Merged:** 2026-10-23  **Files:** 1 changed, +1/-1.
+
+<details>
+<summary>Pull request body</summary>
+
+The release workflow's bump step pushed this branch but could not open the PR: `GitHub Actions is not permitted to create or approve pull requests` (run 39967306578, step 'Commit version bump'). Opening it manually with the owner token so the bump still lands via a PR, as #56 requires.
+
+</details>
+
+#### Closes
+
+- [`x`] [#56](https://github.com/caos-obliquo/tboi-recomp/issues/56) Release workflow fails: libpng16 missing and bump step pushes to protected main (closed)
+
+#### Commits
+
+- `34d9df9b` chore(release): bump version to 0.1.4
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `CMakeLists.txt` | 1 | 1 |
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
