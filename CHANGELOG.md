@@ -139,6 +139,35 @@ Also includes the HANDOFF rewrite, the README warning/comparison/hyperlinks, and
 - `docs/rea-toolchain.md` — one sentence of throat-clearing removed.
 
 
+## [0.1.4] - 2026-10-23
+
+### Merged: [#58](https://github.com/caos-obliquo/tboi-recomp/pull/58) — chore(release): bump the patch version
+
+**Author:** @caos-obliquo  **Merged:** 2026-10-23  **Files:** 1 changed, +1/-1.
+
+<details>
+<summary>Pull request body</summary>
+
+Bumps the recorded version 0.1.2 -> 0.1.3 so a tag v0.1.3 can exercise the fixed release workflow (#56, PR #57). The chore(release) prefix makes version.yml skip itself.
+
+</details>
+
+#### Closes
+
+- [`x`] [#56](https://github.com/caos-obliquo/tboi-recomp/issues/56) Release workflow fails: libpng16 missing and bump step pushes to protected main (closed)
+- [` `] [#57](https://github.com/caos-obliquo/tboi-recomp/pull/57) fix(ci): install libpng and land release version bump via PR (merged)
+
+#### Commits
+
+- `4792eae7` chore(release): bump the patch version
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `CMakeLists.txt` | 1 | 1 |
+
+
 ## [Unreleased]
 
 ## [v0.1.0] - 2026-10-12
