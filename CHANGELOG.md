@@ -139,6 +139,35 @@ Also includes the HANDOFF rewrite, the README warning/comparison/hyperlinks, and
 - `docs/rea-toolchain.md` — one sentence of throat-clearing removed.
 
 
+## [0.1.3] - 2026-10-23
+
+### Merged: [#55](https://github.com/caos-obliquo/tboi-recomp/pull/55) — fix(ci): land version bumps via PR instead of pushing to protected main
+
+**Author:** @caos-obliquo  **Merged:** 2026-10-23  **Files:** 1 changed, +15/-4.
+
+<details>
+<summary>Pull request body</summary>
+
+Fixes #54. The Release version workflow now commits the bump on a release branch and opens a PR to main instead of pushing directly to protected main.
+
+</details>
+
+#### Closes
+
+- [`x`] [#54](https://github.com/caos-obliquo/tboi-recomp/issues/54) fix(ci): version workflow pushes directly to protected main (closed)
+
+#### Commits
+
+- `c8471021` fix(ci): land version bumps via PR instead of pushing to protected ma…
+  …in [#54]
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `.github/workflows/version.yml` | 15 | 4 |
+
+
 ## [Unreleased]
 
 ## [v0.1.0] - 2026-10-12
