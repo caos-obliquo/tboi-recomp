@@ -16,6 +16,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: release-${{ github.ref }}
@@ -53,6 +54,15 @@ jobs:
 
       - name: Release notes must be written
         run: python3 tools/release.py check
+
+      - name: Install libpng
+        # release.yml must install the same dependency ci.yml installs, or
+        # FindPkgConfig dies with "Package 'libpng16' not found" and the tag
+        # never produces a release.
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y libpng-dev
 
       - name: Build and package
         env:
@@ -94,11 +104,19 @@ jobs:
       - name: Commit version bump
         env:
           NEXT: ${{ steps.bump.outputs.next }}
+          TAG: ${{ steps.version.outputs.current }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add CMakeLists.txt
-          git commit -m "chore: bump version to ${NEXT} [skip ci]"
-          git pull --rebase origin main
-          git push origin HEAD:main
+          git commit -m "chore(release): bump version to ${NEXT}"
+          # main is protected: land the bump through a PR, same as #54.
+          # The title starts with "chore(release)" so version.yml skips it
+          # and does not bump the patch a second time for the same change.
+          git checkout -b "release/bump-${NEXT}"
+          git push origin "release/bump-${NEXT}"
+          gh pr create --base main --head "release/bump-${NEXT}" \
+            --title "chore(release): bump version to ${NEXT}" \
+            --body "Automated post-release version bump after tagging v${TAG}."
