@@ -141,6 +141,25 @@ Also includes the HANDOFF rewrite, the README warning/comparison/hyperlinks, and
 
 ## [Unreleased]
 
+## [v0.1.3] - 2026-10-23
+
+### Fixed
+
+- The release workflow could not build on a clean runner: it never installed
+  `libpng-dev`, while `CMakeLists.txt` requires `libpng16` through
+  `pkg_check_modules(... REQUIRED ...)`. The v0.1.2 tag run (39248651627)
+  died in `FindPkgConfig.cmake` with `Package 'libpng16' ... not found`.
+  `ci.yml` already installed it; `release.yml` now does the same.
+  Why: the two workflows drifted, and only the CI one ever proved itself on a
+  bare runner. Effect: a tag run can reach the compile step.
+- The release workflow's version-bump step pushed straight to `main` and hit
+  the branch protection rule (GH006), the same defect already fixed for
+  `version.yml` in [#54](https://github.com/caos-obliquo/tboi-recomp/issues/54).
+  It now commits locally, pushes `release/bump-<version>`, and opens a PR; the
+  `chore(release):` title prefix makes `version.yml` skip itself, so no double
+  bump. Effect: a completed release leaves a reviewable bump instead of a
+  failed push.
+
 ## [v0.1.0] - 2026-10-12
 
 First tagged release. A scaffold, not a playable game: the binding surface is
