@@ -139,6 +139,62 @@ Also includes the HANDOFF rewrite, the README warning/comparison/hyperlinks, and
 - `docs/rea-toolchain.md` — one sentence of throat-clearing removed.
 
 
+## [0.1.3] - 2026-10-23
+
+### Merged: [#57](https://github.com/caos-obliquo/tboi-recomp/pull/57) — fix(ci): install libpng and land release version bump via PR
+
+**Author:** @caos-obliquo  **Merged:** 2026-10-23  **Files:** 2 changed, +36/-7.
+
+<details>
+<summary>Pull request body</summary>
+
+## Problem
+
+Tag push of v0.1.2 (run 39248651627) failed in **Build and package** with:
+
+```
+CMake Error at /usr/local/share/cmake-3.31/Modules/FindPkgConfig.cmake:645:
+  Package 'libpng16', required by 'virtual:world', not found
+```
+
+`release.yml` never installs `libpng-dev`, while `ci.yml` does. `CMakeLists.txt` requires libpng16 (`pkg_check_modules(ISAEC_PNG REQUIRED IMPORTED_TARGET libpng16)`), so a bare runner cannot configure.
+
+Second, latent failure: the final 'Commit version bump' step pushed `HEAD:main` directly, which hits GH006 on the protected branch (the same defect already fixed for version.yml in #54).
+
+## Fix
+
+1. New **Install libpng** step before 'Build and package' (`sudo apt-get update && sudo apt-get install -y libpng-dev`), matching ci.yml.
+2. 'Commit version bump' now commits locally, creates `release/bump-${NEXT}`, pushes it, and opens a PR (`pull-requests: write` added to permissions). The `chore(release):` prefix means version.yml skips it — no double bump.
+
+## Acceptance (issue #56)
+
+- [x] release.yml installs libpng-dev before configure
+- [x] version bump lands via PR, not a direct push to main
+- [ ] a tag run builds the tarball and publishes the release (verified after merge by pushing a tag)
+
+Closes #56 once the tag run is green.
+
+</details>
+
+#### Closes
+
+- [`x`] [#54](https://github.com/caos-obliquo/tboi-recomp/issues/54) fix(ci): version workflow pushes directly to protected main (closed)
+- [`x`] [#56](https://github.com/caos-obliquo/tboi-recomp/issues/56) Release workflow fails: libpng16 missing and bump step pushes to protected main (closed)
+
+#### Commits
+
+- `c8471021` fix(ci): land version bumps via PR instead of pushing to protected ma…
+  …in [#54]
+- `186dbb8c` fix(ci): install libpng and land release version bump via PR [#56]
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `.github/workflows/release.yml` | 21 | 3 |
+| `.github/workflows/version.yml` | 15 | 4 |
+
+
 ## [Unreleased]
 
 ## [v0.1.0] - 2026-10-12
