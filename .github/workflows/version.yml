@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 # One bump at a time. Two merges landing together would otherwise race on
 # CMakeLists.txt and produce the same version twice.
@@ -55,9 +56,19 @@ jobs:
             exit 0
           fi
           git commit -m "chore(release): record PR #${PR} and bump the patch version"
-
-      - name: Push to main
+          git checkout -b "release/pr-${PR}"
+          git push origin "release/pr-${PR}"
+        
+      - name: Open release PR
+        env:
+          PR: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          git pull --rebase origin main
-          git push origin HEAD:main
+          if git diff --quiet origin/main..HEAD -- CMakeLists.txt CHANGELOG.md; then
+            echo "::notice::nothing to open; version already recorded"
+            exit 0
+          fi
+          gh pr create --base main --head "release/pr-${PR}" \
+            --title "chore(release): record PR #${PR} and bump the patch version" \
+            --body "Automated version bump and changelog record for PR #${PR}."
