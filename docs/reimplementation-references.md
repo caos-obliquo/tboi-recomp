@@ -95,3 +95,59 @@ Their README is also a model for honesty: an explicit "Status: experimental,
 playable", a named list of what was actually tested, and a specific statement
 of the one step remaining. That is the register this project's progress table
 should keep.
+---
+
+# The Browsing of Isaac, and the honest split
+
+[`chiikabu/the-browsing-of-isaac`](https://github.com/chiikabu/the-browsing-of-isaac),
+hosted at tboi.online, is the **real Repentance+ game code, statically
+recompiled from the Windows executable to WebAssembly via Emscripten**, running
+in Chromium (desktop and Android), playable by touch or gamepad. GPL-3.0 for
+its own work; the game code inside it remains Nicalis'. Credits TeamREPENTOGON
+(`libzhl` signatures/layouts, GPL-2.0) and Gibbed.Rebirth. Licence of this
+repository changed MIT -> GPL-3.0-only (issue
+[#62](https://github.com/caos-obliquo/tboi-recomp/issues/62)) so that the
+following split is available.
+
+## Half 1 — their own original code: adaptable, with attribution
+
+GPL-3.0-only permits this repository to adapt, with credit, any file that is
+chiikabu's original work rather than a translation of the game:
+
+| artifact | what it is |
+|---|---|
+| `platform/input.js` | keyboard -> Win32 VK codes, `DEFAULT_KEYMAP`, stateful tracker |
+| `platform/frame-loop.js`, `platform/mount.js`, `platform/window.js`, `platform/browser-mount.js` | host glue: loop, mount, window, loading stages |
+| `web/js/*`, `web/game/*` | menu scene, render host, update bridge, prototypes |
+| `scripts/recomp/web/gamepad.mjs` | browser Gamepad API -> **XInput** state (`wButtons` bit layout, thumbs as signed 16-bit up-positive, triggers 0-255, four slots, `dwPacketNumber`, memoised polling) |
+| `scripts/recomp/web/touch_controls.mjs`, `touch_game.mjs`, `touch_input.mjs` | native touch control surface; README: "you play by touching the game" |
+| `scripts/recomp/host/src/host_shims_xinput.c` | what the game does: `LoadLibraryA("XInput1_4.dll")`, resolves `XInputGetState`/`SetState`/`GetCapabilities`, hot-plug via capabilities poll, state poll per pad per frame |
+| `scripts/recomp/*.mjs`, `scripts/decomp/*.mjs` | build/orchestration tooling as a design reference |
+
+Adaptation means: a reviewed change with attribution, not a silent copy. Test
+the adapted code here; do not ship their tree.
+
+## Half 2 — Nicalis-derived recompilation: read-only cross-check evidence
+
+Never enters this tree, in any language, under any licence:
+
+- `native/decomp/*_pure_helpers.cpp` (~266k lines): mechanically recorded
+  instruction-level translations of game bodies (allocator, ANM2, SFX,
+  `Game::Update`, `Game::Render`, `LuaEngine`).
+- `boot.wasm` and everything it does.
+- `decomp/game-update-slice.json`, `decomp/game-render-slice.json`,
+  `decomp/frontier.json`, `decomp/port-roots.json`: one team's *interpretation*
+  (VAs, offsets, layouts, `abiVersion`). Usable only as unverified external
+  derivations: anything adopted must be re-verified against this project's own
+  binary first, as in #17/#20. Agreement is kept; disagreement is reported, not
+  averaged.
+- `docs/decomp-port.md`, `decomp-history.md`: their failure log (tree-poison
+  incidents, ANM2 ABI pitfalls, slice regressions) is worth reading as trap
+  documentation. Read, not copied.
+
+## What this project keeps doing
+
+Clean-room recovery of the binding surface against the project's own binary,
+Win32/XInput facts as interface evidence, implementation written from scratch.
+The licence change makes Half 1 available; it does not make Half 2 available,
+and no licence this project picks ever will.

@@ -79,7 +79,7 @@ The engine ships **no game data**. It is pointed at a copy you already own, the
 way OpenMW points at Morrowind and OpenTTD points at Transport Tycoon. If you
 do not own *The Binding of Isaac*, this project has nothing to show you.
 
-MIT licensed. See [`LICENSE`](LICENSE).
+GPL-3.0-only licensed, as of issue [#62](https://github.com/caos-obliquo/tboi-recomp/issues/62), so that this project may adapt [`the-browsing-of-isaac`](https://github.com/chiikabu/the-browsing-of-isaac)'s own original code with attribution. The game code underneath anything here is Nicalis' and its licence is unchanged by this choice. See [`LICENSE`](LICENSE).
 
 ---
 
@@ -107,9 +107,12 @@ correct and the ethical reference.
 
 ## How this compares to other recompilations
 
-Four projects are worth reading side by side. Between them they cover every
-approach available to someone in this position, and **none of them shares code
-with this repository or with each other**.
+Five projects are worth reading side by side. Between them they cover every
+approach available to someone in this position. **No Nicalis-derived code is
+in this repository**, and nothing from these projects has entered `src/`; this
+repository is GPL-3.0-only so that *their own original host/platform glue* may
+be adapted with attribution, which remains a separate decision made file by
+file.
 
 ### The closest one: [repentogxm](https://github.com/0xl0cal/repentogxm)
 
@@ -155,6 +158,37 @@ Its README describes itself, in the author's words, as AI-assisted and
 experimental. That is worth stating plainly rather than hiding: it is a
 different project with a different licence, consulted as a reference. No code
 from it is used here.
+
+### The browser one: [the-browsing-of-isaac](https://github.com/chiikabu/the-browsing-of-isaac)
+
+Hosted at [tboi.online](https://tboi.online/). The **real Repentance+ game
+code, statically recompiled from the Windows executable to WebAssembly via
+Emscripten**, running in Chromium (desktop and Android) by touch or pad.
+GPL-3.0 for its own work; the game code inside it is Nicalis', as the project
+itself states. Credits TeamREPENTOGON (`libzhl` signatures/layouts) and
+Gibbed.Rebirth.
+
+Two things in it matter here:
+
+1. **Its own original code is the mobile/input design you cannot re-derive for
+   free.** `platform/input.js` (keyboard -> Win32 VK codes), `web/game/input.js`,
+   `scripts/recomp/web/gamepad.mjs` (browser Gamepad API -> **XInput** state:
+   standard-mapping button order, thumbs as signed 16-bit with up positive,
+   triggers 0-255, four slots, packet number), `scripts/recomp/web/touch_controls.mjs`,
+   and `scripts/recomp/host/src/host_shims_xinput.c` (the game polls
+   `XInputGetState` per pad each frame; hot-plug via `XInputGetCapabilities`).
+   This repository is GPL-3.0-only so those files may be adapted, with
+   attribution, instead of re-derived. No adaptation has landed yet; each one
+   lands as its own reviewed change.
+2. **Its `decomp/` is cross-check evidence, not a source.** `game-update-slice.json`,
+   `game-render-slice.json`, `frontier.json` and `port-roots.json` are one team's
+   interpretation of the binary. Their offsets, VAs and layouts are treated as
+   *unverified external derivations*: any of them recorded here must be
+   re-verified against this project's own binary first, exactly as
+   [#20](https://github.com/caos-obliquo/tboi-recomp/issues/20) does with the
+   REPENTOGON `.zhl` files. The mechanically recompiled game bodies
+   (`native/decomp/*`, ~266k lines) and `boot.wasm` are Nicalis-derived and
+   **never enter this tree**, in any language.
 
 ### The other three
 
@@ -448,10 +482,12 @@ wrong reading of the format fails loudly instead of producing confident garbage.
 * Inspired by the OpenMW and OpenTTD model of shipping an engine that reads a
   user's own game install.
 * [`repentogxm`](https://github.com/0xl0cal/repentogxm),
-  [`skate3recomp`](https://github.com/mchughalex/skate3recomp) and
-  [`ReSkate`](https://github.com/Dingo-Shenanigans/ReSkate) are unrelated
-  projects by other authors, consulted as references. No code from any of them is
-  used here.
+  [`skate3recomp`](https://github.com/mchughalex/skate3recomp),
+  [`ReSkate`](https://github.com/Dingo-Shenanigans/ReSkate) and
+  [`the-browsing-of-isaac`](https://github.com/chiikabu/the-browsing-of-isaac)
+  are unrelated projects by other authors. No Nicalis-derived code from any of
+  them is used here; `the-browsing-of-isaac`'s own original host/platform
+  code may be adapted with attribution under GPL-3.0-only.
 * Interface facts learned from other projects are **verified against this
   project's own binary** before being recorded, and disagreements are reported
   rather than averaged away.
