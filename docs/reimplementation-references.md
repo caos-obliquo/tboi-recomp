@@ -151,3 +151,52 @@ Clean-room recovery of the binding surface against the project's own binary,
 Win32/XInput facts as interface evidence, implementation written from scratch.
 The licence change makes Half 1 available; it does not make Half 2 available,
 and no licence this project picks ever will.
+---
+
+# TeamREPENTOGON `.zhl` definitions (`libzhl`)
+
+[TeamREPENTOGON/REPENTOGON](https://github.com/TeamREPENTOGON/REPENTOGON),
+released under GPL-2.0, ships signature/`.zhl` files that annotate the game's
+MSVC layout. They are the single best external check of the memory-structure
+facts this project recovers from the binary — used exactly as such: an
+oracle to compare against, never a source of code.
+
+Pinned for these notes: single-commit checkout, `version.txt` = **1.1.3**,
+`libzhl/functions/` = 244 files, scanned by nibble-mask against the Steam
+retail binary (v1.9.7.17.J460). Hit counts and per-file sha256:
+[`lua-api-reference.md`](lua-api-reference.md). Byte-level layout facts that
+agreed with our binary are already recorded in
+[`binding-surface-findings.md`](binding-surface-findings.md) §21 (105 confirmed
+fields); nothing here duplicates or replaces that section.
+
+Rules that keep this legal and useful:
+
+1. Never paste `.zhl` bytes (signatures, annotated struct text) into the repo.
+   Hashes and tallies only.
+2. A masked file-offset match is not a VA and not a name. Promote nothing on
+   scan strength alone.
+3. Version drift is expected: the oracle targets Repentance+; our target is
+   retail 1.9.7.17.J460. Disagreement is reported, not averaged. See
+   [`lua-api-reference.md`](lua-api-reference.md) grades.
+4. GPL-2.0 covers REPENTOGON's work. Our repository remains GPL-3.0-only;
+   nothing of theirs enters our tree.
+
+# IsaacDocs (moddingofisaac.com)
+
+[wofsauge/IsaacDocs](https://github.com/wofsauge/IsaacDocs) documents the
+modding (Lua) API surface of the game: the classes, their methods and fields,
+and the behaviour of each member, as community-reviewed documentation. Chosen
+as the canonical *interface description* of what Lua scripts may call — the
+nearest thing there is to a spec for the surface this project reimplements.
+
+Consulted for: `Vector` (constructor signature, member list), the existence of
+the namespaces we mirror (`Isaac`, `Game`, `EntityPlayer`, …), and member-
+meaning paraphrases. Nothing from it is copied; the site is referenced for
+verification of member *meaning*, not for offsets, not for implementation.
+
+Measured members we rely on are re-verified against our own binary before
+they enter code (the §21 discipline: correctness evidence is a command, not a
+web page). The `Vector` constructor `Vector(float x, float y)` agreed with the
+existing recovered surface; no other member has been individually verified in
+this session — see [`lua-api-reference.md`](lua-api-reference.md) grades.
+Consulted-only, same posture as REPENTOGON: no text reproduced.
