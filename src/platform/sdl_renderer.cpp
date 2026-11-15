@@ -230,6 +230,8 @@ void SdlRenderer::present() {
     while (SDL_PollEvent(&event) != 0) {
         if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE) {
             alive_ = false;
+        } else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
+            alive_ = false;
         }
     }
 

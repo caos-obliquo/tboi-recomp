@@ -118,6 +118,13 @@ When a result lands:
 - `docs/arch000-format.md` — container format claims only.
 - `docs/roadmap.md` — priority order of the build, with per-reference grades.
 - `README.md` — progress and scope for humans. Never a place for a raw address.
+- `docs/reimplementation-references.md` — what other people's projects offered, and
+  what this project keeps. External sources consulted there are never vendored.
+- `docs/lua-api-reference.md` — notes from external Lua-API oracles (REPENTOGON
+  `.zhl`, IsaacDocs). Every row carries one of: `own-repeat-verified`,
+  `oracle-agreed`, `oracle-disagreed`, `unverified`, `rejected`. An `unverified`
+  row is never used for implementation, tests, or progress claims; changing a
+  grade requires the re-run evidence, in the PR that changes it.
 - `tools/README.md` — what each tool does, and what it does *not* establish.
 - GitHub issues — the durable answer, with the evidence inline.
 

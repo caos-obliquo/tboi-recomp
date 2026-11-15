@@ -6,14 +6,19 @@
 // other than the null backend, which is the condition for every later milestone
 // to be visible at all.
 //
-// Two source modes, picked by the first argument's extension:
+// Three source modes, picked by the first argument:
 //
 //   isaec_window <image.png> [frames] [width] [height]
 //   isaec_window <archive.a> <entry-index> [frames] [width] [height]
+//   isaec_window slice [width] [height] [frames]
 //
-// The second form runs the whole pipeline inside the engine: read the ARCH000
+// The archive form runs the whole pipeline inside the engine: read the ARCH000
 // container, apply the entry's codec, hand the bytes to libpng, upload to the
 // GPU. Nothing shells out to tools/ and nothing is pre-extracted.
+//
+// The slice form is the playable white-box: an empty room (floor, four walls,
+// marker square) drawn with one procedural texture, paced to 60 Hz, Esc exits.
+// It reads no game data and draws nothing Nicalis-derived.
 //
 // Argument handling mirrors null_main.cpp positionally rather than adding a
 // parser, so the two binaries stay diffable.
@@ -73,14 +78,102 @@ bool read_file(const char* path, std::vector<isaec::u8>& out) {
 
 }  // namespace
 
+int run_slice(isaec::i32 width, isaec::i32 height, isaec::u64 frame_budget) {
+    isaec::platform::SdlRenderer renderer("isaec-slice", width, height);
+    if (!renderer.initialize(width, height)) return 1;
+
+    // 64x64 white texture, scaled down by the renderer's 64x clamp means any
+    // destination under 4096 logical px stays exactly integer-scaled.
+    const std::vector<isaec::u8> white(64 * 64 * 4, 255);
+    const isaec::i32 tex = renderer.create_texture(64, 64, white.data(), white.size());
+    if (tex < 0) {
+        renderer.shutdown();
+        return 1;
+    }
+
+    const isaec::engine::Rect full{0, 0, 64, 64};
+    const isaec::f32 room_x = width * 0.15f, room_y = height * 0.15f;
+    const isaec::f32 room_w = width * 0.70f, room_h = height * 0.65f;
+    const isaec::f32 wall = 16.0f, marker = 32.0f;
+    const isaec::f32 cx = room_x + (room_w - marker) * 0.5f;
+    const isaec::f32 cy = room_y + (room_h - marker) * 0.5f;
+
+    const isaec::engine::DrawCall floor_call{
+        tex, full, room_x, room_y, room_w / 64.0f, room_h / 64.0f, 0.35f};
+    const isaec::engine::DrawCall wall_left{tex, full, room_x, room_y, wall / 64.0f,
+                                            room_h / 64.0f, 1.0f};
+    const isaec::engine::DrawCall wall_right{tex, full, room_x + room_w - wall, room_y,
+                                             wall / 64.0f, room_h / 64.0f, 1.0f};
+    const isaec::engine::DrawCall wall_top{tex, full, room_x, room_y, room_w / 64.0f,
+                                           wall / 64.0f, 1.0f};
+    const isaec::engine::DrawCall wall_bottom{tex, full, room_x, room_y + room_h - wall,
+                                              room_w / 64.0f, wall / 64.0f, 1.0f};
+    const isaec::engine::DrawCall marker_call{tex, full, cx, cy, marker / 64.0f,
+                                              marker / 64.0f, 1.0f};
+
+    std::printf("backend   %.*s\n", static_cast<int>(renderer.backend_name().size()),
+                renderer.backend_name().data());
+    std::printf("scene     white-box empty room\n");
+    std::printf("viewport  %d x %d\n", width, height);
+    std::fflush(stdout);
+
+    constexpr auto kFrameTime = std::chrono::microseconds(16666);
+    const auto started = std::chrono::steady_clock::now();
+    isaec::u64 frames = 0;
+    double busy_ms = 0.0;
+
+    while (frames < frame_budget && renderer.alive()) {
+        const auto frame_started = std::chrono::steady_clock::now();
+
+        renderer.submit(floor_call);
+        renderer.submit(wall_left);
+        renderer.submit(wall_right);
+        renderer.submit(wall_top);
+        renderer.submit(wall_bottom);
+        renderer.submit(marker_call);
+        renderer.present();
+        ++frames;
+
+        const auto spent = std::chrono::steady_clock::now() - frame_started;
+        busy_ms += std::chrono::duration<double, std::milli>(spent).count();
+        if (spent < kFrameTime) std::this_thread::sleep_for(kFrameTime - spent);
+    }
+
+    const double elapsed =
+        std::chrono::duration<double>(std::chrono::steady_clock::now() - started).count();
+
+    renderer.destroy_texture(tex);
+    renderer.shutdown();
+
+    std::printf("frames    %lld\n", static_cast<long long>(frames));
+    std::printf("elapsed   %.3f s\n", elapsed);
+    std::printf("pacing    avg=%.3f ms est=%.2f Hz\n", busy_ms / static_cast<double>(frames),
+                static_cast<double>(frames) / elapsed);
+    std::printf("draws     %lld\n", static_cast<long long>(renderer.draw_calls()));
+    std::printf("presented %lld\n", static_cast<long long>(renderer.presented()));
+    std::printf("textures  %lld live\n", static_cast<long long>(renderer.live_textures()));
+    return 0;
+}
+
 int main(int argc, char** argv) {
     int cursor = 1;
     const std::string source = next_arg(argc, argv, cursor, "");
     if (source.empty()) {
         std::fprintf(stderr,
-                     "usage: isaec_window <image.png|archive.a> [entry-index] [frames] "
-                     "[width] [height]\n");
+                     "usage: isaec_window <image.png|archive.a> [entry-index] "
+                     "[frames] [width] [height]  |  isaec_window slice "
+                     "[width] [height] [frames]\n");
         return 2;
+    }
+
+    if (source == "slice") {
+        const isaec::i32 sw = static_cast<isaec::i32>(
+            std::strtol(next_arg(argc, argv, cursor, "1280").c_str(), nullptr, 10));
+        const isaec::i32 sh = static_cast<isaec::i32>(
+            std::strtol(next_arg(argc, argv, cursor, "720").c_str(), nullptr, 10));
+        const isaec::u64 slice_frames = static_cast<isaec::u64>(
+            std::strtoull(next_arg(argc, argv, cursor, "300").c_str(), nullptr, 10));
+        return run_slice(sw, sh, slice_frames);
     }
 
     const bool from_archive = ends_with(source, ".a");
