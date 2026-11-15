@@ -116,6 +116,7 @@ When a result lands:
 - `docs/HANDOFF.md` — what is in flight, what is blocked, what is a known dead
   end. A dead end recorded here saves the next session from re-mining it.
 - `docs/arch000-format.md` — container format claims only.
+- `docs/roadmap.md` — priority order of the build, with per-reference grades.
 - `README.md` — progress and scope for humans. Never a place for a raw address.
 - `docs/reimplementation-references.md` — what other people's projects offered, and
   what this project keeps. External sources consulted there are never vendored.
