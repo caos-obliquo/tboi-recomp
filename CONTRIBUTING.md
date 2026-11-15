@@ -68,8 +68,8 @@ Include the platform, the compiler version, the exact cmake flags, and the full
 output of the failing command. If a test fails, the test name and its `CHECK`
 expression identify the bug more precisely than any description you can write.
 
-By contributing you agree that your work is licensed under the MIT licence in
-[LICENSE](LICENSE).
+By contributing you agree that your work is licensed under the GPL-3.0-only
+licence in [LICENSE](LICENSE).
 ## Releases
 
 The version lives in one place: the `project(... VERSION x.y.z ...)` line of
