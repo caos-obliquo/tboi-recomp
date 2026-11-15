@@ -273,6 +273,7 @@ established from the shipped DLL rather than assumed — see
 | Recovered surface registers and resolves | **done** (as stubs) — 64 classes + 3 namespaces, 1003 methods + 461 properties, all behind `not_implemented_trampoline` except the 342 implemented members |
 | Directory-backed data source | **done** |
 | Headless renderer (counts, draws nothing) | **done** |
+| Playable white-box slice (SDL2, no game data) | **done** — first windowed render; `steady_clock` pacing measured ≈ 60 Hz, Esc quits — see [#67](https://github.com/caos-obliquo/tboi-recomp/issues/67) |
 | **Closure bodies located** | **911 distinct bodies** of 1064 call sites — accounting complete |
 | **Closure bodies decompiled** | **911 / 911**, 0 failures, classified into 11 shapes |
 | **Property-accessor ABI** | **recovered** — [§14](docs/binding-surface-findings.md) |
@@ -363,6 +364,19 @@ Headless smoke test against a real install:
 ./build/isaec_headless "/path/to/steamapps/common/The Binding of Isaac Rebirth"
 ```
 
+Playable white-box slice (no game data needed):
+
+```sh
+./build/isaec_window slice [width] [height] [frames]   # defaults 1280 720 300
+```
+
+Draws a white-box empty room (floor, walls, one marker square), paces via
+`steady_clock` with vsync, Esc or window close quits cleanly. Measured pacing
+≈ 60 Hz (est 59.75 Hz on a 180-frame run at 1280x720; 59.78 Hz under
+`SDL_VIDEODRIVER=dummy`). It proves the Renderer abstraction end to end — it is
+not the game and draws no Isaac assets. GPU rendering proper is still
+[#5](https://github.com/caos-obliquo/tboi-recomp/issues/5).
+
 Cross-compiling for Android (requires the NDK):
 
 ```sh
@@ -395,7 +409,7 @@ include/isaec/
   engine/engine.hpp        mount / start / tick / stop
   engine/renderer.hpp      Renderer: pure virtual, platform fills it in
   engine/clock.hpp         SteadyClock
-  platform/                null_renderer (headless), sdl_renderer
+  platform/                null_renderer (headless), sdl_renderer, slice scene in sdl_main.cpp
 src/                       implementations
 tools/                     research + codegen scripts; see tools/README.md
   inspect-archive.py       ARCH000 reader; asserts the index arithmetic
