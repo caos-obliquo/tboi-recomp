@@ -151,3 +151,23 @@ Clean-room recovery of the binding surface against the project's own binary,
 Win32/XInput facts as interface evidence, implementation written from scratch.
 The licence change makes Half 1 available; it does not make Half 2 available,
 and no licence this project picks ever will.
+
+## The Android-port modding guide — consulted only, never copied
+
+The official modding guide for the Android port (`com.tboi.rebirth`, the iOS
+build of Repentance) describes resource mods with no Lua. Its design is worth
+recording for a future mod system here: a strict `mod.json` description, a
+`patch/` overlay that changes only named records of fixed tables with
+highest-wins precedence across mods, `options/<key>/<value>/` file-set
+overlays, per-record fallback (options → mod → lower mod → game's file),
+whole-mod refusal when a fixed-size table would overflow, and per-mod
+`check.txt` diagnostics.
+
+Nothing in the port — code, binaries, guide text — is vendored here. It is a
+closed-source, Nicalis-derived app; the guide documents behaviour only. The
+design patterns are generic (JSON description + overlay folders + defensive
+guards); adopting them here means writing our own, informed by the above.
+This project keeps Lua 5.3.6, which the port lacks entirely, so the design
+serves a narrower need (no script mods) than ours would.
+
+See [`roadmap.md`](roadmap.md) for where this fits in the build order.
