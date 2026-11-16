@@ -94,6 +94,7 @@ endif()
 add_library(isaec_core
   src/engine/engine.cpp
   src/engine/clock.cpp
+  src/engine/input.cpp
   src/data/source.cpp
   src/data/collection.cpp
   src/data/codec.cpp
@@ -169,6 +170,7 @@ if(ISAEC_SDL_FOUND)
   add_executable(isaec_window
     src/platform/sdl_renderer.cpp
     src/platform/sdl_main.cpp
+    src/platform/sdl_input.cpp
   )
   target_link_libraries(isaec_window PRIVATE isaec_core SDL2::SDL2)
   target_compile_options(isaec_window PRIVATE

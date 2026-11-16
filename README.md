@@ -274,6 +274,7 @@ established from the shipped DLL rather than assumed — see
 | Directory-backed data source | **done** |
 | Headless renderer (counts, draws nothing) | **done** |
 | Playable white-box slice (SDL2, no game data) | **done** — first windowed render; `steady_clock` pacing measured ≈ 60 Hz, Esc quits — see [#67](https://github.com/caos-obliquo/tboi-recomp/issues/67) |
+| **Controller input (XInput-shaped)** | **done** — engine layer: four pad slots, XInput `wButtons` bit layout, signed up-positive 16-bit thumbsticks, triggers 0–255, `dwPacketNumber` bumping on change, 7849 deadzone; **SDL2 backend** (`isaec::platform::SdlGamepadSource`) — device enumeration + hot-plug rescan + both-motor rumble; **100/100 tests green**; never run against a live game — see [#65](https://github.com/caos-obliquo/tboi-recomp/issues/65) |
 | **Closure bodies located** | **911 distinct bodies** of 1064 call sites — accounting complete |
 | **Closure bodies decompiled** | **911 / 911**, 0 failures, classified into 11 shapes |
 | **Property-accessor ABI** | **recovered** — [§14](docs/binding-surface-findings.md) |
