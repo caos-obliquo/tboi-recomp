@@ -60,6 +60,8 @@ Sha256 of the `.zhl` files read directly:
 | `Global` preambles | 10 parseable signature lines (one `\x55…`-escaped entry excluded from scanning) | 4 match | `unverified` (per-entry) |
 | IsaacDocs (moddingofisaac.com) | e.g. `Vector(float x, float y)` constructor; Vector arithmetic documented member-by-member | consulted only; member behaviours not re-derived here | `unverified` |
 | Filloax autocomplete | EmmyLua annotations for LuaLS; Vector number×vector operators unsupported | not consulted for any measurement here | `unverified` |
+| `Vector:Clamp` | public API documents a two-argument member (`Clamp(min, max)`); this binary's closure (`FUN_008a8610`, tag `&DAT_00c82980`) reads four real `luaL_checknumber` arguments at stack indices 2–5 via helper `FUN_008ba890`, passes them to `CALL [inst+0]`. `inst[0]` for engine-created Vectors is `&0xb73574` (luabridge `UserdataValue<Vector2>` reflection entry); `.rdata` is non-executable (`objdump -h`: no CODE flag); NX violation by construction — the member can never have produced a result | `rejected` (never implement; loud stubs stay) — issue #37 |
+| `Vector:Clamped` | same evidence, `FUN_008a8680` (188 B, allocates a fresh 0x10 userdata, returns 1) | `rejected` (never implement; loud stubs stay) — issue #37 |
 
 ### Vector::Lerp disagreement, restated precisely
 

@@ -183,7 +183,7 @@ smaller and more precise, never to round up.
 ## 6. Branching and repository settings
 
 `main` is protected. Direct pushes, force pushes and branch deletion are
-blocked; all 11 CI check contexts are required; history must be linear; review
+blocked; all 9 CI check contexts are required; history must be linear; review
 threads must be resolved.
 
 - **One branch per issue.** Prefix `feature/`, `fix/`, `add/` or `docs/`,
