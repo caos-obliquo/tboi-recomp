@@ -171,3 +171,23 @@ This project keeps Lua 5.3.6, which the port lacks entirely, so the design
 serves a narrower need (no script mods) than ours would.
 
 See [`roadmap.md`](roadmap.md) for where this fits in the build order.
+
+## The Browsing of Isaac — Half 1 adaptation (issue #65)
+
+Reference project: `chiikabu/the-browsing-of-isaac` (GPL-3.0-only since PR #63),
+files read only, never copied verbatim:
+
+- `scripts/recomp/web/gamepad.mjs` — XInput-shaped gamepad state in JS, the
+  reference for the shape (four slots, `wButtons` bitmask, 16-bit thumbs with
+  up-positive Y, triggers 0..255).
+- `scripts/recomp/host/src/host_shims_xinput.c` — host-side controller shims,
+  the reference for reading the OS/Steam-visible pad rather than the web events.
+
+What this project took from them: the *shape* and the *glue idioms*
+(XInput-shaped state + SDL game-controller enumeration), applied as ordinary
+idiomatic C++17. What was not taken: any expression of their code; Half-2
+(Nicalis-derived lifted C++, `native/decomp/*`, `boot.wasm`, model JSONs,
+`decomp/*.json`) never enters this tree in any form. The XInput ABI itself is
+public documentation. Adapt-never-copy applies; attribution lives in the file
+headers (`include/isaec/engine/input.hpp`, `include/isaec/platform/sdl_input.hpp`),
+in the commit message, and in the PR description.
