@@ -212,6 +212,123 @@ Merge policy: standard PR review; this does not bypass any required checks.
 - `docs/reimplementation-references.md`
 
 
+## [0.1.6] - 2026-11-17
+
+### Merged: [#68](https://github.com/caos-obliquo/tboi-recomp/pull/68) — feat(platform): playable white-box slice for Linux x86_64
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-15  **Files:** 3 changed, +114/-5.
+
+<details>
+<summary>Pull request body</summary>
+
+Closes #67.
+
+## What
+
+New mode `isaec_window slice [width] [height] [frames]` (defaults 1280 720 300):
+a white-box empty room (floor, four walls, one marker square, one procedural
+64x64 texture), paced at 60 Hz via steady_clock with vsync, Esc or window close
+exits cleanly.
+
+## Verified here
+
+- `./build/isaec_window slice 1280 720 180` -> backend sdl2, frames 180,
+  elapsed 3.012 s, pacing avg=0.213 ms est=59.75 Hz, draws=1080, exit 0 (DISPLAY=:0).
+- `SDL_VIDEODRIVER=dummy ./build/isaec_window slice 800 600 240` ->
+  est=59.78 Hz (timing-paced, no real vsync), presented=240, exit 0.
+- `ctest --test-dir build` -> 1/1 passed (62 cases with PNG).
+- Asset audit: `git ls-files | grep -Ei '\.(png|ogg|wav|a|jpg)$'` -> only
+  `third_party/lua-5.3.6/doc/osi-certified-72x60.png` (vendored Lua docs, NOT a
+  game asset). No Isaac data committed.
+- Zero warnings on the changed targets.
+
+## Not claimed / unchanged
+
+- GPU rendering proper is still not started — see #5. This is an SDL2 software/GL
+  path proving the Renderer abstraction, not a GPU backend.
+- No Isaac assets, no Lua, no ARCH000, no Heap recomp, not #5/#66.
+- tools/isaac-archive.py untouched (owner's uncommitted change preserved);
+  HANDOFF.md (owner's file) untouched, still untracked.
+
+## Acceptance evidence for #67 (to be closed only after merge)
+
+see PR checks; this text will be re-verified on merge.
+
+</details>
+
+#### Closes
+
+- [` `] [#5](https://github.com/caos-obliquo/tboi-recomp/issues/5) Implement a real GPU renderer backend (portable, Android-first) (open)
+- [` `] [#66](https://github.com/caos-obliquo/tboi-recomp/issues/66) Epic: Linux x86_64 and Android arm64 as first-class targets (packaging, on-device verification, frame pacing, docs) (open)
+- [`x`] [#67](https://github.com/caos-obliquo/tboi-recomp/issues/67) Epic slice: playable 60 fps empty floor (SDL2 white-box, Linux x86_64) (closed)
+
+#### Commits
+
+- `69c97f21` feat(platform): playable white-box slice for Linux x86_64 (#67)
+  Issue #67. The engine had no windowed, human-visible output; this adds
+  `isaec_window slice [width] [height] [frames]`: a white-box empty room
+  (floor, four walls, one marker square) drawn with one procedural 64x64
+  texture, paced at 60 Hz via steady_clock with vsync, Esc or window close
+  exits cleanly.
+  No game data is read or committed; this proves the Renderer abstraction
+  end to end (SDL2 backend, submit/present), nothing more. GPU rendering
+  proper (#5) is untouched.
+  Measured on this machine: ./build/isaec_window slice 1280 720 180
+  -> 180 frames, elapsed 3.012 s, pacing avg=0.213 ms est=59.75 Hz,
+  draws=1080, presented=180, exit 0. Under SDL_VIDEODRIVER=dummy:
+  800 600 240 -> est=59.78 Hz (timing-paced, no real vsync).
+- `5e80ff0f` Merge remote-tracking branch 'origin/main' into slice/67-playable-emp…
+  …ty-floor
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `README.md` | 15 | 1 |
+| `src/platform/sdl_main.cpp` | 97 | 4 |
+| `src/platform/sdl_renderer.cpp` | 2 | 0 |
+
+#### Documentation
+
+- `README.md`
+
+#### Discussion
+
+**@caos-obliquo** (2026-11-15):
+
+> ### Build + run evidence (this machine)
+>
+> Real display (DISPLAY=:0, 1280x720x180):
+>
+>     backend   sdl2
+>     scene     white-box empty room
+>     viewport  1280 x 720
+>     frames    180
+>     elapsed   3.012 s
+>     pacing    avg=0.213 ms est=59.75 Hz
+>     draws     1080
+>     presented 180
+>     exit=0
+>
+> `SDL_VIDEODRIVER=dummy ./build/isaec_window slice 800 600 240` → est=59.78 Hz,
+> presented=240, exit 0 (timing-paced, no real vsync).
+>
+> Clean tree apart from the owner's two files: `M tools/isaac-archive.py`, `?? HANDOFF.md`
+> — neither is in this PR.
+>
+> Game-asset audit: `git ls-files | grep -Ei '\.(png|ogg|wav|a|jpg)$'` → only the
+> vendored Lua OSI cert (`third_party/lua-5.3.6/doc/osi-certified-72x60.png`); no Isaac data.
+>
+> Escape/window-close quit path: wired in `SdlRenderer::present()` (KEYDOWN SDLK_ESCAPE
+> → `alive_=false`).
+>
+> 2026-11-15 review note: pacing measured at ~59.7 Hz on display, not 60.00 — consistent
+> with vsync + sched jitter, well within "60 fps corridor" for #67.
+>
+> GPU rendering (#5) is unchanged. Lua unchanged. Android unchanged.
+>
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
