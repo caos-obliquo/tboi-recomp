@@ -631,6 +631,55 @@ README gains a docs-list row. Half-2 never enters anywhere. User's `tools/isaac-
 - `docs/handoff.md`
 
 
+## [0.1.12] - 2026-11-17
+
+### Merged: [#80](https://github.com/caos-obliquo/tboi-recomp/pull/80) — docs(handoff): playtesting box is the mandatory next deliverable [#79]
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-17  **Files:** 1 changed, +19/-11.
+
+<details>
+<summary>Pull request body</summary>
+
+Updates `docs/handoff.md` (dated 2026-11-17) to record the owner directive from the 2026-11-17 working session: none of the previously listed candidate next steps are mandatory — the mandatory next deliverable is a **playtesting box**, tracked as #79 (definition/scope pending owner input; nothing here implies scope).
+
+- §2 lists the edit; §3 carries re-verified PR/issue state; §4 names the playtesting box as mandatory and the candidates (#64, #66, #52, #3/#4, #35) as not mandatory; §5 points at #79.
+- 34 lines, 5 sections, no invented results. Only `docs/handoff.md` in the diff.
+- User's `tools/isaac-archive.py` (M), `HANDOFF.md` (??), `build-input/` (??) untouched.
+
+Refs #79
+
+</details>
+
+#### Closes
+
+- [` `] [#3](https://github.com/caos-obliquo/tboi-recomp/issues/3) Recover 655 native function signatures and bodies; unblock per-class attribution (open)
+- [` `] [#4](https://github.com/caos-obliquo/tboi-recomp/issues/4) Attribute method names to all ~23 classes (blocked on #3) (open)
+- [` `] [#35](https://github.com/caos-obliquo/tboi-recomp/issues/35) Wire the 76 metamethods from the generated spec into the runtime binding (open)
+- [` `] [#52](https://github.com/caos-obliquo/tboi-recomp/issues/52) LZW (mode 0x01): the decoder over-produces past the recorded size; chunks after the first produce garbage (open)
+- [` `] [#64](https://github.com/caos-obliquo/tboi-recomp/issues/64) Audio: no audio code exists anywhere in the tree — add an injected Audio interface with null and SDL2 backends (open)
+- [` `] [#66](https://github.com/caos-obliquo/tboi-recomp/issues/66) Epic: Linux x86_64 and Android arm64 as first-class targets (packaging, on-device verification, frame pacing, docs) (open)
+- [` `] [#79](https://github.com/caos-obliquo/tboi-recomp/issues/79) Playtesting box: the mandatory next deliverable (definition and scope) (open)
+
+#### Commits
+
+- `408a56fa` docs(handoff): playtesting box is the mandatory next deliverable [#79]
+  Owner directive 2026-11-17: the listed candidates (#64 audio, #66 epic,
+  #52 LZW, #3/#4 signatures, #35 metamethods) are not mandatory. The tracked
+  handoff doc now names the playtesting box (#79) as the next deliverable and
+  records that scope is undefined pending owner input - definition, gating
+  subsystems, platform(s), verification meaning. [#79](https://github.com/caos-obliquo/tboi-recomp/issues/79)
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `docs/handoff.md` | 19 | 11 |
+
+#### Documentation
+
+- `docs/handoff.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
