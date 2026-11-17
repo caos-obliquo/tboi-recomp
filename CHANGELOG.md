@@ -511,6 +511,68 @@ No game code; no assets; no .zhl; only our notes.
 - `docs/lua-api-reference.md`
 
 
+## [0.1.10] - 2026-11-17
+
+### Merged: [#76](https://github.com/caos-obliquo/tboi-recomp/pull/76) — feat(engine): XInput-shaped controller state + SDL2 backend [#65](https://github.com/caos-obliquo/tboi-recomp/issues/65)
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-16  **Files:** 9 changed, +533/-0.
+
+<details>
+<summary>Pull request body</summary>
+
+## What
+
+Adds the engine's first input layer (#65, roadmap Phase 3): **XInput-shaped pad state** as a framework-free engine layer plus an **SDL2 backend** (`isaec::platform::SdlGamepadSource`). Still not wired into the renderer's event queue or gameplay — that remains tracked in #65.
+
+- `include/isaec/engine/input.hpp`, `src/engine/input.cpp` — `GamepadState` (dwPacketNumber bumped only on change), `wButtons` XInput bit layout, signed up-positive 16-bit thumbs, triggers 0..255, 7849 per-axis deadzone (magnitude passthrough, documented), `publish_sample`, `gamepad_state_changed`, `apply_thumb_deadzone`, `axis_to_i16` / `axis_to_u8_trigger` converters. Exactly four pad slots.
+- `include/isaec/platform/sdl_input.hpp`, `src/platform/sdl_input.cpp` — `SDL_GameController` enumeration, hot-plug rescan on poll, Y-axis negation (SDL up-negative → XInput up-positive), both-motor rumble via `SDL_GameControllerRumble`, lazy `SDL_INIT_GAMECONTROLLER` init. Built only when SDL2 is found (`ISAEC_SDL_FOUND`); headless/CI builds unchanged.
+- `tests/test_input.cpp` — pure-layer fixtures (default zeros, first-publish packet bump, no bump on identical republish, four-slot bound, deadzone boundary 7849/7850, axis clamping, trigger rounding, XInput bit layout). **100/100 tests pass locally.**
+
+## Attribution
+
+Controller mapping design and glue idioms adapted from **chiikabu/the-browsing-of-isaac Half 1** (`scripts/recomp/web/gamepad.mjs`, `scripts/recomp/host/src/host_shims_xinput.c`, GPL-3.0-only since PR #63), applied as idiomatic C++17, never transliterated. Half 2 (Nicalis-derived lift, `native/decomp/*`, `boot.wasm`, model JSONs, `decomp/*.json`) never enters this tree; Half-2 marker grep returns only doc strings describing its exclusion plus this header's own 'never present' note.
+
+## Not done (tracked in #65)
+
+Renderer event-queue integration, arm64 Android backend, touch controls (blocked on #5), Unity-style input package ergonomics.
+
+</details>
+
+#### Closes
+
+- [` `] [#5](https://github.com/caos-obliquo/tboi-recomp/issues/5) Implement a real GPU renderer backend (portable, Android-first) (open)
+- [` `] [#63](https://github.com/caos-obliquo/tboi-recomp/pull/63) docs(license): relicense MIT -> GPL-3.0-only for the-browsing-of-isaac [#62](https://github.com/caos-obliquo/tboi-recomp/issues/62) (merged)
+- [` `] [#65](https://github.com/caos-obliquo/tboi-recomp/issues/65) Input: XInput-shaped controller state (adapt The Browsing of Isaac's gamepad/shims, with attribution) + Android touch later (open)
+
+#### Commits
+
+- `3e2391e1` feat(engine): XInput-shaped controller state + SDL2 backend [#65](htt…
+  …ps://github.com/caos-obliquo/tboi-recomp/issues/65)
+  WHY: the engine had no input layer at all — the white-box slice is keyboard-only, and a game that needs a controller cannot be played. Roadmap Phase 3 names this issue as the path there.
+  WHAT: four-pad XInput-shaped GamepadState (dwPacketNumber bumped only on change, 16-bit up-positive thumbs, triggers 0-255, wButtons XInput bit layout, 7849 deadzone per-axis documented passing magnitude through), publish_sample with deadzone-before-compare, axis_to_i16/axis_to_u8_trigger converters, isaec::platform::SdlGamepadSource (SDL_GameController enumeration + hot-plug rescan, Y-axis negation, rumble both motors via SDL_GameControllerRumble). Headless tests: 100/100 green.
+  ATTRIBUTION: controller mapping design and glue idioms adapted from chiikabu's the-browsing-of-isaac Half 1 (scripts/recomp/web/gamepad.mjs, scripts/recomp/host/src/host_shims_xinput.c, GPL-3.0-only since PR #63), written as idiomatic C++17 — never transliterated. Half 2 code never enters; rg for Half-2 markers returns only descriptive doc hits plus the header's own 'never present' comment.
+  Not done (tracked in #65): game-loop integration (renderer event queue wiring), arm64 Android backend, touch controls (blocked on #5).
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `CMakeLists.txt` | 2 | 0 |
+| `README.md` | 1 | 0 |
+| `docs/reimplementation-references.md` | 20 | 0 |
+| `include/isaec/engine/input.hpp` | 109 | 0 |
+| `include/isaec/platform/sdl_input.hpp` | 60 | 0 |
+| `src/engine/input.cpp` | 67 | 0 |
+| `src/platform/sdl_input.cpp` | 135 | 0 |
+| `tests/CMakeLists.txt` | 1 | 0 |
+| `tests/test_input.cpp` | 138 | 0 |
+
+#### Documentation
+
+- `README.md`
+- `docs/reimplementation-references.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
