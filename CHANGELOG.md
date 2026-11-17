@@ -874,6 +874,55 @@ Refs #74
 | `.github/workflows/version.yml` | 4 | 3 |
 
 
+## [0.1.16] - 2026-11-17
+
+### Merged: [#91](https://github.com/caos-obliquo/tboi-recomp/pull/91) — docs(handoff): record the playtesting box landed [#90]
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-17  **Files:** 1 changed, +13/-12.
+
+<details>
+<summary>Pull request body</summary>
+
+Updates `docs/handoff.md` to the post-#88 truth:
+
+- §2/§3: PR #88 merged (9/9 green, run 44020322024) → `main` @ `fce5a9e`; verification lines re-mapped to the merged state.
+- §3: records the release-record consequence of #88's merge — `version.yml` run 44020505173 succeeded and auto-opened checkless PR **#89** (GITHUB_TOKEN-created record PRs trigger no CI, cannot satisfy the 9 required contexts). Resolution tracked in #90 (established catch-up pattern: #81, #87).
+- §4/§5: #79 stays OPEN until the owner witnesses an interactive run or waives; catch-up for #88 + this PR is the exact next step.
+
+Refs #90. Note: this PR deliberately does not start #64/#66/#52/#3/#4/#35 (not mandatory — owner 2026-11-17).
+
+</details>
+
+#### Closes
+
+- [` `] [#3](https://github.com/caos-obliquo/tboi-recomp/issues/3) Recover 655 native function signatures and bodies; unblock per-class attribution (open)
+- [` `] [#4](https://github.com/caos-obliquo/tboi-recomp/issues/4) Attribute method names to all ~23 classes (blocked on #3) (open)
+- [` `] [#35](https://github.com/caos-obliquo/tboi-recomp/issues/35) Wire the 76 metamethods from the generated spec into the runtime binding (open)
+- [` `] [#52](https://github.com/caos-obliquo/tboi-recomp/issues/52) LZW (mode 0x01): the decoder over-produces past the recorded size; chunks after the first produce garbage (open)
+- [` `] [#64](https://github.com/caos-obliquo/tboi-recomp/issues/64) Audio: no audio code exists anywhere in the tree — add an injected Audio interface with null and SDL2 backends (open)
+- [` `] [#66](https://github.com/caos-obliquo/tboi-recomp/issues/66) Epic: Linux x86_64 and Android arm64 as first-class targets (packaging, on-device verification, frame pacing, docs) (open)
+- [` `] [#79](https://github.com/caos-obliquo/tboi-recomp/issues/79) Playtesting box: the mandatory next deliverable (definition and scope) (open)
+- [` `] [#81](https://github.com/caos-obliquo/tboi-recomp/pull/81) chore(release): record the eight unrecorded merges since v0.1.4 (bump to 0.1.12) [#74] (merged)
+- [` `] [#87](https://github.com/caos-obliquo/tboi-recomp/pull/87) chore(release): record the three release-workflow merges (bump to 0.1.15) [#74] (merged)
+- [` `] [#88](https://github.com/caos-obliquo/tboi-recomp/pull/88) feat(sandbox): white-box playtesting box — controllable room [#79] (merged)
+- [` `] [#89](https://github.com/caos-obliquo/tboi-recomp/pull/89) chore(release): record PR #88 and bump the patch version (open)
+- [` `] [#90](https://github.com/caos-obliquo/tboi-recomp/issues/90) Release record: catch up the #88 merge and the handoff docs PR — record PRs #89+ are checkless orphans (open)
+
+#### Commits
+
+- `9bc985e9` docs(handoff): record the playtesting box landed; #89 orphan open [#90]
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `docs/handoff.md` | 13 | 12 |
+
+#### Documentation
+
+- `docs/handoff.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
