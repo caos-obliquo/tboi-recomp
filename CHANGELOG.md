@@ -392,6 +392,74 @@ Repos' Progress table deliberately unchanged — no implementation landed.
 - `docs/reimplementation-references.md`
 
 
+## [0.1.8] - 2026-11-17
+
+### Merged: [#73](https://github.com/caos-obliquo/tboi-recomp/pull/73) — docs(roadmap): Repentance+ build order, references and grades
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-15  **Files:** 4 changed, +186/-48.
+
+<details>
+<summary>Pull request body</summary>
+
+Partially advanced for #71 (epic stays open until its tracked increments land).
+
+## What this adds
+
+`docs/roadmap.md` — the structured priority path:
+
+- Phase plan: 0 binding map (done) → 1 renderer + data spine (ANM2 loader absent — largest gate; #5) → 2 audio (#64) → 3 input (#65) → 4 binding increments (returns-1 bodies first: 534/911) → 5 bootstrap `FUN_006fadc0` → 6 targets #66 (Linux first, Android via NDK + `ISAEC_WITH_PNG=OFF`) → 7 mod system semantics → 8 tracking discipline
+- Every external reference graded: own exe (authoritative), REPENTOGON `.zhl` (consulted-only, 105 offsets cross-checked, no bytes), IsaacDocs/autocomplete (`unverified`), Half-1/`Half-2` policy, switch-native host responsibility map, Android-port modding guide (consulted-only)
+- Explicit "never" list and the honest statement of what this project does not yet have: no renderer, no ANM2, no scripting loop, no audio — the port is months of work, not a weekend
+
+Other edits: `docs/reimplementation-references.md` gains the Android-port section; README docs table gains `docs/roadmap.md`; `AGENTS.md` §3 lists roadmap.md as cross-document authority.
+
+## Not in this PR
+
+No code. No game data. No redistribution of any third-party repo's content — every reference is link + grading + paraphrase only.
+
+## Verification
+
+- `git merge-base --is-ancestor origin/main docs/71-roadmap` → yes (branch off `origin/main` `92df2e1`)
+- Half-2 / raw `.zhl` byte scan of the diff → EMPTY
+- README Progress table deliberately untouched — no implementation landed
+
+User merges.
+
+</details>
+
+#### Closes
+
+- [` `] [#5](https://github.com/caos-obliquo/tboi-recomp/issues/5) Implement a real GPU renderer backend (portable, Android-first) (open)
+- [` `] [#64](https://github.com/caos-obliquo/tboi-recomp/issues/64) Audio: no audio code exists anywhere in the tree — add an injected Audio interface with null and SDL2 backends (open)
+- [` `] [#65](https://github.com/caos-obliquo/tboi-recomp/issues/65) Input: XInput-shaped controller state (adapt The Browsing of Isaac's gamepad/shims, with attribution) + Android touch later (open)
+- [` `] [#66](https://github.com/caos-obliquo/tboi-recomp/issues/66) Epic: Linux x86_64 and Android arm64 as first-class targets (packaging, on-device verification, frame pacing, docs) (open)
+- [` `] [#71](https://github.com/caos-obliquo/tboi-recomp/issues/71) Epic: long-term roadmap - from bindings-only baseline to playable native Repentance+ recomp (open)
+
+#### Commits
+
+- `83824b58` docs(roadmap): Repentance+ build order, references and grades [#71](h…
+  …ttps://github.com/caos-obliquo/tboi-recomp/issues/71)
+  The priority path for reaching the goal in the issue: binding map to data/render spine to audio to input to binding increments to bootstrap to targets. Every external reference is graded by how it was used; the unrecoverable work is stated plainly, not guessed at.
+  Harvests the Android-port modding guide as consulted-only design reference and records the same in reimplementation-references.md.
+- `3c002329` Merge branch 'main' into docs/71-roadmap
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `AGENTS.md` | 1 | 0 |
+| `README.md` | 1 | 0 |
+| `docs/reimplementation-references.md` | 19 | 48 |
+| `docs/roadmap.md` | 165 | 0 |
+
+#### Documentation
+
+- `AGENTS.md`
+- `README.md`
+- `docs/reimplementation-references.md`
+- `docs/roadmap.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
