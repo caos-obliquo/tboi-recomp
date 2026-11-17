@@ -6,8 +6,8 @@ Clean-room recompile of The Binding of Isaac: Repentance+ v1.9.7.17.J460
 Steam user copy), native on Linux x86_64 + Android arm64.
 
 ## 2. Changed files
-- `docs/handoff.md` — dated 2026-11-17. Mandatory next deliverable is the
-  **playtesting box**, tracked as
+- `docs/handoff.md` — dated 2026-11-17. **Playtesting box is landed**:
+  PR #88 → `main` @ `fce5a9e`; tracked as
   [#79](https://github.com/caos-obliquo/tboi-recomp/issues/79).
 - `README.md` — docs-list row for `docs/handoff.md`; progress row for the
   playtesting box (same commit as the sandbox code).
@@ -36,24 +36,25 @@ Steam user copy), native on Linux x86_64 + Android arm64.
   `version.yml` can open record PRs (issuecomment-6938733163); the `if:` inside
   `on:` was silently ignored — moved to job level (PR #85); v0.1.3 remains the
   latest tag/release; no v0.1.4+ tags cut.
-- Playtesting box sandbox (branch `feature/79-playtest-sandbox`):
+- Playtesting box sandbox (PR #88, squash-merged, branch deleted):
   `cmake --build build -j` clean (only the known tmpnam warning); `ctest` 1/1,
   **108 cases, 0 failed**; headless smoke `SDL_VIDEODRIVER=dummy ./build/isaec_window
   slice 320 240 90` → 90 frames, scene "white-box playtest room", EXIT 0;
-  interactive move not run (no display).
+  `gh pr checks 88` → 9/9 green (run 44020322024); interactive move not run (no display).
+- PR #88's merge ran `version.yml` (run 44020505173, success) and auto-opened
+  record PR **#89** — checkless by design (GITHUB_TOKEN PRs trigger no CI).
 
 ## 4. Open questions
 
-- **Playtesting box** — owner-scoped 2026-11-17: white-box playtesting
-  sandbox; scope comment posted (issuecomment-6938614445). Implementation on
-  `feature/79-playtest-sandbox`; AC must all be met + same-turn evidence
-  comment before #79 closes.
+- **Playtesting box** — landed (PR #88); stays OPEN (#79) until the owner
+  witnesses an interactive keyboard/pad run or explicitly waives it
+  (issuecomment-6938840091). No display in this environment yet.
 - NOT mandatory (owner, 2026-11-17): #64 audio, #66 Linux/Android epic,
   #52 LZW (behind runtime vtable `0xba05bc`), #3/#4 signatures, #35 metamethods.
 - Clamp/Clamped runtime semantics; REPENTOGON `.zhl` silent on Clamp.
 
 ## 5. Exact next step
-Land the playtesting sandbox PR for [#79](https://github.com/caos-obliquo/tboi-recomp/issues/79)
-(9/9 green, README progress row in the same commit), then post the same-turn
-evidence comment; #79 closes only when its AC is fully checked.
-Do not start #64/#66/#52/#3/#4/#35 as "mandatory" — they are not.
+Land the release-record catch-up for PR #88 (and this docs PR), anchor issue #90;
+close the checkless orphan record PRs (#89 and the one the docs PR spawns).
+Then: owner witnesses an interactive keyboard/pad run or waives it; #79 closes
+when its AC is fully checked. Do not start #64/#66/#52/#3/#4/#35 as "mandatory".
