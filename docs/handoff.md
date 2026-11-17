@@ -1,4 +1,4 @@
-# Handoff — tboi-recomp (2026-11-16)
+# Handoff — tboi-recomp (2026-11-17)
 
 ## 1. Goal
 Clean-room recompile of The Binding of Isaac: Repentance+ v1.9.7.17.J460
@@ -6,21 +6,29 @@ Clean-room recompile of The Binding of Isaac: Repentance+ v1.9.7.17.J460
 Steam user copy), native on Linux x86_64 + Android arm64.
 
 ## 2. Changed files
-- `docs/handoff.md` — rewritten: 5-section snapshot, max 40 lines, continues
-  [#77](https://github.com/caos-obliquo/tboi-recomp/issues/77).
+- `docs/handoff.md` — dated 2026-11-17. Mandatory next deliverable is the
+  **playtesting box**, tracked as
+  [#79](https://github.com/caos-obliquo/tboi-recomp/issues/79).
 - `README.md` — docs-list row for `docs/handoff.md` (on `docs/77-handoff`).
 
 ## 3. Verified commands and results
-- `gh pr view 76` → MERGED 2026-11-16T04:00:13Z; `main` @ `7b59738`.
-- `gh pr checks 63` → 9/9 pass (2026-11-15).
+- `gh pr checks 78` → 9 required contexts green (2026-11-16); PR #78
+  squash-merged 2026-11-16T14:23:15Z → `main` @ `d7993f4`.
+- `gh issue view 77` → CLOSED/COMPLETED (auto via `Closes #77`); AC re-scoped
+  to the 5-section format (owner decision, 2026-11-16).
+- `gh issue view 67` → CLOSED; playable white-box slice done (SDL2, no game
+  data, ≈60 Hz, Esc quits). NOT a playtesting box.
+- `gh issue view 76` → MERGED 2026-11-16T04:00:13Z.
 - `sha256sum` exe → `3bdfc8bae0dc7e334b76009d0ad45dfbb16ee5f00c06ffbc3a0094e34d44616b`.
-- `gh issue view 37` → CLOSED; Clamp/Clamped grade `rejected`.
 
 ## 4. Open questions
-- Audio interface + SDL2 backend (#64); Android packaging / on-device (#66).
-- LZW mode 0x01 (#52) behind runtime vtable (`0xba05bc`); Clamp/Clamped
-  runtime semantics; REPENTOGON `.zhl` silent on Clamp.
+- **Mandatory: playtesting box** — definition, gating subsystems, platform(s),
+  verification meaning. Owner to scope; do not infer —
+  [#79](https://github.com/caos-obliquo/tboi-recomp/issues/79).
+- NOT mandatory (owner, 2026-11-17): #64 audio, #66 Linux/Android epic,
+  #52 LZW (behind runtime vtable `0xba05bc`), #3/#4 signatures, #35 metamethods.
+- Clamp/Clamped runtime semantics; REPENTOGON `.zhl` silent on Clamp.
 
 ## 5. Exact next step
-Commit rewrite on fresh branch, PR base `main`, comment on [#77]; then pick
-next open issue.
+Define the playtesting box with the owner ([#79](https://github.com/caos-obliquo/tboi-recomp/issues/79)).
+Do not start #64/#66/#52/#3/#4/#35 as "mandatory" — they are not.
