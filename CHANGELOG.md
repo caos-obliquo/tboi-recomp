@@ -831,6 +831,49 @@ Refs #74
 - `docs/handoff.md`
 
 
+## [0.1.15] - 2026-11-17
+
+### Merged: [#85](https://github.com/caos-obliquo/tboi-recomp/pull/85) — fix(ci): make the release-record skip actually apply [#74]
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-17  **Files:** 1 changed, +4/-3.
+
+<details>
+<summary>Pull request body</summary>
+
+The `if:` that was meant to skip the release-record PRs was inside the `on:` event map. GitHub ignores `if` there, so the skip never applied — merging a record PR just spawned the next one (run 44013149509 executed for #81 despite its `chore(release):` title and opened PR #82).
+
+- `if:` moved to a job-level condition (where it is supported): skip when the closing PR either starts with `chore(release):` (title) or has a `release/pr-*` head ref.
+- No other behaviour changes; the bump/push/PR-open steps are unchanged.
+- Record PRs created by `GITHUB_TOKEN` still receive no CI runs (`pull_request` workflows don't fire for GITHUB_TOKEN-created events) — tracked on #74; this PR does not claim to fix that, it stops the infinite chain.
+
+Refs #74
+
+</details>
+
+#### Closes
+
+- [` `] [#74](https://github.com/caos-obliquo/tboi-recomp/issues/74) Release-record workflow fails on every merge: Actions may not create PRs; release/pr-* branches pile up (open)
+- [` `] [#81](https://github.com/caos-obliquo/tboi-recomp/pull/81) chore(release): record the eight unrecorded merges since v0.1.4 (bump to 0.1.12) [#74] (merged)
+- [` `] [#82](https://github.com/caos-obliquo/tboi-recomp/pull/82) chore(release): record PR #81 and bump the patch version (open)
+
+#### Commits
+
+- `3b15fb7f` fix(ci): make the release-record skip actually apply [#74]
+  The workflow-level if lived inside the on: event map, where GitHub
+  ignores it - every merged PR, including the record PRs the workflow
+  itself creates, spawned another record PR (run 44013149509 ran for #81,
+  whose title starts with chore(release), and created release/pr-82). The
+  intended skip never applied.
+  Move the skip to a job-level if (supported there) covering both title
+  prefix and head ref. [#74](https://github.com/caos-obliquo/tboi-recomp/issues/74)
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `.github/workflows/version.yml` | 4 | 3 |
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
