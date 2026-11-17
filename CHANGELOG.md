@@ -139,6 +139,547 @@ Also includes the HANDOFF rewrite, the README warning/comparison/hyperlinks, and
 - `docs/rea-toolchain.md` — one sentence of throat-clearing removed.
 
 
+## [0.1.5] - 2026-11-17
+
+### Merged: [#63](https://github.com/caos-obliquo/tboi-recomp/pull/63) — docs(license): relicense MIT -> GPL-3.0-only for the-browsing-of-isaac [#62](https://github.com/caos-obliquo/tboi-recomp/issues/62)
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-15  **Files:** 4 changed, +777/-32.
+
+<details>
+<summary>Pull request body</summary>
+
+Closes #62.
+
+Relicenses this repository MIT -> GPL-3.0-only so that it may adapt [the-browsing-of-isaac](https://github.com/chiikabu/the-browsing-of-isaac)\'s own original host/platform glue (keyboard -> VK mapping, Gamepad API -> XInput, touch overlay, `host_shims_xinput.c`) **with attribution**, as separate reviewed changes file by file.
+
+## What changed
+
+- `LICENSE` — verbatim GNU GPL v3 (byte-identical copy of the one shipped by the-browsing-of-isaac; verified with `cmp`).
+- `README.md` — license line -> GPL-3.0-only with #62 link; comparison intro now five projects; new "The browser one" subsection; Credits extended.
+- `CONTRIBUTING.md` — licensing note MIT -> GPL-3.0-only.
+- `docs/reimplementation-references.md` — new section "The Browsing of Isaac, and the honest split": Half 1 (their original code, adaptable with attribution) vs Half 2 (Nicalis-derived recompilation; never enters this tree under any licence; only used as unverified external derivations, re-verified against our own binary as in #17/#20).
+
+## What this does not do
+
+- No code, build or dependency changes. `src/` is untouched.
+- Nothing from the-browsing-of-isaac is vendored here.
+- CHANGELOG is not edited by hand; it is composed from merged PRs by `tools/release.py`.
+
+## Verification
+
+- `git diff --stat` (vs `main` @ 6c0c4c1): CONTRIBUTING.md 4, LICENSE 695, README.md 52, docs 58 — 777 insertions, 32 deletions.
+- `cmp LICENSE <browsing-of-isaac>/LICENSE` -> identical.
+- `grep -ri "MIT" README.md CONTRIBUTING.md` -> no matches (one intentional mention left in `docs/arch000-format.md`, referring to a third-party tool, unchanged).
+- `git log --format=%an | sort | uniq -c` -> solo authorship (67 beto bettini, 2 dependabot[bot], 1 github-actions).
+
+## Open decision
+
+GPL-3.0-**only** was chosen because the-browsing-of-isaac ships GPL-3.0. Switching to GPL-3.0-or-later is a one-word change before merge if you prefer it.
+
+Merge policy: standard PR review; this does not bypass any required checks.
+
+</details>
+
+#### Closes
+
+- [`x`] [#17](https://github.com/caos-obliquo/tboi-recomp/issues/17) Attach property names to the 372 anonymous closure bodies (closed)
+- [` `] [#20](https://github.com/caos-obliquo/tboi-recomp/issues/20) Cross-check the 372 anonymous bodies against REPENTOGON's libzhl function table (open)
+- [`x`] [#62](https://github.com/caos-obliquo/tboi-recomp/issues/62) Relicense MIT -> GPL-3.0-only to enable direct reuse of The Browsing of Isaac's original code (closed)
+
+#### Commits
+
+- `f22d6599` docs(license): relicense MIT -> GPL-3.0-only for the-browsing-of-isaa…
+  …c [#62](https://github.com/caos-obliquo/tboi-recomp/issues/62)
+  Relicensing is authorized so this project may adapt the-browsing-of-isaac's own
+  original host/platform glue (input.js, gamepad.mjs XInput mapping, touch
+  controls, host_shims_xinput.c) with attribution, file by file, as separate
+  reviewed changes. Half 2 (mechanically recompiled game bodies, boot.wasm) can
+  never enter this tree under any licence. No source or build changes.
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `CONTRIBUTING.md` | 2 | 2 |
+| `LICENSE` | 674 | 21 |
+| `README.md` | 44 | 8 |
+| `docs/reimplementation-references.md` | 57 | 1 |
+
+#### Documentation
+
+- `CONTRIBUTING.md`
+- `README.md`
+- `docs/reimplementation-references.md`
+
+
+## [0.1.6] - 2026-11-17
+
+### Merged: [#68](https://github.com/caos-obliquo/tboi-recomp/pull/68) — feat(platform): playable white-box slice for Linux x86_64
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-15  **Files:** 3 changed, +114/-5.
+
+<details>
+<summary>Pull request body</summary>
+
+Closes #67.
+
+## What
+
+New mode `isaec_window slice [width] [height] [frames]` (defaults 1280 720 300):
+a white-box empty room (floor, four walls, one marker square, one procedural
+64x64 texture), paced at 60 Hz via steady_clock with vsync, Esc or window close
+exits cleanly.
+
+## Verified here
+
+- `./build/isaec_window slice 1280 720 180` -> backend sdl2, frames 180,
+  elapsed 3.012 s, pacing avg=0.213 ms est=59.75 Hz, draws=1080, exit 0 (DISPLAY=:0).
+- `SDL_VIDEODRIVER=dummy ./build/isaec_window slice 800 600 240` ->
+  est=59.78 Hz (timing-paced, no real vsync), presented=240, exit 0.
+- `ctest --test-dir build` -> 1/1 passed (62 cases with PNG).
+- Asset audit: `git ls-files | grep -Ei '\.(png|ogg|wav|a|jpg)$'` -> only
+  `third_party/lua-5.3.6/doc/osi-certified-72x60.png` (vendored Lua docs, NOT a
+  game asset). No Isaac data committed.
+- Zero warnings on the changed targets.
+
+## Not claimed / unchanged
+
+- GPU rendering proper is still not started — see #5. This is an SDL2 software/GL
+  path proving the Renderer abstraction, not a GPU backend.
+- No Isaac assets, no Lua, no ARCH000, no Heap recomp, not #5/#66.
+- tools/isaac-archive.py untouched (owner's uncommitted change preserved);
+  HANDOFF.md (owner's file) untouched, still untracked.
+
+## Acceptance evidence for #67 (to be closed only after merge)
+
+see PR checks; this text will be re-verified on merge.
+
+</details>
+
+#### Closes
+
+- [` `] [#5](https://github.com/caos-obliquo/tboi-recomp/issues/5) Implement a real GPU renderer backend (portable, Android-first) (open)
+- [` `] [#66](https://github.com/caos-obliquo/tboi-recomp/issues/66) Epic: Linux x86_64 and Android arm64 as first-class targets (packaging, on-device verification, frame pacing, docs) (open)
+- [`x`] [#67](https://github.com/caos-obliquo/tboi-recomp/issues/67) Epic slice: playable 60 fps empty floor (SDL2 white-box, Linux x86_64) (closed)
+
+#### Commits
+
+- `69c97f21` feat(platform): playable white-box slice for Linux x86_64 (#67)
+  Issue #67. The engine had no windowed, human-visible output; this adds
+  `isaec_window slice [width] [height] [frames]`: a white-box empty room
+  (floor, four walls, one marker square) drawn with one procedural 64x64
+  texture, paced at 60 Hz via steady_clock with vsync, Esc or window close
+  exits cleanly.
+  No game data is read or committed; this proves the Renderer abstraction
+  end to end (SDL2 backend, submit/present), nothing more. GPU rendering
+  proper (#5) is untouched.
+  Measured on this machine: ./build/isaec_window slice 1280 720 180
+  -> 180 frames, elapsed 3.012 s, pacing avg=0.213 ms est=59.75 Hz,
+  draws=1080, presented=180, exit 0. Under SDL_VIDEODRIVER=dummy:
+  800 600 240 -> est=59.78 Hz (timing-paced, no real vsync).
+- `5e80ff0f` Merge remote-tracking branch 'origin/main' into slice/67-playable-emp…
+  …ty-floor
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `README.md` | 15 | 1 |
+| `src/platform/sdl_main.cpp` | 97 | 4 |
+| `src/platform/sdl_renderer.cpp` | 2 | 0 |
+
+#### Documentation
+
+- `README.md`
+
+#### Discussion
+
+**@caos-obliquo** (2026-11-15):
+
+> ### Build + run evidence (this machine)
+>
+> Real display (DISPLAY=:0, 1280x720x180):
+>
+>     backend   sdl2
+>     scene     white-box empty room
+>     viewport  1280 x 720
+>     frames    180
+>     elapsed   3.012 s
+>     pacing    avg=0.213 ms est=59.75 Hz
+>     draws     1080
+>     presented 180
+>     exit=0
+>
+> `SDL_VIDEODRIVER=dummy ./build/isaec_window slice 800 600 240` → est=59.78 Hz,
+> presented=240, exit 0 (timing-paced, no real vsync).
+>
+> Clean tree apart from the owner's two files: `M tools/isaac-archive.py`, `?? HANDOFF.md`
+> — neither is in this PR.
+>
+> Game-asset audit: `git ls-files | grep -Ei '\.(png|ogg|wav|a|jpg)$'` → only the
+> vendored Lua OSI cert (`third_party/lua-5.3.6/doc/osi-certified-72x60.png`); no Isaac data.
+>
+> Escape/window-close quit path: wired in `SdlRenderer::present()` (KEYDOWN SDLK_ESCAPE
+> → `alive_=false`).
+>
+> 2026-11-15 review note: pacing measured at ~59.7 Hz on display, not 60.00 — consistent
+> with vsync + sched jitter, well within "60 fps corridor" for #67.
+>
+> GPU rendering (#5) is unchanged. Lua unchanged. Android unchanged.
+>
+
+
+## [0.1.7] - 2026-11-17
+
+### Merged: [#72](https://github.com/caos-obliquo/tboi-recomp/pull/72) — docs(lua-api): external Lua-API oracles, graded
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-15  **Files:** 3 changed, +151/-0.
+
+<details>
+<summary>Pull request body</summary>
+
+Closes #70.
+
+Consultation-only record of external Lua-API references, each finding tagged with a provenance grade (`own-repeat-verified` / `oracle-agreed` / `oracle-disagreed` / `unverified` / `rejected`). Nothing in this PR implements anything; `unverified` rows are explicitly barred from implementation use.
+
+**Measured against** the Steam retail v1.9.7.17.J460 binary (`isaac-ng.exe`, sha256 3bdfc8bae0dc7e334b76009d0ad45dfbb16ee5f00c06ffbc3a0094e34d44616b).
+
+- Vector layout `float x : 0x0, float y : 0x4`, size 0x8 — ours agrees (§21) — `oracle-agreed`
+- PosVel `pos : 0x0`, `vel : 0x8`, size 0x10 — ours agrees (§21) — `oracle-agreed`
+- `Vector::Lerp` masked preamble `558bec8b45??f30f1060` — **NOT FOUND** in this build — `oracle-disagreed`
+- `Game.zhl`: 56 parseable preambles, 40 masked file-offset hits (not VAs)
+- `EntityPlayer.zhl`: 193 preambles, 130 file-offset hits
+- `Global.zhl`: 10 parseable preambles, 4 file-offset hits
+- IsaacDocs (moddingofisaac.com) / Filloax autocomplete — `unverified`; consulted, never copied
+
+**Files:** adds `docs/lua-api-reference.md` (grades legend, environment, findings, commands, file-offset-not-VA warning); extends `docs/reimplementation-references.md` with consulted-only REPENTOGON and IsaacDocs sections; extends `AGENTS.md` §3 cross-document rules with the provenance-grade rule binding.
+
+**Never copies:** no `.zhl` bytes are in the diff; no Half-1/Half-2 content is touched; no text from upstream documentation is reproduced.
+
+Repos' Progress table deliberately unchanged — no implementation landed.
+
+</details>
+
+#### Closes
+
+- [`x`] [#70](https://github.com/caos-obliquo/tboi-recomp/issues/70) Epic: Lua API consultation (IsaacDocs + REPENTOGON) and first recomp increment (closed)
+
+#### Commits
+
+- `069640e3` docs(lua-api): external Lua-API oracles, graded [#70](https://github.…
+  …com/caos-obliquo/tboi-recomp/issues/70) [#71](https://github.com/caos-obliquo/tboi-recomp/issues/71)
+  Records what REPENTOGON (.zhl, GPL-2.0) and IsaacDocs say about the
+  Lua-facing surface, every note tagged with a provenance grade, and adds
+  docs/lua-api-reference.md to AGENTS.md cross-document rules. No text and no
+  bytes are copied from either source; .zhl signature bytes are never pasted.
+  Measured against the Steam retail v1.9.7.17.J460 binary: Vector::Lerp
+  preamble absent, PosVel/Vector layouts agree, Game 40/56, EntityPlayer
+  130/193, Global 4/10 masked file-offset hits (not VAs).
+- `e6d8075c` Merge branch 'main' into docs/70-lua-api-reference
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `AGENTS.md` | 7 | 0 |
+| `docs/lua-api-reference.md` | 95 | 0 |
+| `docs/reimplementation-references.md` | 49 | 0 |
+
+#### Documentation
+
+- `AGENTS.md`
+- `docs/lua-api-reference.md`
+- `docs/reimplementation-references.md`
+
+
+## [0.1.8] - 2026-11-17
+
+### Merged: [#73](https://github.com/caos-obliquo/tboi-recomp/pull/73) — docs(roadmap): Repentance+ build order, references and grades
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-15  **Files:** 4 changed, +186/-48.
+
+<details>
+<summary>Pull request body</summary>
+
+Partially advanced for #71 (epic stays open until its tracked increments land).
+
+## What this adds
+
+`docs/roadmap.md` — the structured priority path:
+
+- Phase plan: 0 binding map (done) → 1 renderer + data spine (ANM2 loader absent — largest gate; #5) → 2 audio (#64) → 3 input (#65) → 4 binding increments (returns-1 bodies first: 534/911) → 5 bootstrap `FUN_006fadc0` → 6 targets #66 (Linux first, Android via NDK + `ISAEC_WITH_PNG=OFF`) → 7 mod system semantics → 8 tracking discipline
+- Every external reference graded: own exe (authoritative), REPENTOGON `.zhl` (consulted-only, 105 offsets cross-checked, no bytes), IsaacDocs/autocomplete (`unverified`), Half-1/`Half-2` policy, switch-native host responsibility map, Android-port modding guide (consulted-only)
+- Explicit "never" list and the honest statement of what this project does not yet have: no renderer, no ANM2, no scripting loop, no audio — the port is months of work, not a weekend
+
+Other edits: `docs/reimplementation-references.md` gains the Android-port section; README docs table gains `docs/roadmap.md`; `AGENTS.md` §3 lists roadmap.md as cross-document authority.
+
+## Not in this PR
+
+No code. No game data. No redistribution of any third-party repo's content — every reference is link + grading + paraphrase only.
+
+## Verification
+
+- `git merge-base --is-ancestor origin/main docs/71-roadmap` → yes (branch off `origin/main` `92df2e1`)
+- Half-2 / raw `.zhl` byte scan of the diff → EMPTY
+- README Progress table deliberately untouched — no implementation landed
+
+User merges.
+
+</details>
+
+#### Closes
+
+- [` `] [#5](https://github.com/caos-obliquo/tboi-recomp/issues/5) Implement a real GPU renderer backend (portable, Android-first) (open)
+- [` `] [#64](https://github.com/caos-obliquo/tboi-recomp/issues/64) Audio: no audio code exists anywhere in the tree — add an injected Audio interface with null and SDL2 backends (open)
+- [` `] [#65](https://github.com/caos-obliquo/tboi-recomp/issues/65) Input: XInput-shaped controller state (adapt The Browsing of Isaac's gamepad/shims, with attribution) + Android touch later (open)
+- [` `] [#66](https://github.com/caos-obliquo/tboi-recomp/issues/66) Epic: Linux x86_64 and Android arm64 as first-class targets (packaging, on-device verification, frame pacing, docs) (open)
+- [` `] [#71](https://github.com/caos-obliquo/tboi-recomp/issues/71) Epic: long-term roadmap - from bindings-only baseline to playable native Repentance+ recomp (open)
+
+#### Commits
+
+- `83824b58` docs(roadmap): Repentance+ build order, references and grades [#71](h…
+  …ttps://github.com/caos-obliquo/tboi-recomp/issues/71)
+  The priority path for reaching the goal in the issue: binding map to data/render spine to audio to input to binding increments to bootstrap to targets. Every external reference is graded by how it was used; the unrecoverable work is stated plainly, not guessed at.
+  Harvests the Android-port modding guide as consulted-only design reference and records the same in reimplementation-references.md.
+- `3c002329` Merge branch 'main' into docs/71-roadmap
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `AGENTS.md` | 1 | 0 |
+| `README.md` | 1 | 0 |
+| `docs/reimplementation-references.md` | 19 | 48 |
+| `docs/roadmap.md` | 165 | 0 |
+
+#### Documentation
+
+- `AGENTS.md`
+- `README.md`
+- `docs/reimplementation-references.md`
+- `docs/roadmap.md`
+
+
+## [0.1.9] - 2026-11-17
+
+### Merged: [#75](https://github.com/caos-obliquo/tboi-recomp/pull/75) — docs(lua-api-reference): Clamp/Clamped rejected; CI contexts 9 [#37](https://github.com/caos-obliquo/tboi-recomp/issues/37)
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-16  **Files:** 2 changed, +3/-1.
+
+<details>
+<summary>Pull request body</summary>
+
+References #37 (closed 2026-11-15 with the full REA chain).
+
+Changes:
+- docs/lua-api-reference.md: adds `Vector:Clamp` / `Vector:Clamped` rows with grade `rejected` — the shipped closures cannot execute by construction (`.rdata` is non-executable; `inst[0]=&0xb73574`; `CALL [inst+0]` is an NX violation by construction). Loud stubs stay in the recomp. Evidence: issue #37 comments 6903733349 / 6904094401 / 6904112121 / 6905780752 / 6905792315 (objdump -h section flags, analyze_function chain, 50 engine creation sites).
+- AGENTS.md §6: corrects the stale claim of 11 required CI contexts to the measured 9 (gh api repos/caos-obliquo/tboi-recomp/branches/main/protection — strict:true, approvals:0, the nine contexts listed on the PR).
+
+No game code; no assets; no .zhl; only our notes.
+
+</details>
+
+#### Closes
+
+- [`x`] [#37](https://github.com/caos-obliquo/tboi-recomp/issues/37) Vector:Clamp / Vector:Clamped read four numbers, the public API documents two (closed)
+
+#### Commits
+
+- `90f8fdb8` docs(lua-api-reference): Clamp/Clamped rejected; CI contexts 9 [#37](…
+  …https://github.com/caos-obliquo/tboi-recomp/issues/37)
+  - Adds Vector:Clamp / Vector:Clamped rows to the findings table with grade
+    `rejected`. The shipped closures cannot execute by construction (.rdata is
+    READONLY DATA with no CODE flag; inst[0] = &0xb73574 points at a
+    luabridge reflection entry; CALL [inst+0] is an NX violation by
+    construction). Evidence in issue #37 comments (objdump -h section table;
+    analyze_function FUN_008ba890/FUN_008a8610/FUN_008a8680; 50 engine sites
+    storing inst[0]=&0xb73574). Loud stubs stay.
+  - AGENTS.md §6: corrects stale claim of 11 required CI contexts to the
+    measured 9 (gh api repos/caos-obliquo/tboi-recomp/branches/main/protection;
+    strict:true, approvals:0).
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `AGENTS.md` | 1 | 1 |
+| `docs/lua-api-reference.md` | 2 | 0 |
+
+#### Documentation
+
+- `AGENTS.md`
+- `docs/lua-api-reference.md`
+
+
+## [0.1.10] - 2026-11-17
+
+### Merged: [#76](https://github.com/caos-obliquo/tboi-recomp/pull/76) — feat(engine): XInput-shaped controller state + SDL2 backend [#65](https://github.com/caos-obliquo/tboi-recomp/issues/65)
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-16  **Files:** 9 changed, +533/-0.
+
+<details>
+<summary>Pull request body</summary>
+
+## What
+
+Adds the engine's first input layer (#65, roadmap Phase 3): **XInput-shaped pad state** as a framework-free engine layer plus an **SDL2 backend** (`isaec::platform::SdlGamepadSource`). Still not wired into the renderer's event queue or gameplay — that remains tracked in #65.
+
+- `include/isaec/engine/input.hpp`, `src/engine/input.cpp` — `GamepadState` (dwPacketNumber bumped only on change), `wButtons` XInput bit layout, signed up-positive 16-bit thumbs, triggers 0..255, 7849 per-axis deadzone (magnitude passthrough, documented), `publish_sample`, `gamepad_state_changed`, `apply_thumb_deadzone`, `axis_to_i16` / `axis_to_u8_trigger` converters. Exactly four pad slots.
+- `include/isaec/platform/sdl_input.hpp`, `src/platform/sdl_input.cpp` — `SDL_GameController` enumeration, hot-plug rescan on poll, Y-axis negation (SDL up-negative → XInput up-positive), both-motor rumble via `SDL_GameControllerRumble`, lazy `SDL_INIT_GAMECONTROLLER` init. Built only when SDL2 is found (`ISAEC_SDL_FOUND`); headless/CI builds unchanged.
+- `tests/test_input.cpp` — pure-layer fixtures (default zeros, first-publish packet bump, no bump on identical republish, four-slot bound, deadzone boundary 7849/7850, axis clamping, trigger rounding, XInput bit layout). **100/100 tests pass locally.**
+
+## Attribution
+
+Controller mapping design and glue idioms adapted from **chiikabu/the-browsing-of-isaac Half 1** (`scripts/recomp/web/gamepad.mjs`, `scripts/recomp/host/src/host_shims_xinput.c`, GPL-3.0-only since PR #63), applied as idiomatic C++17, never transliterated. Half 2 (Nicalis-derived lift, `native/decomp/*`, `boot.wasm`, model JSONs, `decomp/*.json`) never enters this tree; Half-2 marker grep returns only doc strings describing its exclusion plus this header's own 'never present' note.
+
+## Not done (tracked in #65)
+
+Renderer event-queue integration, arm64 Android backend, touch controls (blocked on #5), Unity-style input package ergonomics.
+
+</details>
+
+#### Closes
+
+- [` `] [#5](https://github.com/caos-obliquo/tboi-recomp/issues/5) Implement a real GPU renderer backend (portable, Android-first) (open)
+- [` `] [#63](https://github.com/caos-obliquo/tboi-recomp/pull/63) docs(license): relicense MIT -> GPL-3.0-only for the-browsing-of-isaac [#62](https://github.com/caos-obliquo/tboi-recomp/issues/62) (merged)
+- [` `] [#65](https://github.com/caos-obliquo/tboi-recomp/issues/65) Input: XInput-shaped controller state (adapt The Browsing of Isaac's gamepad/shims, with attribution) + Android touch later (open)
+
+#### Commits
+
+- `3e2391e1` feat(engine): XInput-shaped controller state + SDL2 backend [#65](htt…
+  …ps://github.com/caos-obliquo/tboi-recomp/issues/65)
+  WHY: the engine had no input layer at all — the white-box slice is keyboard-only, and a game that needs a controller cannot be played. Roadmap Phase 3 names this issue as the path there.
+  WHAT: four-pad XInput-shaped GamepadState (dwPacketNumber bumped only on change, 16-bit up-positive thumbs, triggers 0-255, wButtons XInput bit layout, 7849 deadzone per-axis documented passing magnitude through), publish_sample with deadzone-before-compare, axis_to_i16/axis_to_u8_trigger converters, isaec::platform::SdlGamepadSource (SDL_GameController enumeration + hot-plug rescan, Y-axis negation, rumble both motors via SDL_GameControllerRumble). Headless tests: 100/100 green.
+  ATTRIBUTION: controller mapping design and glue idioms adapted from chiikabu's the-browsing-of-isaac Half 1 (scripts/recomp/web/gamepad.mjs, scripts/recomp/host/src/host_shims_xinput.c, GPL-3.0-only since PR #63), written as idiomatic C++17 — never transliterated. Half 2 code never enters; rg for Half-2 markers returns only descriptive doc hits plus the header's own 'never present' comment.
+  Not done (tracked in #65): game-loop integration (renderer event queue wiring), arm64 Android backend, touch controls (blocked on #5).
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `CMakeLists.txt` | 2 | 0 |
+| `README.md` | 1 | 0 |
+| `docs/reimplementation-references.md` | 20 | 0 |
+| `include/isaec/engine/input.hpp` | 109 | 0 |
+| `include/isaec/platform/sdl_input.hpp` | 60 | 0 |
+| `src/engine/input.cpp` | 67 | 0 |
+| `src/platform/sdl_input.cpp` | 135 | 0 |
+| `tests/CMakeLists.txt` | 1 | 0 |
+| `tests/test_input.cpp` | 138 | 0 |
+
+#### Documentation
+
+- `README.md`
+- `docs/reimplementation-references.md`
+
+
+## [0.1.11] - 2026-11-17
+
+### Merged: [#78](https://github.com/caos-obliquo/tboi-recomp/pull/78) — docs(handoff): tracked state snapshot for fresh sessions [#77]
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-16  **Files:** 2 changed, +27/-0.
+
+<details>
+<summary>Pull request body</summary>
+
+Closes #77.
+
+Adds `docs/handoff.md` (dated 2026-11-16): snapshot of main @ `bdf2abb`, open PR #76 state, #37 Clamp verdict pointer, standing locks verbatim, cold-start recipe (AGENTS.md → README.md → `gh issue list` → `docs/roadmap.md`), and the recorded dead ends (#52 LZW behind runtime vtable; #37 runtime-only settlement; REPENTOGON `.zhl` silent; busy-loop upstream bug; #74 release-note 10 pending branches).
+
+README gains a docs-list row. Half-2 never enters anywhere. User's `tools/isaac-archive.py` (M) and `HANDOFF.md` (??) untouched. Only `docs/handoff.md` and `README.md` in the diff.
+
+</details>
+
+#### Closes
+
+- [`x`] [#37](https://github.com/caos-obliquo/tboi-recomp/issues/37) Vector:Clamp / Vector:Clamped read four numbers, the public API documents two (closed)
+- [` `] [#52](https://github.com/caos-obliquo/tboi-recomp/issues/52) LZW (mode 0x01): the decoder over-produces past the recorded size; chunks after the first produce garbage (open)
+- [` `] [#74](https://github.com/caos-obliquo/tboi-recomp/issues/74) Release-record workflow fails on every merge: Actions may not create PRs; release/pr-* branches pile up (open)
+- [` `] [#76](https://github.com/caos-obliquo/tboi-recomp/pull/76) feat(engine): XInput-shaped controller state + SDL2 backend [#65](https://github.com/caos-obliquo/tboi-recomp/issues/65) (merged)
+- [`x`] [#77](https://github.com/caos-obliquo/tboi-recomp/issues/77) Docs: tracked docs/handoff.md so a fresh session is self-contained (closed)
+
+#### Commits
+
+- `876d9acf` docs(handoff): tracked state snapshot for fresh sessions [#77](https:…
+  …//github.com/caos-obliquo/tboi-recomp/issues/77)
+  Why: the untracked HANDOFF.md is stale and off-limits, and a fresh session
+  needs a self-contained entry point. docs/handoff.md records the state on
+  2026-11-16: main @ bdf2abb, PR #76 open (all 9 required contexts must go
+  green before merge), #37 Clamp/Clamped verdict, standing locks verbatim,
+  dead ends not to redo.
+  Half-2 never enters; user's tools/isaac-archive.py (M) and HANDOFF.md (??)
+  untouched; README gains a docs-list row.
+- `bfd9e546` docs(handoff): 5-section snapshot, 26 lines [#77](https://github.com/…
+  …caos-obliquo/tboi-recomp/issues/77)
+  Why: the tracked snapshot was 114 lines of prose naming main @ bdf2abb and
+  a pending PR #76; main is now 7b59738 (PR #76 MERGED) and the user asked
+  for a max-40-line five-section handoff. The rewrite records verified
+  state only (gh pr view 76 MERGED 2026-11-16T04:00:13Z; gh pr checks 63
+  9/9; issue #37 closed). User's tools/isaac-archive.py and untracked
+  HANDOFF.md untouched.
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `README.md` | 1 | 0 |
+| `docs/handoff.md` | 26 | 0 |
+
+#### Documentation
+
+- `README.md`
+- `docs/handoff.md`
+
+
+## [0.1.12] - 2026-11-17
+
+### Merged: [#80](https://github.com/caos-obliquo/tboi-recomp/pull/80) — docs(handoff): playtesting box is the mandatory next deliverable [#79]
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-17  **Files:** 1 changed, +19/-11.
+
+<details>
+<summary>Pull request body</summary>
+
+Updates `docs/handoff.md` (dated 2026-11-17) to record the owner directive from the 2026-11-17 working session: none of the previously listed candidate next steps are mandatory — the mandatory next deliverable is a **playtesting box**, tracked as #79 (definition/scope pending owner input; nothing here implies scope).
+
+- §2 lists the edit; §3 carries re-verified PR/issue state; §4 names the playtesting box as mandatory and the candidates (#64, #66, #52, #3/#4, #35) as not mandatory; §5 points at #79.
+- 34 lines, 5 sections, no invented results. Only `docs/handoff.md` in the diff.
+- User's `tools/isaac-archive.py` (M), `HANDOFF.md` (??), `build-input/` (??) untouched.
+
+Refs #79
+
+</details>
+
+#### Closes
+
+- [` `] [#3](https://github.com/caos-obliquo/tboi-recomp/issues/3) Recover 655 native function signatures and bodies; unblock per-class attribution (open)
+- [` `] [#4](https://github.com/caos-obliquo/tboi-recomp/issues/4) Attribute method names to all ~23 classes (blocked on #3) (open)
+- [` `] [#35](https://github.com/caos-obliquo/tboi-recomp/issues/35) Wire the 76 metamethods from the generated spec into the runtime binding (open)
+- [` `] [#52](https://github.com/caos-obliquo/tboi-recomp/issues/52) LZW (mode 0x01): the decoder over-produces past the recorded size; chunks after the first produce garbage (open)
+- [` `] [#64](https://github.com/caos-obliquo/tboi-recomp/issues/64) Audio: no audio code exists anywhere in the tree — add an injected Audio interface with null and SDL2 backends (open)
+- [` `] [#66](https://github.com/caos-obliquo/tboi-recomp/issues/66) Epic: Linux x86_64 and Android arm64 as first-class targets (packaging, on-device verification, frame pacing, docs) (open)
+- [` `] [#79](https://github.com/caos-obliquo/tboi-recomp/issues/79) Playtesting box: the mandatory next deliverable (definition and scope) (open)
+
+#### Commits
+
+- `408a56fa` docs(handoff): playtesting box is the mandatory next deliverable [#79]
+  Owner directive 2026-11-17: the listed candidates (#64 audio, #66 epic,
+  #52 LZW, #3/#4 signatures, #35 metamethods) are not mandatory. The tracked
+  handoff doc now names the playtesting box (#79) as the next deliverable and
+  records that scope is undefined pending owner input - definition, gating
+  subsystems, platform(s), verification meaning. [#79](https://github.com/caos-obliquo/tboi-recomp/issues/79)
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `docs/handoff.md` | 19 | 11 |
+
+#### Documentation
+
+- `docs/handoff.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
