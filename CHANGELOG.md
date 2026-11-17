@@ -780,6 +780,57 @@ Refs #74
 - `CHANGELOG.md`
 
 
+## [0.1.14] - 2026-11-17
+
+### Merged: [#83](https://github.com/caos-obliquo/tboi-recomp/pull/83) — docs: record release catch-up + fix stale workflow notes [#74]
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-17  **Files:** 3 changed, +33/-17.
+
+<details>
+<summary>Pull request body</summary>
+
+Docs-only follow-through for the release catch-up (PR #81) and issue #74. Also the functional test of the flipped Actions setting: this merge fires `version.yml`, which should now open the record PR for this PR instead of failing at "Open release PR".
+
+- `README.md` docs-list row for `docs/handoff.md`: updated to the 2026-11-17 re-scope; playtesting box (#79) named mandatory.
+- `docs/HANDOFF.md` §12: required checks corrected to the verified 9 (`gh api repos/.../required_status_checks`, strict=true, 2026-11-17); the old "11 including nonexistent macos-*, PR #10 open" paragraph (wrong on both counts) removed with the correction visible; release-record fix (#74) noted, including what the 2026-11-17 catch-up did and did not establish.
+- `docs/handoff.md`: 39 lines, 5 sections, dated 2026-11-17; §3 now carries PR #81's verified facts.
+
+Refs #74
+
+</details>
+
+#### Closes
+
+- [` `] [#10](https://github.com/caos-obliquo/tboi-recomp/pull/10) ci: cover ARM64 natively and stop macOS coverage silently narrowing (merged)
+- [` `] [#74](https://github.com/caos-obliquo/tboi-recomp/issues/74) Release-record workflow fails on every merge: Actions may not create PRs; release/pr-* branches pile up (open)
+- [` `] [#79](https://github.com/caos-obliquo/tboi-recomp/issues/79) Playtesting box: the mandatory next deliverable (definition and scope) (open)
+- [` `] [#81](https://github.com/caos-obliquo/tboi-recomp/pull/81) chore(release): record the eight unrecorded merges since v0.1.4 (bump to 0.1.12) [#74] (merged)
+
+#### Commits
+
+- `0cf14f3d` docs: record release catch-up + correction of stale workflow notes [#74]
+  README docs-list row for docs/handoff.md now matches the 2026-11-17
+  re-scope (mandatory deliverable: playtesting box #79). docs/HANDOFF.md
+  §12 is corrected to the verified 9-context required list (was a stale
+  '11 incl macos-*' claim and a stale PR #10 paragraph) and records the
+  release-record workflow fix from #74. docs/handoff.md re-dated
+  2026-11-17 in §3 with PR #81 verified facts. Part of [#74](https://github.com/caos-obliquo/tboi-recomp/issues/74).
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `README.md` | 1 | 1 |
+| `docs/HANDOFF.md` | 20 | 9 |
+| `docs/handoff.md` | 12 | 7 |
+
+#### Documentation
+
+- `README.md`
+- `docs/HANDOFF.md`
+- `docs/handoff.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
