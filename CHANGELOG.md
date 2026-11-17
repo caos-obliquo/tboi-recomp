@@ -329,6 +329,69 @@ see PR checks; this text will be re-verified on merge.
 >
 
 
+## [0.1.7] - 2026-11-17
+
+### Merged: [#72](https://github.com/caos-obliquo/tboi-recomp/pull/72) — docs(lua-api): external Lua-API oracles, graded
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-15  **Files:** 3 changed, +151/-0.
+
+<details>
+<summary>Pull request body</summary>
+
+Closes #70.
+
+Consultation-only record of external Lua-API references, each finding tagged with a provenance grade (`own-repeat-verified` / `oracle-agreed` / `oracle-disagreed` / `unverified` / `rejected`). Nothing in this PR implements anything; `unverified` rows are explicitly barred from implementation use.
+
+**Measured against** the Steam retail v1.9.7.17.J460 binary (`isaac-ng.exe`, sha256 3bdfc8bae0dc7e334b76009d0ad45dfbb16ee5f00c06ffbc3a0094e34d44616b).
+
+- Vector layout `float x : 0x0, float y : 0x4`, size 0x8 — ours agrees (§21) — `oracle-agreed`
+- PosVel `pos : 0x0`, `vel : 0x8`, size 0x10 — ours agrees (§21) — `oracle-agreed`
+- `Vector::Lerp` masked preamble `558bec8b45??f30f1060` — **NOT FOUND** in this build — `oracle-disagreed`
+- `Game.zhl`: 56 parseable preambles, 40 masked file-offset hits (not VAs)
+- `EntityPlayer.zhl`: 193 preambles, 130 file-offset hits
+- `Global.zhl`: 10 parseable preambles, 4 file-offset hits
+- IsaacDocs (moddingofisaac.com) / Filloax autocomplete — `unverified`; consulted, never copied
+
+**Files:** adds `docs/lua-api-reference.md` (grades legend, environment, findings, commands, file-offset-not-VA warning); extends `docs/reimplementation-references.md` with consulted-only REPENTOGON and IsaacDocs sections; extends `AGENTS.md` §3 cross-document rules with the provenance-grade rule binding.
+
+**Never copies:** no `.zhl` bytes are in the diff; no Half-1/Half-2 content is touched; no text from upstream documentation is reproduced.
+
+Repos' Progress table deliberately unchanged — no implementation landed.
+
+</details>
+
+#### Closes
+
+- [`x`] [#70](https://github.com/caos-obliquo/tboi-recomp/issues/70) Epic: Lua API consultation (IsaacDocs + REPENTOGON) and first recomp increment (closed)
+
+#### Commits
+
+- `069640e3` docs(lua-api): external Lua-API oracles, graded [#70](https://github.…
+  …com/caos-obliquo/tboi-recomp/issues/70) [#71](https://github.com/caos-obliquo/tboi-recomp/issues/71)
+  Records what REPENTOGON (.zhl, GPL-2.0) and IsaacDocs say about the
+  Lua-facing surface, every note tagged with a provenance grade, and adds
+  docs/lua-api-reference.md to AGENTS.md cross-document rules. No text and no
+  bytes are copied from either source; .zhl signature bytes are never pasted.
+  Measured against the Steam retail v1.9.7.17.J460 binary: Vector::Lerp
+  preamble absent, PosVel/Vector layouts agree, Game 40/56, EntityPlayer
+  130/193, Global 4/10 masked file-offset hits (not VAs).
+- `e6d8075c` Merge branch 'main' into docs/70-lua-api-reference
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `AGENTS.md` | 7 | 0 |
+| `docs/lua-api-reference.md` | 95 | 0 |
+| `docs/reimplementation-references.md` | 49 | 0 |
+
+#### Documentation
+
+- `AGENTS.md`
+- `docs/lua-api-reference.md`
+- `docs/reimplementation-references.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
