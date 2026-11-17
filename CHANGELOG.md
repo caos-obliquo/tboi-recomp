@@ -680,6 +680,106 @@ Refs #79
 - `docs/handoff.md`
 
 
+## [0.1.13] - 2026-11-17
+
+### Merged: [#81](https://github.com/caos-obliquo/tboi-recomp/pull/81) — chore(release): record the eight unrecorded merges since v0.1.4 (bump to 0.1.12) [#74]
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-17  **Files:** 2 changed, +542/-1.
+
+<details>
+<summary>Pull request body</summary>
+
+Records the eight merges that `Release version` failed to record because Actions was not permitted to create PRs (issue #74), whereas the workflow's `bump-notes` and branch push both succeeded each time.
+
+8 tool-composed commits, one per merge, `python3 tools/release.py bump-notes --pr N`, not hand-edited:
+
+- #63 → 0.1.5 (relicense MIT → GPL-3.0-only)
+- #68 → 0.1.6 (playable white-box slice, Linux x86_64)
+- #72 → 0.1.7 (Lua API external oracles)
+- #73 → 0.1.8 (roadmap: Repentance+ build order)
+- #75 → 0.1.9 (lua-api-reference: Clamp/Clamped rejected)
+- #76 → 0.1.10 (XInput-shaped controller state + SDL2 backend)
+- #78 → 0.1.11 (docs/handoff.md #77)
+- #80 → 0.1.12 (mandatory playtesting box, #79)
+
+`CMakeLists.txt` `project(... VERSION)` and `CHANGELOG.md` agree; `python3 tools/release.py check` → "changelog ok for 0.1.12". CHANGELOG layout is exactly the tool's insertion shape (sections inserted above `## [Unreleased]`); nothing hand-reordered. Note, for the record: no `[v0.1.4]` section ever existed (PR #61 merged the bump without notes), and no v0.1.4 or v0.1.5+ tags/releases have been cut — tagging is a separate, still-manual step, outside this PR.
+
+Title carries the `chore(release):` prefix deliberately so this PR is not recorded by the recorder it exists to repair.
+
+Refs #74
+
+</details>
+
+#### Closes
+
+- [` `] [#61](https://github.com/caos-obliquo/tboi-recomp/pull/61) chore(release): bump version to 0.1.4 (merged)
+- [` `] [#63](https://github.com/caos-obliquo/tboi-recomp/pull/63) docs(license): relicense MIT -> GPL-3.0-only for the-browsing-of-isaac [#62](https://github.com/caos-obliquo/tboi-recomp/issues/62) (merged)
+- [` `] [#68](https://github.com/caos-obliquo/tboi-recomp/pull/68) feat(platform): playable white-box slice for Linux x86_64 (merged)
+- [` `] [#72](https://github.com/caos-obliquo/tboi-recomp/pull/72) docs(lua-api): external Lua-API oracles, graded (merged)
+- [` `] [#73](https://github.com/caos-obliquo/tboi-recomp/pull/73) docs(roadmap): Repentance+ build order, references and grades (merged)
+- [` `] [#74](https://github.com/caos-obliquo/tboi-recomp/issues/74) Release-record workflow fails on every merge: Actions may not create PRs; release/pr-* branches pile up (open)
+- [` `] [#75](https://github.com/caos-obliquo/tboi-recomp/pull/75) docs(lua-api-reference): Clamp/Clamped rejected; CI contexts 9 [#37](https://github.com/caos-obliquo/tboi-recomp/issues/37) (merged)
+- [` `] [#76](https://github.com/caos-obliquo/tboi-recomp/pull/76) feat(engine): XInput-shaped controller state + SDL2 backend [#65](https://github.com/caos-obliquo/tboi-recomp/issues/65) (merged)
+- [`x`] [#77](https://github.com/caos-obliquo/tboi-recomp/issues/77) Docs: tracked docs/handoff.md so a fresh session is self-contained (closed)
+- [` `] [#78](https://github.com/caos-obliquo/tboi-recomp/pull/78) docs(handoff): tracked state snapshot for fresh sessions [#77] (merged)
+- [` `] [#79](https://github.com/caos-obliquo/tboi-recomp/issues/79) Playtesting box: the mandatory next deliverable (definition and scope) (open)
+- [` `] [#80](https://github.com/caos-obliquo/tboi-recomp/pull/80) docs(handoff): playtesting box is the mandatory next deliverable [#79] (merged)
+
+#### Commits
+
+- `1334055c` chore(release): record PR #63 and bump the patch version
+  Part of the unrecorded-merges catch-up for [#74](https://github.com/caos-obliquo/tboi-recomp/issues/74): the
+  Release version workflow has been red since PR #76 because Actions could not
+  create PRs, so no release PR was opened for this merge. Composed with
+  'tools/release.py bump-notes', not by hand.
+- `91afdb0a` chore(release): record PR #68 and bump the patch version
+  Part of the unrecorded-merges catch-up for [#74](https://github.com/caos-obliquo/tboi-recomp/issues/74): the
+  Release version workflow has been red since PR #76 because Actions could not
+  create PRs, so no release PR was opened for this merge. Composed with
+  'tools/release.py bump-notes', not by hand.
+- `8ad8dcfc` chore(release): record PR #72 and bump the patch version
+  Part of the unrecorded-merges catch-up for [#74](https://github.com/caos-obliquo/tboi-recomp/issues/74): the
+  Release version workflow has been red since PR #76 because Actions could not
+  create PRs, so no release PR was opened for this merge. Composed with
+  'tools/release.py bump-notes', not by hand.
+- `c14a2294` chore(release): record PR #73 and bump the patch version
+  Part of the unrecorded-merges catch-up for [#74](https://github.com/caos-obliquo/tboi-recomp/issues/74): the
+  Release version workflow has been red since PR #76 because Actions could not
+  create PRs, so no release PR was opened for this merge. Composed with
+  'tools/release.py bump-notes', not by hand.
+- `c1289481` chore(release): record PR #75 and bump the patch version
+  Part of the unrecorded-merges catch-up for [#74](https://github.com/caos-obliquo/tboi-recomp/issues/74): the
+  Release version workflow has been red since PR #76 because Actions could not
+  create PRs, so no release PR was opened for this merge. Composed with
+  'tools/release.py bump-notes', not by hand.
+- `1a9f03d6` chore(release): record PR #76 and bump the patch version
+  Part of the unrecorded-merges catch-up for [#74](https://github.com/caos-obliquo/tboi-recomp/issues/74): the
+  Release version workflow has been red since PR #76 because Actions could not
+  create PRs, so no release PR was opened for this merge. Composed with
+  'tools/release.py bump-notes', not by hand.
+- `a1bca4a0` chore(release): record PR #78 and bump the patch version
+  Part of the unrecorded-merges catch-up for [#74](https://github.com/caos-obliquo/tboi-recomp/issues/74): the
+  Release version workflow has been red since PR #76 because Actions could not
+  create PRs, so no release PR was opened for this merge. Composed with
+  'tools/release.py bump-notes', not by hand.
+- `83a7df10` chore(release): record PR #80 and bump the patch version
+  Part of the unrecorded-merges catch-up for [#74](https://github.com/caos-obliquo/tboi-recomp/issues/74): the
+  Release version workflow has been red since PR #76 because Actions could not
+  create PRs, so no release PR was opened for this merge. Composed with
+  'tools/release.py bump-notes', not by hand.
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `CHANGELOG.md` | 541 | 0 |
+| `CMakeLists.txt` | 1 | 1 |
+
+#### Documentation
+
+- `CHANGELOG.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
