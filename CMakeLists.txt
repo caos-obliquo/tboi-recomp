@@ -95,6 +95,7 @@ add_library(isaec_core
   src/engine/engine.cpp
   src/engine/clock.cpp
   src/engine/input.cpp
+  src/engine/sandbox.cpp
   src/data/source.cpp
   src/data/collection.cpp
   src/data/codec.cpp
