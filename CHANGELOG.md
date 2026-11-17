@@ -139,6 +139,79 @@ Also includes the HANDOFF rewrite, the README warning/comparison/hyperlinks, and
 - `docs/rea-toolchain.md` — one sentence of throat-clearing removed.
 
 
+## [0.1.5] - 2026-11-17
+
+### Merged: [#63](https://github.com/caos-obliquo/tboi-recomp/pull/63) — docs(license): relicense MIT -> GPL-3.0-only for the-browsing-of-isaac [#62](https://github.com/caos-obliquo/tboi-recomp/issues/62)
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-15  **Files:** 4 changed, +777/-32.
+
+<details>
+<summary>Pull request body</summary>
+
+Closes #62.
+
+Relicenses this repository MIT -> GPL-3.0-only so that it may adapt [the-browsing-of-isaac](https://github.com/chiikabu/the-browsing-of-isaac)\'s own original host/platform glue (keyboard -> VK mapping, Gamepad API -> XInput, touch overlay, `host_shims_xinput.c`) **with attribution**, as separate reviewed changes file by file.
+
+## What changed
+
+- `LICENSE` — verbatim GNU GPL v3 (byte-identical copy of the one shipped by the-browsing-of-isaac; verified with `cmp`).
+- `README.md` — license line -> GPL-3.0-only with #62 link; comparison intro now five projects; new "The browser one" subsection; Credits extended.
+- `CONTRIBUTING.md` — licensing note MIT -> GPL-3.0-only.
+- `docs/reimplementation-references.md` — new section "The Browsing of Isaac, and the honest split": Half 1 (their original code, adaptable with attribution) vs Half 2 (Nicalis-derived recompilation; never enters this tree under any licence; only used as unverified external derivations, re-verified against our own binary as in #17/#20).
+
+## What this does not do
+
+- No code, build or dependency changes. `src/` is untouched.
+- Nothing from the-browsing-of-isaac is vendored here.
+- CHANGELOG is not edited by hand; it is composed from merged PRs by `tools/release.py`.
+
+## Verification
+
+- `git diff --stat` (vs `main` @ 6c0c4c1): CONTRIBUTING.md 4, LICENSE 695, README.md 52, docs 58 — 777 insertions, 32 deletions.
+- `cmp LICENSE <browsing-of-isaac>/LICENSE` -> identical.
+- `grep -ri "MIT" README.md CONTRIBUTING.md` -> no matches (one intentional mention left in `docs/arch000-format.md`, referring to a third-party tool, unchanged).
+- `git log --format=%an | sort | uniq -c` -> solo authorship (67 beto bettini, 2 dependabot[bot], 1 github-actions).
+
+## Open decision
+
+GPL-3.0-**only** was chosen because the-browsing-of-isaac ships GPL-3.0. Switching to GPL-3.0-or-later is a one-word change before merge if you prefer it.
+
+Merge policy: standard PR review; this does not bypass any required checks.
+
+</details>
+
+#### Closes
+
+- [`x`] [#17](https://github.com/caos-obliquo/tboi-recomp/issues/17) Attach property names to the 372 anonymous closure bodies (closed)
+- [` `] [#20](https://github.com/caos-obliquo/tboi-recomp/issues/20) Cross-check the 372 anonymous bodies against REPENTOGON's libzhl function table (open)
+- [`x`] [#62](https://github.com/caos-obliquo/tboi-recomp/issues/62) Relicense MIT -> GPL-3.0-only to enable direct reuse of The Browsing of Isaac's original code (closed)
+
+#### Commits
+
+- `f22d6599` docs(license): relicense MIT -> GPL-3.0-only for the-browsing-of-isaa…
+  …c [#62](https://github.com/caos-obliquo/tboi-recomp/issues/62)
+  Relicensing is authorized so this project may adapt the-browsing-of-isaac's own
+  original host/platform glue (input.js, gamepad.mjs XInput mapping, touch
+  controls, host_shims_xinput.c) with attribution, file by file, as separate
+  reviewed changes. Half 2 (mechanically recompiled game bodies, boot.wasm) can
+  never enter this tree under any licence. No source or build changes.
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `CONTRIBUTING.md` | 2 | 2 |
+| `LICENSE` | 674 | 21 |
+| `README.md` | 44 | 8 |
+| `docs/reimplementation-references.md` | 57 | 1 |
+
+#### Documentation
+
+- `CONTRIBUTING.md`
+- `README.md`
+- `docs/reimplementation-references.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
