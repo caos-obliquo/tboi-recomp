@@ -480,8 +480,13 @@ file is kept beside it as `isaac-ng-body-seeds-441.tsv`.
 ```
 approvals required   0     solo repo: the owner cannot approve their own PR,
                             so requiring 1 blocked every merge forever
-required checks     11     every real CI job context, verified against the
-                            contexts GitHub has actually recorded on main
+required checks      9     every real CI job context, verified 2026-11-17
+                            against the branch-protection API (strict=true):
+                            linux-gcc, linux-clang, linux-arm64, android-arm64,
+                            warnings-as-errors, asan-ubsan,
+                            generated-spec-is-current,
+                            binding-extractor-selfcheck,
+                            release-notes-are-writable
 force push / delete  blocked
 linear history      required
 conversation        must be resolved
@@ -491,13 +496,19 @@ enforce admins      false   deliberate escape hatch
 Branch model: one branch per issue, `feature/` `fix/` `add/` `docs/` prefixed,
 opened as a PR. Never commit to `main`.
 
-**The 11 required contexts include `linux-arm64`, `macos-arm64` and
-`macos-x86_64`, which do not exist yet** — [PR #10](https://github.com/caos-obliquo/tboi-recomp/pull/10) adds them. They are required
-by name; if a name is wrong, PRs block permanently. Confirm they report under
-those exact names when [PR #10](https://github.com/caos-obliquo/tboi-recomp/pull/10)'s CI runs, and correct the list if not.
+An earlier version of this section said the required list was **11** and that
+`macos-arm64` / `macos-x86_64` were missing, pending [PR #10](https://github.com/caos-obliquo/tboi-recomp/pull/10). That
+text was wrong twice over: there are **9** required contexts (listed above),
+and [PR #10](https://github.com/caos-obliquo/tboi-recomp/pull/10) already merged on 2026-10-19. Corrected 2026-11-17.
 
-Open: **[PR #10](https://github.com/caos-obliquo/tboi-recomp/pull/10)** `feature/arm-ci-coverage` — native ARM64 CI, explicit macOS
-architectures.
+Release-record workflow: since 2026-11-17 the repository setting *Allow
+GitHub Actions to create and approve pull requests* is enabled, so
+`.github/workflows/version.yml` can open the record PR after each merge
+instead of failing at the `gh pr create` step (the failure was silent, it was
+not a required context). The eight merges made while it was broken were
+recorded by [PR #81](https://github.com/caos-obliquo/tboi-recomp/pull/81), bumping 0.1.4 → 0.1.12 via
+`python3 tools/release.py bump-notes --pr N` per merge. No tags were cut —
+`v0.1.3` remains the latest tag/release. See #74.
 
 ## 13. Method-binding recovery (supersedes the earlier 92)
 

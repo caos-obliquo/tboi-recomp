@@ -10,16 +10,21 @@ Steam user copy), native on Linux x86_64 + Android arm64.
   **playtesting box**, tracked as
   [#79](https://github.com/caos-obliquo/tboi-recomp/issues/79).
 - `README.md` — docs-list row for `docs/handoff.md` (on `docs/77-handoff`).
+- `docs/HANDOFF.md` — §12 corrected: 9 required contexts (was a stale
+  "11 incl macOS" claim; PR #10 merged 2026-10-19), release-record fix (#74)
+  noted.
 
 ## 3. Verified commands and results
-- `gh pr checks 78` → 9 required contexts green (2026-11-16); PR #78
-  squash-merged 2026-11-16T14:23:15Z → `main` @ `d7993f4`.
 - `gh issue view 77` → CLOSED/COMPLETED (auto via `Closes #77`); AC re-scoped
-  to the 5-section format (owner decision, 2026-11-16).
-- `gh issue view 67` → CLOSED; playable white-box slice done (SDL2, no game
-  data, ≈60 Hz, Esc quits). NOT a playtesting box.
-- `gh issue view 76` → MERGED 2026-11-16T04:00:13Z.
-- `sha256sum` exe → `3bdfc8bae0dc7e334b76009d0ad45dfbb16ee5f00c06ffbc3a0094e34d44616b`.
+  (owner decision, 2026-11-16). #76 MERGED 2026-11-16T04:00:13Z.
+- #67 CLOSED; white-box slice done (SDL2, ≈60 Hz, no game data). NOT a playtesting box.
+- Exe sha256 → `3bdfc8bae0dc7e334b76009d0ad45dfbb16ee5f00c06ffbc3a0094e34d44616b`.
+- `gh pr checks 81` → 9/9 green (run 44012965729); squash-merged → `main` @ `a49d727`;
+  0.1.4 → 0.1.12 (release catch-up for #74); 14 stale `release/pr-*` branches deleted.
+- `gh api repos/.../required_status_checks` → 9 contexts, `strict=true`.
+- Release-record workflow: Actions checkbox flipped 2026-11-17 so
+  `version.yml` can open record PRs; v0.1.3 remains the latest tag/release;
+  no v0.1.4+ tags cut.
 
 ## 4. Open questions
 - **Mandatory: playtesting box** — definition, gating subsystems, platform(s),
