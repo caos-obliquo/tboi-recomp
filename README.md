@@ -273,7 +273,7 @@ established from the shipped DLL rather than assumed — see
 | Recovered surface registers and resolves | **done** (as stubs) — 64 classes + 3 namespaces, 1003 methods + 461 properties, all behind `not_implemented_trampoline` except the 342 implemented members |
 | Directory-backed data source | **done** |
 | Headless renderer (counts, draws nothing) | **done** |
-| Playable white-box slice (SDL2, no game data) | **done** — first windowed render; `steady_clock` pacing measured ≈ 60 Hz, Esc quits — see [#67](https://github.com/caos-obliquo/tboi-recomp/issues/67) |
+| **Playtesting box (white-box sandbox)** | **done** — controllable room, no game data: a square entity moved by arrows/WASD or the stick of XInput-shaped pad 0 (deadzone applied in the engine layer), 60 Hz fixed-step movement in `src/engine/sandbox.cpp` clamped to the room, unit-covered in `tests/test_sandbox.cpp`; `./build/isaec_window slice`, `frames=0` plays until Esc — supersedes #67's fixed marker; see [#67](https://github.com/caos-obliquo/tboi-recomp/issues/67), [#79](https://github.com/caos-obliquo/tboi-recomp/issues/79) |
 | **Controller input (XInput-shaped)** | **done** — engine layer: four pad slots, XInput `wButtons` bit layout, signed up-positive 16-bit thumbsticks, triggers 0–255, `dwPacketNumber` bumping on change, 7849 deadzone; **SDL2 backend** (`isaec::platform::SdlGamepadSource`) — device enumeration + hot-plug rescan + both-motor rumble; **100/100 tests green**; never run against a live game — see [#65](https://github.com/caos-obliquo/tboi-recomp/issues/65) |
 | **Closure bodies located** | **911 distinct bodies** of 1064 call sites — accounting complete |
 | **Closure bodies decompiled** | **911 / 911**, 0 failures, classified into 11 shapes |
@@ -365,16 +365,20 @@ Headless smoke test against a real install:
 ./build/isaec_headless "/path/to/steamapps/common/The Binding of Isaac Rebirth"
 ```
 
-Playable white-box slice (no game data needed):
+Playtesting box (no game data needed):
 
 ```sh
 ./build/isaec_window slice [width] [height] [frames]   # defaults 1280 720 300
+./build/isaec_window slice 1280 720 0                   # 0 = play until Esc
 ```
 
-Draws a white-box empty room (floor, walls, one marker square), paces via
-`steady_clock` with vsync, Esc or window close quits cleanly. Measured pacing
-≈ 60 Hz (est 59.75 Hz on a 180-frame run at 1280x720; 59.78 Hz under
-`SDL_VIDEODRIVER=dummy`). It proves the Renderer abstraction end to end — it is
+Draws a white-box room (floor, walls) with a controllable marker square —
+arrows/WASD or the stick of XInput-shaped pad 0 moves it (pad Y flipped to
+screen convention, the engine's 7849 deadzone applies). Movement math lives in
+`src/engine/sandbox.cpp` and is unit-tested in `tests/test_sandbox.cpp`. Paces
+via `steady_clock` with vsync, Esc or window close quits cleanly. Measured
+pacing ≈ 60 Hz (est 59.75 Hz windowed; ~57 Hz under `SDL_VIDEODRIVER=dummy`,
+2026-11-17). It proves the Renderer abstraction end to end — it is
 not the game and draws no Isaac assets. GPU rendering proper is still
 [#5](https://github.com/caos-obliquo/tboi-recomp/issues/5).
 

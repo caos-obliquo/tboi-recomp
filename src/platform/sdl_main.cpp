@@ -16,9 +16,13 @@
 // container, apply the entry's codec, hand the bytes to libpng, upload to the
 // GPU. Nothing shells out to tools/ and nothing is pre-extracted.
 //
-// The slice form is the playable white-box: an empty room (floor, four walls,
-// marker square) drawn with one procedural texture, paced to 60 Hz, Esc exits.
-// It reads no game data and draws nothing Nicalis-derived.
+// The slice form is the playable white-box (the issue #79 playtesting box):
+// an empty room (floor, four walls) with a controllable marker square — move
+// it with arrows/WASD or the stick of XInput-shaped pad 0. Drawn with one
+// procedural texture, paced to 60 Hz, Esc exits. It reads no game data and
+// draws nothing Nicalis-derived. A frames argument of 0 runs until the
+// window closes (the actual playtest mode); the default budget of 300 frames
+// exists so headless smoke runs self-terminate.
 //
 // Argument handling mirrors null_main.cpp positionally rather than adding a
 // parser, so the two binaries stay diffable.
@@ -26,9 +30,12 @@
 #include "isaec/data/archive.hpp"
 #include "isaec/data/image.hpp"
 #include "isaec/engine/renderer.hpp"
+#include "isaec/engine/sandbox.hpp"
+#include "isaec/platform/sdl_input.hpp"
 #include "isaec/platform/sdl_renderer.hpp"
 #include "isaec/platform/types.hpp"
 
+#include <SDL_keyboard.h>
 #include <chrono>
 #include <cstdio>
 #include <filesystem>
@@ -95,8 +102,15 @@ int run_slice(isaec::i32 width, isaec::i32 height, isaec::u64 frame_budget) {
     const isaec::f32 room_x = width * 0.15f, room_y = height * 0.15f;
     const isaec::f32 room_w = width * 0.70f, room_h = height * 0.65f;
     const isaec::f32 wall = 16.0f, marker = 32.0f;
-    const isaec::f32 cx = room_x + (room_w - marker) * 0.5f;
-    const isaec::f32 cy = room_y + (room_h - marker) * 0.5f;
+    // Playtest sandbox state: the entity is a square moved by keyboard or
+    // the first XInput-shaped pad, constrained to the room's inner bounds.
+    isaec::engine::SandboxPos entity{room_x + (room_w - marker) * 0.5f,
+                                     room_y + (room_h - marker) * 0.5f};
+    const isaec::engine::SandboxBounds bounds{room_x + wall, room_y + wall,
+                                              room_w - 2.0f * wall, room_h - 2.0f * wall};
+    constexpr isaec::f32 kSpeedPxPerSec = 240.0f;
+    constexpr isaec::f32 kDt = 1.0f / 60.0f;  // fixed step; matches the 60 Hz pacing below
+    isaec::platform::SdlGamepadSource pads;
 
     const isaec::engine::DrawCall floor_call{
         tex, full, room_x, room_y, room_w / 64.0f, room_h / 64.0f, 0.35f};
@@ -108,12 +122,13 @@ int run_slice(isaec::i32 width, isaec::i32 height, isaec::u64 frame_budget) {
                                            wall / 64.0f, 1.0f};
     const isaec::engine::DrawCall wall_bottom{tex, full, room_x, room_y + room_h - wall,
                                               room_w / 64.0f, wall / 64.0f, 1.0f};
-    const isaec::engine::DrawCall marker_call{tex, full, cx, cy, marker / 64.0f,
-                                              marker / 64.0f, 1.0f};
+    isaec::engine::DrawCall marker_call{tex, full, entity.x, entity.y,
+                                        marker / 64.0f, marker / 64.0f, 1.0f};
 
     std::printf("backend   %.*s\n", static_cast<int>(renderer.backend_name().size()),
                 renderer.backend_name().data());
-    std::printf("scene     white-box empty room\n");
+    std::printf("scene     white-box playtest room\n");
+    std::printf("controls  arrows/WASD move; stick 0 moves (XInput); Space does nothing; Esc quits\n");
     std::printf("viewport  %d x %d\n", width, height);
     std::fflush(stdout);
 
@@ -124,6 +139,23 @@ int run_slice(isaec::i32 width, isaec::i32 height, isaec::u64 frame_budget) {
 
     while (frames < frame_budget && renderer.alive()) {
         const auto frame_started = std::chrono::steady_clock::now();
+
+        // Sample input and advance the entity before drawing. The keyboard
+        // state is edge-triggered by SDL's event pump in present() of the
+        // previous frame (one frame of lag); arrows and WASD both work.
+        const auto* keys = SDL_GetKeyboardState(nullptr);
+        const bool kb_left = keys[SDL_SCANCODE_LEFT] != 0 || keys[SDL_SCANCODE_A] != 0;
+        const bool kb_right = keys[SDL_SCANCODE_RIGHT] != 0 || keys[SDL_SCANCODE_D] != 0;
+        const bool kb_up = keys[SDL_SCANCODE_UP] != 0 || keys[SDL_SCANCODE_W] != 0;
+        const bool kb_down = keys[SDL_SCANCODE_DOWN] != 0 || keys[SDL_SCANCODE_S] != 0;
+        pads.poll();
+        const isaec::engine::GamepadState& pad = pads.states()[0];  // player 1
+        const isaec::engine::SandboxMove move =
+            isaec::engine::sandbox_axes(kb_left, kb_right, kb_up, kb_down, pad);
+        entity = isaec::engine::sandbox_step(entity, move, bounds, marker,
+                                             kSpeedPxPerSec, kDt);
+        marker_call.x = entity.x;
+        marker_call.y = entity.y;
 
         renderer.submit(floor_call);
         renderer.submit(wall_left);
@@ -162,7 +194,7 @@ int main(int argc, char** argv) {
         std::fprintf(stderr,
                      "usage: isaec_window <image.png|archive.a> [entry-index] "
                      "[frames] [width] [height]  |  isaec_window slice "
-                     "[width] [height] [frames]\n");
+                     "[width] [height] [frames]  (frames 0 = play until Esc)\n");
         return 2;
     }
 
@@ -171,8 +203,11 @@ int main(int argc, char** argv) {
             std::strtol(next_arg(argc, argv, cursor, "1280").c_str(), nullptr, 10));
         const isaec::i32 sh = static_cast<isaec::i32>(
             std::strtol(next_arg(argc, argv, cursor, "720").c_str(), nullptr, 10));
-        const isaec::u64 slice_frames = static_cast<isaec::u64>(
+        isaec::u64 slice_frames = static_cast<isaec::u64>(
             std::strtoull(next_arg(argc, argv, cursor, "300").c_str(), nullptr, 10));
+        // A zero frame budget means "play until Esc/close" — the playtesting
+        // mode. A default budget keeps headless smoke runs self-terminating.
+        if (slice_frames == 0) slice_frames = ~isaec::u64{0};
         return run_slice(sw, sh, slice_frames);
     }
 
