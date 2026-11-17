@@ -573,6 +573,64 @@ Renderer event-queue integration, arm64 Android backend, touch controls (blocked
 - `docs/reimplementation-references.md`
 
 
+## [0.1.11] - 2026-11-17
+
+### Merged: [#78](https://github.com/caos-obliquo/tboi-recomp/pull/78) — docs(handoff): tracked state snapshot for fresh sessions [#77]
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-16  **Files:** 2 changed, +27/-0.
+
+<details>
+<summary>Pull request body</summary>
+
+Closes #77.
+
+Adds `docs/handoff.md` (dated 2026-11-16): snapshot of main @ `bdf2abb`, open PR #76 state, #37 Clamp verdict pointer, standing locks verbatim, cold-start recipe (AGENTS.md → README.md → `gh issue list` → `docs/roadmap.md`), and the recorded dead ends (#52 LZW behind runtime vtable; #37 runtime-only settlement; REPENTOGON `.zhl` silent; busy-loop upstream bug; #74 release-note 10 pending branches).
+
+README gains a docs-list row. Half-2 never enters anywhere. User's `tools/isaac-archive.py` (M) and `HANDOFF.md` (??) untouched. Only `docs/handoff.md` and `README.md` in the diff.
+
+</details>
+
+#### Closes
+
+- [`x`] [#37](https://github.com/caos-obliquo/tboi-recomp/issues/37) Vector:Clamp / Vector:Clamped read four numbers, the public API documents two (closed)
+- [` `] [#52](https://github.com/caos-obliquo/tboi-recomp/issues/52) LZW (mode 0x01): the decoder over-produces past the recorded size; chunks after the first produce garbage (open)
+- [` `] [#74](https://github.com/caos-obliquo/tboi-recomp/issues/74) Release-record workflow fails on every merge: Actions may not create PRs; release/pr-* branches pile up (open)
+- [` `] [#76](https://github.com/caos-obliquo/tboi-recomp/pull/76) feat(engine): XInput-shaped controller state + SDL2 backend [#65](https://github.com/caos-obliquo/tboi-recomp/issues/65) (merged)
+- [`x`] [#77](https://github.com/caos-obliquo/tboi-recomp/issues/77) Docs: tracked docs/handoff.md so a fresh session is self-contained (closed)
+
+#### Commits
+
+- `876d9acf` docs(handoff): tracked state snapshot for fresh sessions [#77](https:…
+  …//github.com/caos-obliquo/tboi-recomp/issues/77)
+  Why: the untracked HANDOFF.md is stale and off-limits, and a fresh session
+  needs a self-contained entry point. docs/handoff.md records the state on
+  2026-11-16: main @ bdf2abb, PR #76 open (all 9 required contexts must go
+  green before merge), #37 Clamp/Clamped verdict, standing locks verbatim,
+  dead ends not to redo.
+  Half-2 never enters; user's tools/isaac-archive.py (M) and HANDOFF.md (??)
+  untouched; README gains a docs-list row.
+- `bfd9e546` docs(handoff): 5-section snapshot, 26 lines [#77](https://github.com/…
+  …caos-obliquo/tboi-recomp/issues/77)
+  Why: the tracked snapshot was 114 lines of prose naming main @ bdf2abb and
+  a pending PR #76; main is now 7b59738 (PR #76 MERGED) and the user asked
+  for a max-40-line five-section handoff. The rewrite records verified
+  state only (gh pr view 76 MERGED 2026-11-16T04:00:13Z; gh pr checks 63
+  9/9; issue #37 closed). User's tools/isaac-archive.py and untracked
+  HANDOFF.md untouched.
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `README.md` | 1 | 0 |
+| `docs/handoff.md` | 26 | 0 |
+
+#### Documentation
+
+- `README.md`
+- `docs/handoff.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
