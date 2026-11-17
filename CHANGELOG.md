@@ -874,6 +874,105 @@ Refs #74
 | `.github/workflows/version.yml` | 4 | 3 |
 
 
+## [0.1.16] - 2026-11-17
+
+### Merged: [#88](https://github.com/caos-obliquo/tboi-recomp/pull/88) — feat(sandbox): white-box playtesting box — controllable room [#79]
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-17  **Files:** 8 changed, +370/-24.
+
+<details>
+<summary>Pull request body</summary>
+
+Implements the owner-mandated playtesting box scope (2026-11-17, #79): a **white-box playtesting sandbox** — a controllable entity in an empty room, moved by keyboard and XInput-shaped pad, no Isaac game data, not a port of any existing game's code, no new runtime subsystems.
+
+## What lands
+
+- **`include/isaec/engine/sandbox.hpp` + `src/engine/sandbox.cpp`** — platform-independent math: keyboard digits ±1 with diagonals normalized to unit length; pad thumbsticks pre-deadzoned by the engine layer, rescaled to [-1, 1] with Y flipped to the screen convention; sources add and clamp; `sandbox_step` advances at caller speed/dt (fixed 1/60) and clamps the square entity fully inside the room inner bounds.
+- **`src/platform/sdl_main.cpp`** — `isaec_window slice` is now playable: arrows/WASD + pad 0 (XInput-shaped, 7849 deadzone), Esc/close quits. `frames=0` = play until Esc (playtesting mode); default 300 frames keeps headless runs self-terminating. Slice header comment + usage string updated.
+- **`tests/test_sandbox.cpp`** — 12 new cases (keyboard cardinals, diagonal normalization, pad Y flip, add-and-clamp, opposing cancel, dt/speed integration, wall containment, zero input, entity-larger-than-room centring). Wired into `tests/CMakeLists.txt`; `sandbox.cpp` added to `isaec_core` sources.
+- **README progress row** updated in the same commit (AGENTS §5).
+
+## Verification (measured on this machine, 2026-11-17)
+
+- `cmake --build build -j` — clean (only the known third_party/lua-5.3.6 `tmpnam` linker warning, pre-existing).
+- `ctest` 1/1 pass; `./build/tests/isaec_tests` → **108 cases, 0 failed** (incl. the new sandbox suite).
+- Headless smoke: `SDL_VIDEODRIVER=dummy ./build/isaec_window slice 320 240 90` — 90 frames, controls line printed, draws 540 (6×90), EXIT 0, est ~57 Hz (dummy driver).
+- **Interactive keyboard/pad movement NOT run — this session has no display.** The motion path is unit-tested for the math; the SDL sampling path is the same pattern as #65's pad pipeline (poll → states()) and is unverified with real input.
+
+## Honest limits
+
+- Not the game; no Isaac assets are read. GPU rendering remains #5.
+- One-frame input lag (keyboard sampled before `present()`'s event pump) — documented in code; fine for a sandbox.
+- Movement speed 240 px/s is a sandbox default, not a game value.
+- `docs/HANDOFF.md` and the long-form handoff still describe the box as proposed until this merges.
+
+Refs #79 (does not close — all AC items must hold first, incl. same-turn evidence comment).
+
+</details>
+
+#### Closes
+
+- [` `] [#5](https://github.com/caos-obliquo/tboi-recomp/issues/5) Implement a real GPU renderer backend (portable, Android-first) (open)
+- [` `] [#65](https://github.com/caos-obliquo/tboi-recomp/issues/65) Input: XInput-shaped controller state (adapt The Browsing of Isaac's gamepad/shims, with attribution) + Android touch later (open)
+- [` `] [#79](https://github.com/caos-obliquo/tboi-recomp/issues/79) Playtesting box: the mandatory next deliverable (definition and scope) (open)
+
+#### Commits
+
+- `3d4d3454` feat(sandbox): white-box playtesting box — controllable room (#79)
+  Extends the #67 white-box slice into the owner-mandated playtesting box
+  (issue #79, scope per owner 2026-11-17: White-box playtesting sandbox):
+  a controllable entity in an empty room, moved by keyboard (arrows/WASD)
+  or the stick of XInput-shaped pad 0. No game data, no Isaac assets,
+  no port of any existing game's movement code.
+  Mechanics:
+  - include/isaec/engine/sandbox.hpp + src/engine/sandbox.cpp: platform-
+    independent math. Keyboard digits contribute ±1 with diagonals
+    normalized to unit length; pad thumbsticks arrive pre-deadzoned from
+    the engine layer and are rescaled to [-1, 1] with Y flipped to the
+    screen convention; sources add and clamp to ±1; sandbox_step advances
+    at a caller speed/dt and clamps the square entity fully inside the
+    inner room bounds (centers an over-large entity instead of clamping
+    into an inverted range).
+  - src/platform/sdl_main.cpp: `isaec_window slice` now samples
+    SDL_GetKeyboardState (arrows + WASD) and pads.states()[0] (player 1)
+    each frame, integrates the entity at 240 px/s fixed-step dt = 1/60
+    (pacing unchanged at ~60 Hz), clamps to the room, and moves the
+    marker DrawCall. `frames=0` now plays until Esc/close (the real
+    playtest mode); the default 300-frame budget stays so headless smoke
+    runs self-terminate. Esc/window close quits as before.
+  - tests/test_sandbox.cpp (wired into tests/CMakeLists.txt and
+    CMakeLists.txt isaec_core sources): 12 new cases — keyboard cardinals,
+    diagonal normalization, pad rescale + Y flip, add-and-clamp, opposing
+    cancel, dt/speed integration, containment at all walls, zero move /
+    zero dt / negative speed, entity-larger-than-room centring.
+  Verification (measured this session):
+  - cmake --build build -j — clean (only the known
+    third_party/lua-5.3.6 loslib.c tmpnam linker warning, pre-existing).
+  - ctest — 1/1 pass; isaec_tests reports 108 cases, 0 failed.
+  - SDL_VIDEODRIVER=dummy ./build/isaec_window slice 320 240 90 —
+    90 frames, scene "white-box playtest room", draws 540, EXIT 0,
+    est ~57 Hz; interactive keyboard/pad move NOT run (no display here).
+  README progress row updated in the same commit as required.
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `CMakeLists.txt` | 1 | 0 |
+| `README.md` | 10 | 6 |
+| `docs/handoff.md` | 28 | 8 |
+| `include/isaec/engine/sandbox.hpp` | 75 | 0 |
+| `src/engine/sandbox.cpp` | 75 | 0 |
+| `src/platform/sdl_main.cpp` | 45 | 10 |
+| `tests/CMakeLists.txt` | 1 | 0 |
+| `tests/test_sandbox.cpp` | 135 | 0 |
+
+#### Documentation
+
+- `README.md`
+- `docs/handoff.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
