@@ -464,7 +464,7 @@ milestone `M1 Foundation` covers the current blockers.
 | [`docs/HANDOFF.md`](docs/HANDOFF.md) | what is in flight, what is blocked, what is a dead end |
 | [`docs/rea-toolchain.md`](docs/rea-toolchain.md) | the reverse-engineering toolchain and its traps |
 | [`docs/roadmap.md`](docs/roadmap.md) | priority order, references and what each skips — the build order |
-| [`docs/handoff.md`](docs/handoff.md) | the state of the project on 2026-11-16 — snapshot, standing locks, dead ends |
+| [`docs/handoff.md`](docs/handoff.md) | the state of the project on 2026-11-17 — 5-section snapshot; mandatory next deliverable: the playtesting box ([#79](https://github.com/caos-obliquo/tboi-recomp/issues/79)) |
 | [`docs/reimplementation-references.md`](docs/reimplementation-references.md) | what was borrowed from other recompilations, and what was rejected |
 | [`tools/README.md`](tools/README.md) | what each tool does, and what it does *not* establish |
 | [`AGENTS.md`](AGENTS.md) | working rules |
