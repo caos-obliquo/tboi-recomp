@@ -460,6 +460,57 @@ User merges.
 - `docs/roadmap.md`
 
 
+## [0.1.9] - 2026-11-17
+
+### Merged: [#75](https://github.com/caos-obliquo/tboi-recomp/pull/75) — docs(lua-api-reference): Clamp/Clamped rejected; CI contexts 9 [#37](https://github.com/caos-obliquo/tboi-recomp/issues/37)
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-16  **Files:** 2 changed, +3/-1.
+
+<details>
+<summary>Pull request body</summary>
+
+References #37 (closed 2026-11-15 with the full REA chain).
+
+Changes:
+- docs/lua-api-reference.md: adds `Vector:Clamp` / `Vector:Clamped` rows with grade `rejected` — the shipped closures cannot execute by construction (`.rdata` is non-executable; `inst[0]=&0xb73574`; `CALL [inst+0]` is an NX violation by construction). Loud stubs stay in the recomp. Evidence: issue #37 comments 6903733349 / 6904094401 / 6904112121 / 6905780752 / 6905792315 (objdump -h section flags, analyze_function chain, 50 engine creation sites).
+- AGENTS.md §6: corrects the stale claim of 11 required CI contexts to the measured 9 (gh api repos/caos-obliquo/tboi-recomp/branches/main/protection — strict:true, approvals:0, the nine contexts listed on the PR).
+
+No game code; no assets; no .zhl; only our notes.
+
+</details>
+
+#### Closes
+
+- [`x`] [#37](https://github.com/caos-obliquo/tboi-recomp/issues/37) Vector:Clamp / Vector:Clamped read four numbers, the public API documents two (closed)
+
+#### Commits
+
+- `90f8fdb8` docs(lua-api-reference): Clamp/Clamped rejected; CI contexts 9 [#37](…
+  …https://github.com/caos-obliquo/tboi-recomp/issues/37)
+  - Adds Vector:Clamp / Vector:Clamped rows to the findings table with grade
+    `rejected`. The shipped closures cannot execute by construction (.rdata is
+    READONLY DATA with no CODE flag; inst[0] = &0xb73574 points at a
+    luabridge reflection entry; CALL [inst+0] is an NX violation by
+    construction). Evidence in issue #37 comments (objdump -h section table;
+    analyze_function FUN_008ba890/FUN_008a8610/FUN_008a8680; 50 engine sites
+    storing inst[0]=&0xb73574). Loud stubs stay.
+  - AGENTS.md §6: corrects stale claim of 11 required CI contexts to the
+    measured 9 (gh api repos/caos-obliquo/tboi-recomp/branches/main/protection;
+    strict:true, approvals:0).
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `AGENTS.md` | 1 | 1 |
+| `docs/lua-api-reference.md` | 2 | 0 |
+
+#### Documentation
+
+- `AGENTS.md`
+- `docs/lua-api-reference.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
