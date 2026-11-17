@@ -31,9 +31,11 @@ namespace {
 class PrngStream {
 public:
     explicit PrngStream(u32 seed) {
-        u32 h = (seed << 15) ^ seed;
-        h ^= (seed >> 9);
-        h = (h << 8) ^ seed;
+        // Seed prep as disassembled (docs/arch000-format.md section 9.2,
+        // corrected 2026-11-17): the <<8 applies BEFORE the ^(seed>>9).
+        // Earlier revision applied it after, transcribing the bytes in the
+        // wrong order; the emitted hash stream is the keystream of section 9.3.
+        u32 h = (((seed << 15) ^ seed) << 8) ^ (seed >> 9) ^ seed;
 
         state_ = (static_cast<u64>(seed) << 32) | h;
     }
