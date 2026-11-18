@@ -1022,6 +1022,86 @@ Refs #90. Note: this PR deliberately does not start #64/#66/#52/#3/#4/#35 (not m
 - `docs/handoff.md`
 
 
+## [0.1.18] - 2026-11-18
+
+### Merged: [#95](https://github.com/caos-obliquo/tboi-recomp/pull/95) — feat(bindings): translate the Vector and Color natives
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-18  **Files:** 11 changed, +1059/-277.
+
+<details>
+<summary>Pull request body</summary>
+
+Closes #94. Corrects #38 and #40.
+
+## What changed
+
+The `Vector` and `Color` classes were implemented from public API documentation. The native functions behind their Lua closures were read from the reference binary (`isaac-ng.exe` v1.9.7.17.J460, sha256 `3bdfc8ba...`) and translated instead.
+
+- **Vector** — 15 instance methods, `Vector.FromAngle` on the class table, `X`/`Y`, five arithmetic metamethods. `Clamp`/`Clamped` were previously absent. `Lerp`'s fourth argument is a clamp flag; it mutates the receiver and returns an alias. `Normalize`/`Resize` guard `len > 0` (zero and NaN untouched). `GetAngleDegrees` does not remap `-180 → 180`. Metamethods gained component-wise `vector * vector` and `vector / vector`.
+- **Color** — `Reset`, `SetTint`, `SetColorize`, `SetOffset`, the undocumented `Lerp`, and `__mul`. The block at offsets 16..28 is the colorize RGBA. `__mul` mutates and aliases the left operand, matching the native.
+- `Color:Lerp` and the corrected native addresses are recorded in `docs/binding-surface-findings.md` §18/§19; `README.md` Progress and `docs/HANDOFF.md` §25/§26 updated in the same commit.
+
+## Verification
+
+- `cmake --build build -j$(nproc)` succeeds.
+- `ctest --test-dir build --output-on-failure`: **119 cases, 0 failed**.
+- Oracle: 91 deterministic cases from the owned game under Wine via a probe mod, raw output outside the repository (`/tmp/opencode/isaec-oracle/raw.log`), probe removed after capture. The host was v1.9.7.12.J273, not the reference v1.9.7.17.J460: Vector natives are byte-identical after a `-0x2a640` shift except `Lerp`, which lost the clamp branch, so the reference disassembly remains authoritative for that one. `Color:Lerp` does not exist in the host and is static-only. The version difference is documented.
+
+</details>
+
+#### Closes
+
+- [`x`] [#38](https://github.com/caos-obliquo/tboi-recomp/issues/38) Vector:Lerp takes a fourth boolean argument that the public API does not document (closed)
+- [`x`] [#40](https://github.com/caos-obliquo/tboi-recomp/issues/40) Color: the four methods and __mul call into C++ that is not in the binary (closed)
+- [`x`] [#94](https://github.com/caos-obliquo/tboi-recomp/issues/94) Vector: translate the 18 native methods and prove them against the live game (closed)
+
+#### Commits
+
+- `11e27228` feat(bindings): translate the Vector and Color natives [#94]
+  The two classes were implemented from public API documentation, and the
+  documentation is wrong in several places. The native functions behind their
+  Lua closures were read from the reference binary and translated instead:
+  * Vector: Clamp and Clamped exist and are now implemented; Clamp is not a
+    class-table function. FromAngle is a class-table function, not a method.
+    Lerp's fourth argument is a clamp flag, and Lerp mutates its receiver and
+    returns an alias of it, rather than a new vector. Normalize and Resize
+    leave zero and NaN vectors untouched. GetAngleDegrees does not remap
+    -180 to 180.
+  * Color: Reset, SetTint, SetColorize, SetOffset, __mul and the undocumented
+    Lerp. The block at offsets 16..28 is the colorize RGBA, not padding.
+    The registration-time function pointers differ from the vtable slots
+    quoted in #40.
+  Semantics were checked against the owned game under Wine through a probe
+  mod (91 logged cases). The host was v1.9.7.12.J273, not the reference
+  v1.9.7.17.J460; its Vector natives are byte-identical after a -0x2a640
+  shift except Lerp, which lost the clamp branch, so the reference
+  disassembly stays authoritative there. Color:Lerp does not exist in the
+  host and is static-only. The probe was removed after capture.
+  ctest: 119 cases, 0 failed.
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `README.md` | 12 | 9 |
+| `docs/HANDOFF.md` | 59 | 2 |
+| `docs/binding-surface-findings.md` | 192 | 133 |
+| `include/isaec/api/color.hpp` | 52 | 4 |
+| `include/isaec/api/vector.hpp` | 63 | 22 |
+| `src/api/color.cpp` | 80 | 1 |
+| `src/api/color_lua.cpp` | 94 | 1 |
+| `src/api/vector.cpp` | 114 | 25 |
+| `src/api/vector_lua.cpp` | 72 | 12 |
+| `tests/test_color.cpp` | 196 | 19 |
+| `tests/test_vector.cpp` | 125 | 49 |
+
+#### Documentation
+
+- `README.md`
+- `docs/HANDOFF.md`
+- `docs/binding-surface-findings.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
