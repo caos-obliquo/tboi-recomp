@@ -1022,6 +1022,105 @@ Refs #90. Note: this PR deliberately does not start #64/#66/#52/#3/#4/#35 (not m
 - `docs/handoff.md`
 
 
+## [0.1.18] - 2026-11-18
+
+### Merged: [#104](https://github.com/caos-obliquo/tboi-recomp/pull/104) — feat(bindings): translate the BitSet128 natives [#103](https://github.com/caos-obliquo/tboi-recomp/issues/103)
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-18  **Files:** 10 changed, +742/-8.
+
+<details>
+<summary>Pull request body</summary>
+
+Closes #103.
+
+Translates the nine `BitSet128` natives from the reference executable
+(v1.9.7.17.J460, sha256 `3bdfc8ba...4616b`) into C++:
+
+| member | address | shape |
+|---|---|---|
+| `Get(index)` | `0x0085e560` | bool |
+| `Set(index, value)` | `0x0085e5c0` | — |
+| `__band` | `0x0085e4d0` | new value |
+| `__bor` | `0x0085e4f0` | new value |
+| `__bxor` | `0x0085e510` | new value |
+| `__bnot` | `0x00592200` | new value |
+| `__eq` | `0x0085e530` | bool |
+| `__tostring` | `0x0085e490` | text |
+| constructor | `0x008bc330` | `BitSet128(low, high)` |
+
+Behaviour recovered from the binary:
+
+- Payload is four 32-bit words; the generated field class already supplies
+  `l` at offset 0 and `h` at offset 8 as `Int64`.
+- `Get` returns false and `Set` is a no-op for a negative index or an index
+  of 128 or more — the recovered bounds check, not a Lua error.
+- The bitwise metamethods are non-mutating: they build and return a new
+  `BitSet128`. A non-`BitSet128` operand raises the native's error.
+- `__tostring` is exactly `BitSet128: %016llx%016llx`, high half first.
+
+No game-side oracle is needed: every one of these bodies is pure arithmetic
+over the payload, so the static translation is the whole result.
+
+Tests: `tests/test_bitset128.cpp` covers every word boundary, the
+out-of-range paths, set/clear, non-mutation, equality, the exact text, the
+constructor halves and the foreign-operand errors. Suite is **138 cases,
+0 failed** (was 128). Build and `ctest` both green locally.
+
+Docs: `docs/binding-surface-findings.md` §26 (authoritative addresses),
+`docs/HANDOFF.md` §29, README Progress now 372 implemented members and
+42 translated native methods.
+
+</details>
+
+#### Closes
+
+- [`x`] [#103](https://github.com/caos-obliquo/tboi-recomp/issues/103) BitSet128: translate Get/Set and the bitwise metamethods (closed)
+
+#### Commits
+
+- `1c9e0acc` feat(bindings): translate the BitSet128 natives [#103](https://github…
+  ….com/caos-obliquo/tboi-recomp/issues/103)
+  Translate the nine `BitSet128` natives from the reference executable
+  (v1.9.7.17.J460, sha256 3bdfc8ba...4616b) into C++: `Get` (0x0085e560),
+  `Set` (0x0085e5c0), `__band` (0x0085e4d0), `__bor` (0x0085e4f0),
+  `__bxor` (0x0085e510), `__bnot` (0x00592200), `__eq` (0x0085e530),
+  `__tostring` (0x0085e490) and the callable constructor (0x008bc330).
+  The payload is four 32-bit words. `Get` returns false for a negative index
+  or an index of 128 or more and `Set` ignores both, which is what the
+  recovered bounds checks do rather than a Lua error. The bitwise operators
+  build a new value and never mutate the receiver; a non-`BitSet128` operand
+  raises the same error the native does. `__tostring` prints the high half
+  first: `BitSet128: %016llx%016llx`.
+  The class table is callable, matching the other value types. `tests/
+  test_bitset128.cpp` covers every word boundary, the out-of-range paths,
+  set/clear, non-mutation, equality, the exact text, the constructor halves
+  and the foreign-operand errors; the suite is 138 cases, 0 failed (was 128).
+  Addresses and reasoning are in docs/binding-surface-findings.md §26, the
+  handoff note in docs/HANDOFF.md §29, and the Progress table in README.md
+  now reads 372 implemented members and 42 translated native methods.
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `CMakeLists.txt` | 2 | 0 |
+| `README.md` | 9 | 8 |
+| `docs/HANDOFF.md` | 24 | 0 |
+| `docs/binding-surface-findings.md` | 114 | 0 |
+| `include/isaec/api/bitset128.hpp` | 79 | 0 |
+| `include/isaec/api/bitset128_lua.hpp` | 26 | 0 |
+| `src/api/bitset128.cpp` | 72 | 0 |
+| `src/api/bitset128_lua.cpp` | 187 | 0 |
+| `tests/CMakeLists.txt` | 1 | 0 |
+| `tests/test_bitset128.cpp` | 228 | 0 |
+
+#### Documentation
+
+- `README.md`
+- `docs/HANDOFF.md`
+- `docs/binding-surface-findings.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
