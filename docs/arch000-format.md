@@ -121,7 +121,37 @@ period; a strong single-byte skew (period-1 bias 36.9 against 0.13 at period 256
 combined with an entropy ramp from 7.07 in the first 256 bytes to 7.93 over the
 whole payload points at a custom LZ variant rather than a cipher.
 
-Recovering it needs the decompressor in the shipped binary. See [#1](https://github.com/caos-obliquo/tboi-recomp/issues/1) and [#2](https://github.com/caos-obliquo/tboi-recomp/issues/2).
+The decompressor is not missing: it is statically present in the reference
+binary. Mode dispatch at VA `0xa68c50` reaches an LZW arm whose natives were
+recovered from `isaac-ng.exe` with REA/Ghidra (SHA256
+`3bdfc8bae0dc7e334b76009d0ad45dfbb16ee5f00c06ffbc3a0094e34d44616b`): dictionary
+init `0xa850f0` (Evidence `ev_2ba7fae00f476b26809b438919f98d5f79ea9ab52bb30d9d99b40a3ff9939edd`),
+MSB-first byte-accumulator bit reader `0xa85090` (`ev_022dd8441b68bb8c05295291c706d5d4c3ce7141b14d471b0290afe8c337b690`),
+prefix-chain emit `0xa85020` (`ev_7e10cbc6d1e68acef69eb4da7e34bfa2845aa5793a7b77352d107fc3a0414a99`)
+and the per-chunk decode loop `0xa85320` (`ev_8f84fe3f86c05c3868f6e941f6039201a6865ca0993510ef59215363fb12152e`).
+The Python reference is `tools/isaac-archive.py`, the C++ port is
+`src/data/codec.cpp`, and the work is tracked in [#52](https://github.com/caos-obliquo/tboi-recomp/issues/52).
+
+### 6.1 The LZW arm, as implemented
+
+- An entry is a sequence of 4-byte little-endian chunk lengths, each followed by
+  that many compressed bytes. The walk limit is the entry's **compressed span**
+  (next entry's offset minus this one's), not `size`: `size` is the decompressed
+  length, and walking it runs into the next payload.
+- Dictionary state persists across chunks: 4096 slots of `(prefix, chain_head,
+  next_in_chain, first_char)`, `next_code=0x100`, `width=8`. Only the bit reader
+  is per chunk.
+- Width grows **before** each read (`while (1 << width) <= next_code`). When
+  `next_code+1 >= 0x1000`, chain heads are cleared and decoding restarts at 8
+  bits. A code above `next_code` aborts the chunk, mirroring the binary's
+  `ERROR! wrong code %u`.
+- `tests/lzw_fixtures.inc` is generated from the Python reference by
+  `tools/gen_lzw_fixtures.py`. It contains only synthetic cases — single,
+  literal-stream, wide-code, three-chunk and twelve-chunk streams, plus a
+  trailing-garbage case — so no game bytes are committed. The three-chunk case
+  carries a recorded size shorter than its plaintext, pinning the truncate-back
+  step at the container layer. No game-side oracle run has been performed:
+  agreement is with the disassembly and the Python port.
 
 ## 7. A build-pipeline leftover, now explained
 
@@ -133,14 +163,16 @@ array at `.data + 0x2E60` has zero references anywhere in the binary — so the
 loader enumerates `resources/packed/` itself at startup.
 ## 8. Provenance and licensing
 
-The codec details in sections 4 and 6 were cross-checked against
+Section 4 was cross-checked against
 `github.com/diamondo25/tbar-archive-unpacker`, whose own `LICENSE` is MIT
 (Copyright 2014 Erwin Oegema). That project ships a vendored `SharpLZW`
 directory whose files carry the GNU GPL; **none of it was copied into this
-repository.** The container parser, the mode `0x00` obfuscation and the LZW
-decoder here are independent implementations written from the algorithm
-descriptions. That project's format does not document mode `0x02`, which predates
-it.
+repository.** The container parser and the mode `0x00` obfuscation are
+independent implementations. The mode `0x01` LZW decoder is no longer based on
+that project's algorithm description: it was re-derived from `isaac-ng.exe`
+through the REA/Ghidra evidence cited in section 6.1. No code or data from that
+project was vendored. That project's format does not document mode `0x02`, which
+predates it.
 
 ## 9. Mode 0x02 decoder (recovered from disassembly)
 
@@ -148,7 +180,7 @@ The mode dispatch lives at VA `0xa68c50`. Byte 7 of the header selects the arm:
 
 | mode | path |
 |---|---|
-| `0x01` | `0xa850f0` — LZW (section 6) |
+| `0x01` | `0xa68c50` dispatch → `0xa85320` chunk loop (init `0xa850f0`, §6.1) |
 | `0x02` | `0xa89c90` → `0xaa93e0` PRNG + `0xa89f80` MiniZ wrapper (this section) |
 | `0x00` | inline at `0xa68cc5` — XOR (section 4) |
 

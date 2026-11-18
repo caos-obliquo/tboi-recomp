@@ -11,6 +11,7 @@ a binary **you** already own, from a path **you** pass in.
 | `extract-binding-tables.py` | Surveys the native→Lua binding surface from `isaac-ng.exe`. Hard-fails if its class anchors do not validate. | yes |
 | `gen-api-spec.py` | Turns the code-derived surface into `bindings/isaac-api-spec.json` + a generated C++ header (methods, properties, metamethods). | no |
 | `gen_body_seeds.py` | Regenerates the REA/Ghidra seed list of closure bodies (911) from the code-derived attribution table. | no |
+| `gen_lzw_fixtures.py` | Regenerates `tests/lzw_fixtures.inc` from `tools/isaac-archive.py`: six synthetic streams covering width growth, persistent dictionary across chunks and truncation back to recorded size. No game bytes are committed. | no |
 | `pe_vaddr.py` | PE section reader. Translates addresses and **refuses to guess** when a VA is ambiguous. | yes |
 | `probe_metatable_keys.py` | Locates the nine recovered metatable keys in `.rdata`. | yes |
 | `probe_xrefs.py` | Counts `.text` references to each metatable key address. | yes |

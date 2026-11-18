@@ -50,6 +50,13 @@ std::vector<u8> make_pattern(usize size, u32 seed) {
 static const usize kBogocrypt1FixtureCount =
     sizeof(kBogocrypt1Fixtures) / sizeof(kBogocrypt1Fixtures[0]);
 
+const LzwFixture* find_lzw_fixture(const char* name) {
+    for (usize i = 0; i < kLzwFixtureCount; ++i) {
+        if (std::strcmp(kLzwFixtures[i].name, name) == 0) return &kLzwFixtures[i];
+    }
+    return nullptr;
+}
+
 
 
 
@@ -156,7 +163,9 @@ ISAEC_TEST(codec_lzw_matches_reference_decoder) {
     for (usize i = 0; i < kLzwFixtureCount; ++i) {
         const LzwFixture& f = kLzwFixtures[i];
         std::vector<u8> data(f.input, f.input + f.input_size);
-        CHECK(ArchiveCodec::decode(data, 0x01, 0));
+        // The compressed span is an explicit argument: passing the recorded
+        // size here instead would walk into the next entry (#52).
+        REQUIRE(ArchiveCodec::decode(data, 0x01, 0, f.input_size));
         if (data.size() != f.expected_size) {
             ::isaec::test::fail_now(std::string("fixture ") + f.name +
                                      ": size mismatch (got " +
@@ -165,6 +174,65 @@ ISAEC_TEST(codec_lzw_matches_reference_decoder) {
         }
         CHECK(std::memcmp(data.data(), f.expected, f.expected_size) == 0);
     }
+}
+
+// A decoder that rebuilds the dictionary at every 4-byte-prefixed chunk
+// agrees on chunk 0 and diverges from chunk 1 on. These fixtures cross that
+// boundary in the synthetic multi-chunk cases, so this test is a positive
+// control that the state really survives across chunks.
+ISAEC_TEST(codec_lzw_dictionary_persists_across_chunks) {
+    bool checked = false;
+    for (usize i = 0; i < kLzwFixtureCount; ++i) {
+        const LzwFixture& f = kLzwFixtures[i];
+        if (f.input_size < 8) continue;
+
+        // Decode just the first chunk, then the whole span. The first chunk's
+        // output must be a prefix of the full decode, and the bytes after it
+        // must exist -- otherwise there was no second chunk to test.
+        const usize first_length = static_cast<usize>(f.input[0]) |
+                                   (static_cast<usize>(f.input[1]) << 8) |
+                                   (static_cast<usize>(f.input[2]) << 16) |
+                                   (static_cast<usize>(f.input[3]) << 24);
+        if (first_length == 0 || first_length + 4 >= f.input_size ||
+            f.expected_size <= first_length) {
+            continue;
+        }
+
+        std::vector<u8> head(f.input, f.input + 4 + first_length);
+        REQUIRE(ArchiveCodec::decode(head, 0x01, 0, head.size()));
+        REQUIRE(head.size() <= f.expected_size);
+        if (head.size() == f.expected_size) continue;
+        CHECK(std::memcmp(head.data(), f.expected, head.size()) == 0);
+
+        std::vector<u8> full(f.input, f.input + f.input_size);
+        REQUIRE(ArchiveCodec::decode(full, 0x01, 0, f.input_size));
+        CHECK(full.size() > head.size());
+        CHECK(std::memcmp(full.data() + head.size(), f.expected + head.size(),
+                          full.size() - head.size()) == 0);
+        checked = true;
+    }
+    CHECK(checked);
+}
+
+// The compressed span -- not the recorded decompressed size -- controls how
+// far the chunk walker goes. Truncating the span must produce fewer bytes
+// rather than the same output.
+ISAEC_TEST(codec_lzw_span_controls_the_walk) {
+    // Pick the three-chunk fixture: a third of its span cuts inside chunk 3,
+    // so the truncated walk must stop on a chunk boundary with real output,
+    // not simply return zero bytes because it never reached a chunk at all.
+    const LzwFixture* f = find_lzw_fixture("multi_chunk_1024");
+    REQUIRE(f != nullptr);
+    REQUIRE(f->input_size > 16);
+
+    std::vector<u8> full(f->input, f->input + f->input_size);
+    REQUIRE(ArchiveCodec::decode(full, 0x01, 0, f->input_size));
+
+    std::vector<u8> short_span(f->input, f->input + f->input_size);
+    REQUIRE(ArchiveCodec::decode(short_span, 0x01, 0, f->input_size / 3));
+    CHECK(short_span.size() < full.size());
+    CHECK(short_span.size() > 0);
+    CHECK(std::memcmp(short_span.data(), full.data(), short_span.size()) == 0);
 }
 
 ISAEC_TEST(codec_lzw_ignores_seed) {

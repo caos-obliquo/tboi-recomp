@@ -37,6 +37,7 @@ using isaec::data::kArchiveHeaderSize;
 // The generated fixtures spell u8/u32/usize unqualified, so they must follow the
 // using-declarations above.
 #include "bogocrypt1_fixtures.inc"
+#include "lzw_fixtures.inc"
 
 namespace {
 
@@ -386,17 +387,7 @@ ISAEC_TEST(archive_decode_returns_a_stored_payload_verbatim) {
     CHECK(second[3] == 0xEF);
 }
 
-ISAEC_TEST(archive_decode_refuses_lzw_but_decodes_mode_0x02_chunks) {
-    // Mode 0x01 decodes real XML and then diverges in length, so the reader
-    // refuses. Mode 0x02 is a chunk stream and is decoded.
-    std::vector<Slot> lzw(1);
-    lzw[0].payload = std::vector<u8>(64, 0x7B);
-    Archive lzw_archive;
-    REQUIRE(lzw_archive.open(scratch("lzw.a", build(0x01, lzw))));
-    std::vector<u8> lzw_out;
-    CHECK(!lzw_archive.decode(0, lzw_out));
-    CHECK(lzw_archive.error().find("0x01") != std::string::npos);
-
+ISAEC_TEST(archive_decode_decodes_a_mode_0x02_chunk_stream) {
     const std::vector<u8> text = {'<', '?', 'x', 'm', 'l', ' ', 'v', '=', '1'};
     const std::vector<u8> compressed = ::isaec::test::raw_deflate(text);
     std::vector<u8> stream;
@@ -422,6 +413,42 @@ ISAEC_TEST(archive_decode_reports_a_bad_mode_0x02_chunk_stream) {
     std::vector<u8> out;
     CHECK(!archive.decode(0, out));
     CHECK(archive.error().find("0x02") != std::string::npos);
+}
+
+ISAEC_TEST(archive_decode_of_an_lzw_entry_matches_the_reference_decoder) {
+    // Each fixture's input is the compressed span of one entry. A second slot
+    // bounds that span; the entry's recorded size is patched separately, so
+    // this test also pins the container's truncate-to-size behaviour when size
+    // is smaller than what the decompressor actually produced.
+    for (usize i = 0; i < kLzwFixtureCount; ++i) {
+        const LzwFixture& f = kLzwFixtures[i];
+
+        std::vector<Slot> slots(2);
+        slots[0].payload.assign(f.input, f.input + f.input_size);
+        slots[0].asset_size = f.size;
+        slots[1].payload = {0x00};
+
+        std::vector<u8> blob = build(0x01, slots);
+        Archive archive;
+        REQUIRE(archive.open(scratch("lzw_fixture.a", blob)));
+        REQUIRE(archive.entries().size() == 2);
+        CHECK(archive.cipher_span(0) == f.input_size);
+
+        std::vector<u8> out;
+        if (!archive.decode(0, out)) {
+            ::isaec::test::fail_now(std::string("container rejected LZW fixture ") +
+                                    f.name + ": " + archive.error());
+        }
+        if (out.size() != f.size) {
+            ::isaec::test::fail_now(std::string("LZW fixture ") + f.name +
+                                    " produced " + std::to_string(out.size()) +
+                                    " bytes, expected " + std::to_string(f.size));
+        }
+        if (std::memcmp(out.data(), f.expected, f.size) != 0) {
+            ::isaec::test::fail_now(std::string("LZW fixture ") + f.name +
+                                    " differs from the reference");
+        }
+    }
 }
 
 ISAEC_TEST(archive_decode_rejects_an_index_outside_the_entry_table) {

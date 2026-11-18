@@ -32,7 +32,7 @@ clean-room project cannot be built on a tampered artifact.
 |---|---|
 | Lua binding layer | registry, single-parent inheritance, property model, `ApiSpec` codegen — 16 tests green |
 | `ARCH000` container | solved; the reader asserts index arithmetic instead of trusting it |
-| Payload codec | all three modes: `0x00` XOR keystream, `0x01` plain LZW, `0x02` LCG keystream |
+| Payload codec | `0x00` XOR keystream, `0x01` LZW (§32), `0x02` chunked DEFLATE (§30.1); 2647 entries in an unresolved third arm |
 | PNG decoding | from an in-memory buffer, via libpng |
 | Headless binary | reads an archive, decodes, counts draws, exits |
 | Windowed binary | SDL2 window; the renderer **counts calls and draws nothing** |
@@ -87,8 +87,8 @@ and offsets strictly ascending.
 | mode | name | status |
 |---|---|---|
 | `0x00` | bogocrypt1 | **VERIFIED** against real archives |
-| `0x01` | plain LZW | **DEFECTIVE** — see below |
-| `0x02` | PRNG keystream | **UNVERIFIED** — produces noise on real data |
+| `0x01` | LZW | **IMPLEMENTED** — ported from the natives, see §32 |
+| `0x02` | chunked DEFLATE | **MOSTLY DECODED** — 1533/4180 entries, third arm open, see §30.1 |
 
 Mode is a file-level byte, not per entry.
 
@@ -197,29 +197,21 @@ of the same disassembly reading. That was flagged as the available check in §9.
 the format doc, and §9.5 now records that the stronger check — a real packed archive —
 was run and failed.
 
-`Archive::decode` therefore **refuses** mode 0x01 and non-stored mode 0x02 with an
-error naming the mode, instead of returning bytes known to be wrong. `isaec_window`
-on `videos.a 0` exits 1 with `not a decodable PNG: entry 0
-resources/gfx/cutscenes/001_epilogue.ogv`. A renderer that draws noise is worse than
-one that reports it cannot decode the entry.
+`Archive::decode` no longer refuses either arm: mode 0x01 decodes through the
+ported LZW state machine (§32) and mode 0x02 through the chunk walker (§30.1).
+The unresolved 0x02 entries still fail explicitly rather than returning noise.
+`isaec_window` on `videos.a 0` now gets past the LZW arm and fails later at the
+entry's own format (`resources/gfx/cutscenes/001_epilogue.ogv` is not a PNG). A
+renderer that draws noise is worse than one that reports what it cannot decode.
 
-### 5.2 mode 0x01 LZW has a real defect
+### 5.2 mode 0x01 LZW: the defect is fixed
 
-Decodes **genuine** content — `config.a` yields XML (`<achievements gfxroot=...>`),
-`fonts.a` yields BMF with real font names — then diverges in length. Both
-over- and under-producing:
-
-```
-config.a e0       got 45575   size 25894
-fonts.a  e0       got  7408   size  4147
-rooms.a  e0       got 190901  size 113413
-animations.a e0   got 1099332 size 4049421
-```
-
-Tails are garbage, but content *at* the `size` cut point is still coherent
-mid-XML. So `size` is the true plaintext length and the LZW stream is correct for a
-while (dictionary warm-up) and then breaks. Looks like a dictionary-reset or
-code-width bug. Not yet found.
+**Resolved by [#52](https://github.com/caos-obliquo/tboi-recomp/issues/52).**
+The old Python and C++ ports all rebuilt the dictionary per chunk, grew the code
+width after insertion, and walked `size` as if it were the compressed span. The
+natives show one dictionary per entry, width grown before each read, and a walk
+bounded by the compressed span; the container layer then truncates to `size`.
+See §32 for the evidence and the negative control.
 
 ### 5.3 `repentance.a` is 0/4180 named
 
@@ -252,23 +244,19 @@ repack's 14. It is safe to delete.
 
 Ranked by expected value.
 
-1. **Mode 0x01 LZW.** Real bug, real content, fixable. Decodes XML/BMF then breaks.
-   Prime suspects: dictionary reset at a specific code, and code-width growth past a
-   threshold. `size` is authoritative so there's a length oracle to test against.
-   Evidence to re-derive: `config.a` e0 got 45575 vs 25894.
+1. **Mode 0x02 third arm.** 2647 of 4180 entries assemble to their declared size
+   but match no magic and resist the PRNG and bogocrypt1 families. The native
+   stored-block XOR at `0xa89d70` is not yet identified in the data; see §30.1 and
+   `docs/arch000-format.md` §9.6.
 
-2. **Mode 0x02 PRNG.** The disassembly reading is wrong. Either re-disassemble with
-   more context, or brute-force the family: the shape (`state = state*MULT + INC`,
-   output from the high words, variable rotate) suggests a known 64-bit LCG family.
-   One right `MULT` would resolve 3000+ entries at once.
-
-3. **`repentance.a` names.** Needs a Repentance-era manifest. Candidates not yet
+2. **`repentance.a` names.** Needs a Repentance-era manifest. Candidates not yet
    exhausted: strings inside `isaac-ng.exe`, the `mods/` directory contents in full,
    or brute-forcing paths against Isaac's DLC naming conventions.
 
-4. **Merge the stack.** Nothing blocks it; it's 5 green commits.
+3. **Merge the stack.** #106/#108 need a rebase onto the post-#110 codec; the rest
+   of the stack is green.
 
-5. **Archive entry names in the window tool** are already done. What's missing is a
+4. **Archive entry names in the window tool** are already done. What's missing is a
    resource-index that groups entries by directory, or a `--names` dump mode in the
    C++ tool to match the Python one.
 
@@ -1179,3 +1167,41 @@ in `README.md`; the first physical run is an owner step and stays open on #66.
 `com.google.errorprone:error_prone_annotations:2.3.1` from Maven; a rerun of
 the same commit passed unchanged. That is an upstream-registry flake, not a
 build defect — check the failing URL before changing the build.
+
+## 32. Mode 0x01 LZW ported from the natives; #52
+
+Work on `fix/52-lzw-decoder`
+(issue [#52](https://github.com/caos-obliquo/tboi-recomp/issues/52)). The four
+natives were re-derived from the Steam `isaac-ng.exe` with REA/Ghidra, not from
+the external format description:
+
+| native | role | Evidence |
+|---|---|---|
+| `0xa850f0` | dictionary init | `ev_2ba7fae00f476b26809b438919f98d5f79ea9ab52bb30d9d99b40a3ff9939edd` |
+| `0xa85090` | MSB-first byte-accumulator bit reader | `ev_022dd8441b68bb8c05295291c706d5d4c3ce7141b14d471b0290afe8c337b690` |
+| `0xa85020` | prefix-chain emit | `ev_7e10cbc6d1e68acef69eb4da7e34bfa2845aa5793a7b77352d107fc3a0414a99` |
+| `0xa85320` | per-chunk decode loop | `ev_8f84fe3f86c05c3868f6e941f6039201a6865ca0993510ef59215363fb12152e` |
+
+`src/data/codec.cpp` now mirrors them: one dictionary per entry, width grown
+before each read, reset when `next_code+1 >= 0x1000`, early abort on an
+out-of-range code, and a walk bounded by the compressed span. `Archive::decode`
+passes `cipher_span(index)` and truncates to the recorded `size`; it no longer
+refuses mode 0x01.
+
+`tools/gen_lzw_fixtures.py` regenerates `tests/lzw_fixtures.inc` (6 synthetic
+cases, no game bytes committed) from `tools/isaac-archive.py`. The multi-chunk
+cases exercise dictionary persistence and the truncate-back step. The suite
+went from 145 to 152 cases, 0 failed. A negative control that reset the
+dictionary per chunk made three LZW tests fail, so the persistence assertions
+are not vacuous.
+
+Real-archive check on the same day: `config.a` 24/24 entries decoded at
+exactly their recorded size (first entry begins `<achievements gfxroot="resources/gfx/ui/`),
+`fonts.a` 10/10 exact (BMF with `PF Tempesta Seven`), `rooms.a` 12/13 exact.
+`rooms.a` entry 7 under-produces (318647 of 382561 bytes), which is now an
+explicit error in `Archive::decode` instead of a zero-padded payload. The cause
+is not identified.
+
+What this does **not** establish: the reimplementation has not been run against
+the game's own decoder as an oracle. Agreement is between the disassembly, the
+Python port and the C++ port.
