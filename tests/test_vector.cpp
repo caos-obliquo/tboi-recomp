@@ -57,11 +57,23 @@ ISAEC_TEST(vector_products_follow_the_native_routines) {
     CHECK(near(isaec::api::vector_distance_squared(a, b), 8.0f));
 }
 
-ISAEC_TEST(vector_products_are_component_wise) {
+ISAEC_TEST(vector_metamethod_products_use_the_other_x) {
+    // 0xa104e0 and 0xa105a0 scale/divide both components by the second
+    // operand's x component. They are not component-wise products.
     const Vector a{1.0f, 2.0f};
     const Vector b{2.0f, 0.5f};
-    CHECK((isaec::api::vector_multiply(a, b) == Vector{2.0f, 1.0f}));
-    CHECK((isaec::api::vector_divide(a, b) == Vector{0.5f, 4.0f}));
+    CHECK((isaec::api::vector_multiply(a, b) == Vector{2.0f, 4.0f}));
+    CHECK((isaec::api::vector_divide(a, b) == Vector{0.5f, 1.0f}));
+}
+
+ISAEC_TEST(vector_negation_flips_the_sign_bit) {
+    // 0xa10660 flips the sign bit, so -0.0 becomes +0.0 and a NaN keeps its
+    // payload.
+    const Vector z = isaec::api::vector_negate(Vector{0.0f, -0.0f});
+    CHECK(z.x == 0.0f);
+    CHECK(std::signbit(z.x));
+    CHECK(z.y == 0.0f);
+    CHECK(!std::signbit(z.y));
 }
 
 ISAEC_TEST(vector_lerp_mutates_the_receiver_and_honours_the_clamp_flag) {
@@ -105,14 +117,6 @@ ISAEC_TEST(vector_normalize_and_resize_keep_the_direction) {
     CHECK(near(resized.y, 8.0f));
     CHECK(near(isaec::api::vector_length(resized), 10.0f));
     CHECK((isaec::api::vector_resized(Vector{0.0f, 0.0f}, 5.0f) == Vector{0.0f, 0.0f}));
-}
-
-ISAEC_TEST(vector_division_by_zero_yields_the_zero_vector) {
-    // This is the one arithmetic rule that is not from the binary: the
-    // `Vector / number` path was not disassembled, so the earlier documented
-    // rule is kept and stated here.
-    const Vector result = isaec::api::vector_scale_divide(Vector{1.0f, 2.0f}, 0.0f);
-    CHECK((result == Vector{0.0f, 0.0f}));
 }
 
 ISAEC_TEST(vector_rotation_matches_the_measured_float_results) {
@@ -184,6 +188,8 @@ ISAEC_TEST(vector_class_is_reachable_from_a_script) {
     lua_setglobal(L, "w");
     isaec::api::push_vector(L, Vector{2.0f, 2.0f});
     lua_setglobal(L, "u");
+    isaec::api::push_vector(L, Vector{2.0f, 5.0f});
+    lua_setglobal(L, "t");
 
     const char* script = R"lua(
         assert(v.X == 3, "X")
@@ -199,14 +205,18 @@ ISAEC_TEST(vector_class_is_reachable_from_a_script) {
         assert(sum.X == 4 and sum.Y == 4, "__add")
         local difference = v - w
         assert(difference.X == 2 and difference.Y == 4, "__sub")
-        local scaled = v * 2
-        assert(scaled.X == 6 and scaled.Y == 8, "__mul scalar")
-        local componentwise = v * u
-        assert(componentwise.X == 6 and componentwise.Y == 8, "__mul vector")
-        local divided = v / u
-        assert(divided.X == 1.5 and divided.Y == 2, "__div vector")
+        local scaled = v * t
+        assert(scaled.X == 6 and scaled.Y == 8, "__mul uses other.X")
+        local divided = v / t
+        assert(divided.X == 1.5 and divided.Y == 2, "__div uses other.X")
         local negated = -v
         assert(negated.X == -3 and negated.Y == -4, "__unm")
+        assert(tostring(u) == "2 2", "__tostring")
+
+        -- The reference closure accepts only a Vector operand; scalars error.
+        assert(not pcall(function() return v * 2 end), "__mul scalar must fail")
+        assert(not pcall(function() return 2 * v end), "scalar __mul must fail")
+        assert(not pcall(function() return v / 2 end), "__div scalar must fail")
 
         -- Lerp mutates the receiver and returns the same userdata.
         local receiver = v

@@ -7,6 +7,8 @@
 #include "isaec/api/lua_value.hpp"
 #include "isaec/api/vector.hpp"
 
+#include <cstdio>
+
 #if ISAEC_HAS_LUA
 extern "C" {
 #include <lauxlib.h>
@@ -212,42 +214,37 @@ int vector_meta_sub(lua_State* L) {
     return 1;
 }
 
-// Vector * number, number * Vector, and Vector * Vector.
+// Vector * Vector (0xa104e0). The shared closure 0x8a8740 accepts only a
+// Vector second operand, so a number raises a Lua error rather than scaling.
 int vector_meta_mul(lua_State* L) {
-    if (lua_type(L, 1) == LUA_TNUMBER) {
-        const f32 factor = static_cast<f32>(lua_tonumber(L, 1));
-        const Vector* v = check_vector(L, 2);
-        push_vector(L, vector_scale(*v, factor));
-        return 1;
-    }
     const Vector* v = check_vector(L, 1);
-    if (lua_type(L, 2) == LUA_TNUMBER) {
-        const f32 factor = static_cast<f32>(lua_tonumber(L, 2));
-        push_vector(L, vector_scale(*v, factor));
-        return 1;
-    }
     const Vector* other = check_vector(L, 2);
     push_vector(L, vector_multiply(*v, *other));
     return 1;
 }
 
-// Vector / number and Vector / Vector.
+// Vector / Vector (0xa105a0), same operand rule as __mul.
 int vector_meta_div(lua_State* L) {
     const Vector* v = check_vector(L, 1);
-    if (lua_type(L, 2) == LUA_TNUMBER) {
-        const f32 divisor = static_cast<f32>(lua_tonumber(L, 2));
-        push_vector(L, vector_scale_divide(*v, divisor));
-        return 1;
-    }
     const Vector* other = check_vector(L, 2);
     push_vector(L, vector_divide(*v, *other));
     return 1;
 }
 
-// -Vector.
+// -Vector: 0xa10660 flips the sign bit of each float.
 int vector_meta_unm(lua_State* L) {
     const Vector* v = check_vector(L, 1);
     push_vector(L, vector_negate(*v));
+    return 1;
+}
+
+// tostring(Vector): 0x85e630 formats with "%g %g" into a 256-byte buffer.
+int vector_meta_tostring(lua_State* L) {
+    const Vector* v = check_vector(L, 1);
+    char buffer[256];
+    std::snprintf(buffer, sizeof(buffer), "%g %g", static_cast<double>(v->x),
+                  static_cast<double>(v->y));
+    lua_pushstring(L, buffer);
     return 1;
 }
 
@@ -277,6 +274,8 @@ void install_vector_class(Binding& binding) {
         lua_setfield(L, -2, "__div");
         lua_pushcfunction(L, vector_meta_unm);
         lua_setfield(L, -2, "__unm");
+        lua_pushcfunction(L, vector_meta_tostring);
+        lua_setfield(L, -2, "__tostring");
     }
     lua_pop(L, 1);
 

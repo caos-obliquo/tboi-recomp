@@ -15,14 +15,20 @@
 //     native function pointer, which the closure invokes through the upvalue
 //     at pseudo-index 0xfff0b9d7.
 //   * The arithmetic below is a translation of those native functions
-//     (0xa0fea0..0xa10420). The comments name the function each block came
+//     (0xa0fea0..0xa10660). The comments name the function each block came
 //     from.
 //
+// The arithmetic metamethods are registered by the same function: `__sub`
+// 0xa10480, `__mul` 0xa104e0, `__div` 0xa105a0, `__unm` 0xa10660, and
+// `__tostring` 0x85e630. The four binary arithmetic closures accept only a
+// Vector as the second operand (helper 0x8baa50 rejects numbers), so the
+// recomp does not offer scalar `v * 2` / `v / 2`.
+//
 // The Lua-visible results were checked against the owned game running under
-// Wine (see docs/binding-surface-findings.md, section 16). The oracle host was
+// Wine (see docs/binding-surface-findings.md, section 18). The oracle host was
 // v1.9.7.12.J273 because that is the build the installed launcher runs; the
 // functions used by these tests are byte-identical at their remapped
-// addresses, with the one exception noted on Lerp.
+// addresses, with the exceptions noted on Lerp and on `__mul`/`__div`.
 //
 // Nothing in this header includes Lua: the value type and the arithmetic are
 // usable (and testable) without an interpreter.
@@ -59,19 +65,16 @@ struct Vector {
 [[nodiscard]] Vector vector_sub(const Vector& a, const Vector& b) noexcept;
 [[nodiscard]] Vector vector_negate(const Vector& v) noexcept;
 
-// Scalar multiplication and division.
+// Scalar multiplication. The `Vector * Vector` metamethod does not use this;
+// it scales by the other vector's x component (see vector_multiply).
 [[nodiscard]] Vector vector_scale(const Vector& v, f32 factor) noexcept;
 
-// Component-wise multiplication and division, the `Vector * Vector` and
-// `Vector / Vector` metamethods. The oracle run confirmed both are
-// component-wise rather than scalar products.
+// `Vector * Vector` (0xa104e0) and `Vector / Vector` (0xa105a0). Both use the
+// second operand's x component for both components, not component-wise
+// multiplication or division. The operand must be a Vector; the binary's
+// shared closure rejects numbers.
 [[nodiscard]] Vector vector_multiply(const Vector& a, const Vector& b) noexcept;
 [[nodiscard]] Vector vector_divide(const Vector& a, const Vector& b) noexcept;
-
-// Scalar division. The binary's `Vector / number` path was not disassembled;
-// this keeps the earlier documented rule of returning the zero vector for a
-// zero divisor rather than introducing an infinity.
-[[nodiscard]] Vector vector_scale_divide(const Vector& v, f32 divisor) noexcept;
 
 // -- products ---------------------------------------------------------------
 
