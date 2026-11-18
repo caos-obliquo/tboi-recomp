@@ -1061,3 +1061,45 @@ over the payload.
 
 The authoritative write-up is `docs/binding-surface-findings.md` §26. Next
 work is the next pure-data class or the list classes, per the roadmap.
+
+---
+
+## 30. REA verification of mode 0x02: MiniZ found, PRNG transcription retracted
+
+Work on `verify/109-prng-rea` (issue #109, documented in
+`docs/arch000-format.md` §9) used the DX-Ball/TH04 REA workflow — instructions,
+callers, constants, recovered C, independent check — on the shipped
+`isaac-ng.exe` (SHA256
+`3bdfc8bae0dc7e334b76009d0ad45dfbb16ee5f00c06ffbc3a0094e34d44616b`).
+
+Native chain, all evidence from Ghidra (untrusted target data, cited as
+Evidence IDs):
+
+| VA | role | Evidence ID |
+|---|---|---|
+| `0xa68c50` | mode dispatch | `ev_9734722ed3d254f67bf9738cc450c60c4beb597c8633a43d6a067455d3ed8e20` |
+| `0xa89c90` | PRNG buffer wrapper | `ev_4957dbced24eeaf09e969600de5891fbe57209d27da4f2897048a737dda1c670` |
+| `0xaa93e0` | PRNG generator | `ev_fe9f7e0135d4ab37b5a0134573e1ce885d317846453c3bc8905acfe4190a3865` |
+| `0xaa93eb` | seed-prep bytes | `ev_dd72ecf227305aee7420801d63a464968849b03d5ed1e79714a10fbbeb85f833` |
+| `0xaa9420` / `0xaa9425` | multiplier immediates | `ev_f45a036bf54ad8e5388809fdfe279f2481726b8b312bc91c570720e1db193d97` / `ev_ff92aeb65ab4dd4497213617bee2c070fb258db5c9385a3087470008bdbe9446` |
+| `0xa694a0` | vtable refill | `ev_c46289808951fff4cdb4f2dbbe0e6884131cf7a3b438e7d31465c38b57c655db` |
+| `0xa69090` | chunk refill | `ev_9bb8bfe6a9261ddc23a7a22df21e6a7c1aecce7cab5b1c1a911903a8f4ba21ab` |
+| `0xa89f80` | MiniZ wrapper | `ev_f2927f0f8983277f6d9771f90bb46f4ecb4989990d3add4a69fc5477e24c2881` |
+| `0xa89d70` | stored-block XOR | `ev_6ec6deefdee9729772e73b4b5f3e026a7da44d6ae54da659a501a9f4d51b460a` |
+| `0xa85710` | MiniZ decompressor | `ev_cd61b34462953efeb4a0ae3a963ac5321ee9b8f9e31e996f0a648a34d174436a` |
+
+Findings:
+
+- Mode 0x02 is **MiniZ-compressed chunks**, not a whole-entry PRNG XOR.
+  `0xa69090` reads a 32-bit length (`len & 0x7fffffff`, `flag = len >> 31`,
+  `len <= 0x7ff`) and calls `0xa89f80` into a 0x400-byte buffer. The stored
+  path calls `0xa89d70` for PRNG XOR; the compressed path calls `0xa85710`
+  MiniZ with no XOR. This explains why 1406 real entries decoded to noise.
+- Retraction: the PRNG multiplier in `src/data/codec.cpp`,
+  `tools/isaac-archive.py` and §9.2 was documented as
+  `0x4c957f2d5851f42d`; immediate order gives `0x5851f42d4c957f2d`.
+- Retraction: seed preparation wrongly shifted the `seed >> 9` term left 8;
+  native bytes give `(((seed<<15)^seed)<<8) ^ (seed>>9) ^ seed`.
+- Do not patch production code on this verification branch. The MiniZ stage
+  and the two constant fixes are tracked in issue #110, opened before any
+  implementation work, per the repository rules. No game bytes are committed.
