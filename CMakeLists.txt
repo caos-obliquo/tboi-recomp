@@ -133,6 +133,8 @@ add_library(isaec_lua STATIC
   src/api/posvel_lua.cpp
   src/api/rng.cpp
   src/api/rng_lua.cpp
+  src/api/bitset128.cpp
+  src/api/bitset128_lua.cpp
   src/api/field_class.cpp
   src/api/field_classes_generated.cpp
 )
