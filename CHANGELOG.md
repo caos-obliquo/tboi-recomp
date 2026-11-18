@@ -1022,6 +1022,71 @@ Refs #90. Note: this PR deliberately does not start #64/#66/#52/#3/#4/#35 (not m
 - `docs/handoff.md`
 
 
+## [0.1.18] - 2026-11-18
+
+### Merged: [#101](https://github.com/caos-obliquo/tboi-recomp/pull/101) — feat(bindings): translate the Vector metamethod natives [#100]
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-18  **Files:** 7 changed, +142/-80.
+
+<details>
+<summary>Pull request body</summary>
+
+## Summary
+
+Translates the Vector metamethods that were still documented-API guesses:
+
+- `__sub` 0xa10480, `__mul` 0xa104e0, `__div` 0xa105a0, `__unm` 0xa10660, `__tostring` 0x85e630.
+- `__mul`/`__div` scale both components by the **other vector's x component**; they are not component-wise.
+- The shared closure 0x8a8740 rejects non-Vector operands, so `v * 2`, `2 * v` and `v / 2` now raise Lua errors.
+- `__unm` flips the sign bit; `__tostring` uses the native `%g %g` format.
+- Removed the undocumented `vector_scale_divide` helper.
+
+## Divergence recorded
+
+The v1.9.7.12 Repentogon oracle host returned component-wise products and accepted scalars. The reference v1.9.7.17 binary does neither. §18.3 of `docs/binding-surface-findings.md` records both the host measurement and the reference behaviour; the reference wins for the recomp.
+
+## Verification
+
+- `cmake --build build -j$(nproc)` — succeeds (only the pre-existing third-party lua `tmpnam` warning).
+- `ctest --test-dir build --output-on-failure` — 1/1, 128 cases, 0 failed.
+- Tests cover corrected products, scalar rejection, sign-bit negation including `-0.0`, and `tostring`.
+
+## Issue
+
+References #100. Anchored to #35. Does not close #97 (RNG oracle remains open).
+
+</details>
+
+#### Closes
+
+- [` `] [#35](https://github.com/caos-obliquo/tboi-recomp/issues/35) Wire the 76 metamethods from the generated spec into the runtime binding (open)
+- [`x`] [#97](https://github.com/caos-obliquo/tboi-recomp/issues/97) RNG: translate the 5 native methods and validate seed streams against the live game (closed)
+- [` `] [#100](https://github.com/caos-obliquo/tboi-recomp/issues/100) Vector metamethods: translate __sub/__mul/__div/__unm/__tostring and match the base binary (open)
+
+#### Commits
+
+- `4761c2b9` feat(bindings): translate the Vector metamethod natives [#100]
+  The reference binary's __sub/__mul/__div/__unm/__tostring are now translated. __mul and __div use the other vector's x component for both components and reject non-Vector operands; the v1.9.7.12 oracle host did neither, so the divergence is documented and the reference binary wins. __unm flips the sign bit, __tostring formats with "%g %g".
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `README.md` | 7 | 7 |
+| `docs/HANDOFF.md` | 24 | 0 |
+| `docs/binding-surface-findings.md` | 35 | 17 |
+| `include/isaec/api/vector.hpp` | 15 | 12 |
+| `src/api/vector.cpp` | 16 | 8 |
+| `src/api/vector_lua.cpp` | 18 | 19 |
+| `tests/test_vector.cpp` | 27 | 17 |
+
+#### Documentation
+
+- `README.md`
+- `docs/HANDOFF.md`
+- `docs/binding-surface-findings.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
