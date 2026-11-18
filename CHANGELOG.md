@@ -1022,6 +1022,77 @@ Refs #90. Note: this PR deliberately does not start #64/#66/#52/#3/#4/#35 (not m
 - `docs/handoff.md`
 
 
+## [0.1.18] - 2026-11-18
+
+### Merged: [#98](https://github.com/caos-obliquo/tboi-recomp/pull/98) — feat(bindings): translate the RNG natives [#97]
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-18  **Files:** 11 changed, +736/-18.
+
+<details>
+<summary>Pull request body</summary>
+
+## What
+
+Translates the five `RNG` natives from the reference binary into C++ and binds them to a callable `RNG` class table:
+
+- `GetSeed` `0x0040c3a0`
+- `SetSeed` `0x007e8fe0`
+- `RandomInt` `0x007e9020`
+- `RandomFloat` `0x007e9080`
+- `Next` `0x007e90f0`
+
+The 16-byte payload is a seed plus three shift counts. `SetSeed` selects one of the 81 rows at `0x00b1f4c8` and clamps the row to 80, as the v1.9.7.17 binary does. The constructor installs seed `0xaa17414f` and row 35 `{5,9,7}` and ignores its arguments. `Next` returns the new seed; `RandomInt(0)` advances and returns 0; `RandomFloat` uses the exact float at `0x00ba9ff0`.
+
+`tests/test_rng.cpp` covers the state, the clamp edges, fixed streams, the exact float values, zero-seed non-crash, callable-table shape and foreign userdata refusal. Suite: **128 cases, 0 failed**.
+
+## Oracle status (partial)
+
+The RNG probe was installed, but the Repentogon launcher did not start an `isaac-ng.exe` process in this session, so no numeric RNG fixtures were captured. The implementation is static-only for now; #97 remains open for the oracle. The host's `SetSeed` (`0x7df450`) also differs: it logs `RNG: Invalid ShiftIdx` and reads the table out of bounds instead of clamping, so it must not be used to probe that path.
+
+## Docs
+
+- `docs/binding-surface-findings.md` §25 — authoritative addresses, shift table, algorithms, zero-seed difference, tests.
+- `docs/HANDOFF.md` §27 — in flight, dead end, next probe.
+- `README.md` Progress — 362 implemented members, 28 native methods, 0/911 closure bodies.
+
+Refs #97. Does not close #97: the oracle acceptance criterion is still open.
+
+</details>
+
+#### Closes
+
+- [`x`] [#97](https://github.com/caos-obliquo/tboi-recomp/issues/97) RNG: translate the 5 native methods and validate seed streams against the live game (closed)
+
+#### Commits
+
+- `66e52b66` feat(bindings): translate the RNG natives [#97]
+  The RNG class is the first stateful value class translated from the reference binary: GetSeed (0x0040c3a0), SetSeed (0x007e8fe0), RandomInt (0x007e9020), RandomFloat (0x007e9080) and Next (0x007e90f0), plus the callable constructor and the 16-byte xorshift state.
+  The 81-row shift table at 0x00b1f4c8 is transcribed and clamped to row 80, matching v1.9.7.17. The zero seed does not abort the recompilation; that deliberate difference is documented, because the original executes INT3 there.
+  tests/test_rng.cpp brings the suite to 128 cases, 0 failed. The numeric oracle is not yet captured: the Repentogon launcher did not start a game process in this session, so #97 stays open until a v1.9.7.17 host is probed. Docs §25, HANDOFF §27 and README Progress record the measured addresses and the gap.
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `CMakeLists.txt` | 2 | 0 |
+| `README.md` | 10 | 9 |
+| `docs/HANDOFF.md` | 30 | 0 |
+| `docs/binding-surface-findings.md` | 116 | 0 |
+| `include/isaec/api/color_lua.hpp` | 5 | 9 |
+| `include/isaec/api/rng.hpp` | 88 | 0 |
+| `include/isaec/api/rng_lua.hpp` | 23 | 0 |
+| `src/api/rng.cpp` | 101 | 0 |
+| `src/api/rng_lua.cpp` | 130 | 0 |
+| `tests/CMakeLists.txt` | 1 | 0 |
+| `tests/test_rng.cpp` | 230 | 0 |
+
+#### Documentation
+
+- `README.md`
+- `docs/HANDOFF.md`
+- `docs/binding-surface-findings.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
