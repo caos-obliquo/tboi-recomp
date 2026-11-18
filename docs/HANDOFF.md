@@ -1037,3 +1037,27 @@ results; that host divergence is recorded in `docs/binding-surface-findings.md`
 sign-bit negation and `__tostring`; the suite is 128 cases, 0 failed. The
 authoritative write-up is §18.2/§18.4. The next work is the remaining
 `__add`-family metadata or the next class, not a re-probe of these natives.
+
+## 29. The BitSet128 class is translated; #103
+
+`BitSet128` is implemented on `feature/103-bitset128-natives` (issue #103):
+two methods (`Get` `0x0085e560`, `Set` `0x0085e5c0`), six metamethods
+(`__band` `0x0085e4d0`, `__bor` `0x0085e4f0`, `__bxor` `0x0085e510`,
+`__bnot` `0x00592200`, `__eq` `0x0085e530`, `__tostring` `0x0085e490`) and
+the callable class table (`BitSet128(low, high)`, native `0x008bc330`).
+
+The payload is four 32-bit words; the existing generated field class already
+supplies `l` at offset 0 and `h` at offset 8 as `Int64`. `Get` returns false
+for a negative index or an index of 128 or more, `Set` ignores both. The
+bitwise operators build a new value; the receiver is never mutated.
+`__tostring` is exactly `BitSet128: %016llx%016llx` with the high half
+first.
+
+`tests/test_bitset128.cpp` brings the suite to **138 cases, 0 failed**. It
+covers every word boundary, the out-of-range paths, set/clear, non-mutation,
+equality, the exact text, the constructor halves and the foreign-operand
+errors. No game-side oracle is needed: every native here is pure arithmetic
+over the payload.
+
+The authoritative write-up is `docs/binding-surface-findings.md` §26. Next
+work is the next pure-data class or the list classes, per the roadmap.

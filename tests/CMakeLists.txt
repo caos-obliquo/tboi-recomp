@@ -6,6 +6,7 @@ set(ISAEC_TEST_SRC
     test_color.cpp
     test_posvel.cpp
     test_rng.cpp
+    test_bitset128.cpp
     test_field_class.cpp
     test_codec.cpp
     test_archive.cpp

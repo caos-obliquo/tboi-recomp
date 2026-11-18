@@ -2316,3 +2316,117 @@ Repentogon launcher stayed at validation and never produced an
 algorithm above is therefore static-only; the host-version difference in
 `SetSeed` is recorded, and a v1.9.7.17 host remains the next probe. This is
 the one acceptance criterion of #97 that is not yet met.
+
+## 26. Fifth implementation: the BitSet128 class
+
+`BitSet128` is a 128-bit set stored as four 32-bit words in a 16-byte
+payload. It is the first translated class with no pointers and no game
+state: every member is pure arithmetic over the payload, so the port can be
+checked exhaustively rather than sampled.
+
+### 26.1 Registration and native table
+
+The class name string `BitSet128` is at `0x00b70894`; its block in the shared
+registration function `0x00866960` starts at `0x008679c2`. The binding
+helpers are `0x00877100` (class), `0x00877170` (binary metamethod),
+`0x008771d0` (`__bnot`), `0x00877280` (`__eq`), `0x00877330`
+(`__tostring`), `0x008773e0` (`Get`), `0x00877490` (`Set`) and `0x008774f0`
+(property).
+
+| member | name string | native | closure |
+| --- | --- | --- | --- |
+| `__band` | 0x00b708a0 | **0x0085e4d0** | 0x008aa300 |
+| `__bor` | 0x00b70884 | **0x0085e4f0** | 0x008aa300 |
+| `__bxor` | 0x00b7088c | **0x0085e510** | 0x008aa300 |
+| `__bnot` | 0x00b70874 | **0x00592200** | 0x008aa3e0 |
+| `__eq` | 0x00b7087c | **0x0085e530** | 0x008aa480 |
+| `__tostring` | 0x00b70300 | **0x0085e490** | 0x008aa530 |
+| `Get` | 0x00b70920 | **0x0085e560** | 0x008aa5b0 |
+| `Set` | 0x00b70924 | **0x0085e5c0** | 0x008aa640 |
+| `__call` (constructor) | — | **0x008bc330** | binder 0x00877120 |
+
+The payload is four words, and the two Lua properties are their little-endian
+64-bit halves:
+
+```
++0x00  u32 words[0]   } l, bits 0..63
++0x04  u32 words[1]   }
++0x08  u32 words[2]   } h, bits 64..127
++0x0c  u32 words[3]   }
+```
+
+Both properties are `Int64` fields at offsets 0 and 8, already supplied by the
+generated field class for `BitSet128`. The port adds the methods and
+metamethods on top of that class rather than redefining the layout.
+
+### 26.2 Get and Set
+
+```
+Get(index):
+    if index < 0 or index >= 128: return false
+    return (words[index >> 5] >> (index & 31)) & 1
+
+Set(index, value):
+    if index < 0 or index >= 128: return
+    words[index >> 5] = value ? set bit : clear bit
+```
+
+The native reads the index through `luaL_checkinteger` and returns through
+`lua_pushboolean`; `Set` reads the value through `lua_toboolean`, so any
+truthy Lua value sets and any falsey value clears. The four words are indexed
+in order: bits 0..31 word 0, 32..63 word 1, 64..95 word 2, 96..127 word 3.
+Neither native reads or writes outside the 16-byte payload; an out-of-range
+index is a false read and an ignored write rather than an error.
+
+### 26.3 The metamethods
+
+`__eq` compares all four words. `__band`, `__bor` and `__bxor` call the
+four-word helpers `0x00417170`, `0x00435c20` and `0x0085dae0`, which write
+`dst = lhs op rhs` across the four words. `__bnot` writes the complement of
+each word. All four **return a new BitSet128 and leave both operands
+unchanged**; the receiver is not mutated.
+
+`__tostring` is exactly the native format:
+
+```
+sprintf(buf, 0x100, "BitSet128: %016llx%016llx",
+        words[2] | words[3] << 32, words[0] | words[1] << 32)
+```
+
+The high 64 bits are printed first, then the low 64 bits, each as 16
+hexadecimal digits. For the words `{0x11223344, 0x55667788, 0x99aabbcc,
+0xddeeff00}` the port returns
+`BitSet128: ddeeff0099aabbcc5566778811223344`.
+
+The binary metamethod closures (`0x008aa300`, `0x008aa3e0`) accept only a
+`BitSet128` userdata as the second operand and raise a Lua error for a number
+or a foreign userdata. The port uses `ValueClass::check`, which has the same
+observable rule.
+
+### 26.4 The constructor
+
+The class table is callable. `BitSet128(low, high)` reads both arguments with
+`luaL_checkinteger` and stores them as two little-endian 64-bit halves:
+
+```
+words[0] = low  & 0xffffffff
+words[1] = low  >> 32
+words[2] = high & 0xffffffff
+words[3] = high >> 32
+```
+
+Both arguments are required; there is no zero-argument form.
+
+### 26.5 Tests and what is not established
+
+`tests/test_bitset128.cpp` covers every word boundary (0, 31, 32, 63, 64, 95,
+96, 127), the out-of-range and negative reads, set and clear, the
+non-mutation of the bitwise operators, equality, the exact `%016llx%016llx`
+text, the constructor halves, the `l`/`h` properties and the rejection of a
+number operand. The suite is 138 cases, 0 failed.
+
+Nothing here needs a game-side oracle: all eight native bodies are pure
+arithmetic over a 16-byte payload, and the tests exercise them directly. The
+one thing not established is the original's behaviour for a non-integer
+`Get` index; its closure calls `luaL_checkinteger`, which errors on a string,
+and the port reproduces that through `luaL_checkinteger` as well.
