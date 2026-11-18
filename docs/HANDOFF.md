@@ -904,8 +904,9 @@ and writes `include/isaec/api/generated/field_classes.hpp` and
   diffs them, so the tables cannot drift from the JSON.
 * The JSON still needs the binary and is refreshed by hand with
   `tools/probe_field_layout.py`; that is the one step CI cannot repeat.
-* The honest count: **342 of the 1464 members do something**, they cover
-  **222 of the 911 bodies**, and **0 of the 911 bodies are translated**.
+* The honest count: **356 of the 1464 members do something**, and **0 of the
+  911 closure bodies are translated**. The bodies are glue; the arithmetic
+  they call is translated separately (see §26).
 * The 17 string fields are implemented as well: a `std::string` in the game's
   layout (a pointer, a length, a capacity), with the port owning the bytes it
   stores and the collector of the class releasing them. Making them work
@@ -926,3 +927,59 @@ The next steps, in order:
 3. The classes whose values live in the game: the methods, the object
    fields and the list classes. These need the game side, not more
    disassembly.
+
+## 26. The Vector and Color methods are translated from the natives
+
+The `Vector` and `Color` classes were reimplemented from public API
+documentation through §18 and §19. They are now translated from the reference
+binary's native functions (v1.9.7.17.J460, sha256 `3bdfc8ba...`), and the
+translation was checked against the owned game running under Wine.
+
+### What moved
+
+* **Vector**: 15 instance methods (`Clamp` and `Clamped` are new), the
+  class-table `Vector.FromAngle`, X/Y and the arithmetic metamethods. The 17
+  native functions at `0x00a0fea0`..`0x00a10420` were read instruction by
+  instruction. The 4th argument of `Lerp` is a clamp flag, and the receiver is
+  mutated; the Lua-visible result aliases the receiver (#38).
+* **Color**: `Reset`, `SetTint`, `SetColorize`, `SetOffset`, `__mul` and the
+  undocumented `Color:Lerp` (`0x006832e0`). The block at offsets 16..28 is the
+  colorize RGBA, not reserved padding. The measured registration-time
+  pointers are `0x00682ed0`, `0x00682f20`, `0x00682fb0`, `0x00682fe0`,
+  `0x006832e0` and `0x006831c0`; the numbers quoted in #40 are vtable slots.
+* `docs/binding-surface-findings.md` §18/§19 carry the authoritative tables.
+* `tests/test_vector.cpp` and `tests/test_color.cpp` were rewritten; ctest is
+  119 cases, 0 failed.
+
+### Oracle, and why it is only partial
+
+The owned game was launched through REPENTOGON's launcher, with a probe mod
+that logged deterministic cases through `Isaac.DebugString`. 91 lines were
+captured in `/tmp/opencode/isaec-oracle/raw.log`; the mod was removed after.
+
+The host was **v1.9.7.12.J273** (sha256 `ceb598b4...`), not the reference
+v1.9.7.17.J460. Most Vector natives are byte-identical after a **-0x2a640**
+shift, and the two Color functions after **-0x4880**. The exception is
+`Vector:Lerp`: the host's native has no clamp branch. Static disassembly of
+the reference is authoritative there. `Color:Lerp` does not exist in the host
+at all, so its behaviour is static-only.
+
+### Dead ends recorded
+
+* System Wine 11.22 in a fresh prefix cannot start the game (exit 53, empty
+  log). Proton 9.0 run directly in the existing 250900 prefix truncates the
+  log and then hangs before the first line; `Xvfb :99` does not help.
+* The only working launch path is the Steam/REPENTOGON launcher. Changing
+  `repentogon_launcher.ini` LaunchMode to 0 starts the game and runs the mods;
+  it was restored to 1 afterwards.
+* The probe must live at `<install>/mods/<name>/main.lua` with a
+  `metadata.xml` next to it; every folder in `mods/` auto-loads.
+
+### Next probes
+
+1. Re-run the same probe against a v1.9.7.17 host if one is ever available;
+   the only open oracle gap is `Vector:Lerp`'s clamp and `Color:Lerp`.
+2. `Vector.__mul`, `__div`, `__sub`, `__unm` were checked through the oracle
+   but their native bodies were not disassembled; read them the same way.
+3. The remaining `Color` colorize float values have no Lua getter; a probe
+   would need a native field read or a `SetColorize`/`__mul` differential.

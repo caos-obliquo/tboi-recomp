@@ -81,15 +81,108 @@ FieldAccessors accessors_for(std::size_t offset) {
     }
 }
 
+// -- methods ---------------------------------------------------------------
+
+int color_reset_lua(lua_State* L) {
+    auto* color = static_cast<Color*>(ValueClass::check(L, 1, kColorClassName));
+    color_reset(*color);
+    return 0;
+}
+
+int color_set_tint_lua(lua_State* L) {
+    auto* color = static_cast<Color*>(ValueClass::check(L, 1, kColorClassName));
+    const f32 r = static_cast<f32>(luaL_checknumber(L, 2));
+    const f32 g = static_cast<f32>(luaL_checknumber(L, 3));
+    const f32 b = static_cast<f32>(luaL_checknumber(L, 4));
+    const f32 a = static_cast<f32>(luaL_checknumber(L, 5));
+    color_set_tint(*color, r, g, b, a);
+    return 0;
+}
+
+int color_set_colorize_lua(lua_State* L) {
+    auto* color = static_cast<Color*>(ValueClass::check(L, 1, kColorClassName));
+    const f32 r = static_cast<f32>(luaL_checknumber(L, 2));
+    const f32 g = static_cast<f32>(luaL_checknumber(L, 3));
+    const f32 b = static_cast<f32>(luaL_checknumber(L, 4));
+    const f32 a = static_cast<f32>(luaL_checknumber(L, 5));
+    color_set_colorize(*color, r, g, b, a);
+    return 0;
+}
+
+int color_set_offset_lua(lua_State* L) {
+    auto* color = static_cast<Color*>(ValueClass::check(L, 1, kColorClassName));
+    const f32 r = static_cast<f32>(luaL_checknumber(L, 2));
+    const f32 g = static_cast<f32>(luaL_checknumber(L, 3));
+    const f32 b = static_cast<f32>(luaL_checknumber(L, 4));
+    color_set_offset(*color, r, g, b);
+    return 0;
+}
+
+// Color:Lerp(goal, t) returns a new colour; the oracle host predates the
+// method, so this follows the reference binary's native routine.
+int color_lerp_lua(lua_State* L) {
+    const auto* color = static_cast<const Color*>(ValueClass::check(L, 1, kColorClassName));
+    const auto* goal = static_cast<const Color*>(ValueClass::check(L, 2, kColorClassName));
+    const f32 t = static_cast<f32>(luaL_checknumber(L, 3));
+    push_color(L, color_lerp(*color, *goal, t));
+    return 1;
+}
+
+// -- metamethods ------------------------------------------------------------
+
+// Color * Color mutates and returns the left operand, which the oracle
+// confirmed by watching the left colour change and the returned value alias
+// it.
+int color_meta_mul(lua_State* L) {
+    auto* color = static_cast<Color*>(ValueClass::check(L, 1, kColorClassName));
+    const auto* other = static_cast<const Color*>(ValueClass::check(L, 2, kColorClassName));
+    color_multiply(*color, *other);
+    lua_pushvalue(L, 1);
+    return 1;
+}
+
 #endif  // ISAEC_HAS_LUA
 
 }  // namespace
 
 void install_color_class(Binding& binding) {
 #if ISAEC_HAS_LUA
+    if (!binding.attached()) return;
+    auto* L = static_cast<lua_State*>(binding.state());
+
     // The metatable with the read and the write dispatch. The class table
     // has to exist first: apply the generated spec before this call.
-    ValueClass::install(binding.state(), kColorClassName);
+    ValueClass::install(L, kColorClassName);
+
+    // The multiplication metamethod mutates the left operand.
+    ValueClass::push_metatable(L, kColorClassName);
+    if (lua_istable(L, -1)) {
+        lua_pushcfunction(L, color_meta_mul);
+        lua_setfield(L, -2, "__mul");
+    }
+    lua_pop(L, 1);
+
+    struct Method {
+        const char* name;
+        lua_CFunction fn;
+    };
+    static const Method kMethods[] = {
+        {"Lerp", color_lerp_lua},          {"Reset", color_reset_lua},
+        {"SetColorize", color_set_colorize_lua}, {"SetOffset", color_set_offset_lua},
+        {"SetTint", color_set_tint_lua},
+    };
+    for (const auto& method : kMethods) {
+        binding.register_method(kColorClassName, method.name,
+                                reinterpret_cast<NativeFunction>(method.fn));
+    }
+
+    // The original exposes the class table as the global `Color`.
+    lua_getfield(L, LUA_REGISTRYINDEX, kColorClassName);
+    if (lua_istable(L, -1)) {
+        lua_pushvalue(L, -1);
+        lua_setglobal(L, kColorClassName);
+    }
+    lua_pop(L, 1);
 
     struct Property {
         const char* name;

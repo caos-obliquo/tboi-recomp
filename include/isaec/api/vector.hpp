@@ -7,17 +7,22 @@
 //
 // Where the numbers come from
 // ----------------------------
-// The *shape* of the ABI is recovered from the binary (see
-// docs/binding-surface-findings.md): the receiver is the first argument, the
-// visible arguments start at index 2, a method returns 0 or 1 values, and a
-// method that returns a new vector allocates a fresh userdata.
+// Both the ABI and the arithmetic are recovered from the reference binary
+// (v1.9.7.17.J460, sha256
+// 3bdfc8bae0dc7e334b76009d0ad45dfbb16ee5f00c06ffbc3a0094e34d44616b):
 //
-// The *math* is not. The shipped closures do not contain the arithmetic: they
-// call the game's C++ Vector through a vtable pointer, so the numbers below
-// are the documented Isaac API reimplemented from scratch, not a disassembly
-// of the original. Every function here is therefore a claim about the public
-// behaviour of the game, and a discrepancy against the shipped build would
-// show up here first.
+//   * The registration function at 0x00866960 binds each Lua method to a
+//     native function pointer, which the closure invokes through the upvalue
+//     at pseudo-index 0xfff0b9d7.
+//   * The arithmetic below is a translation of those native functions
+//     (0xa0fea0..0xa10420). The comments name the function each block came
+//     from.
+//
+// The Lua-visible results were checked against the owned game running under
+// Wine (see docs/binding-surface-findings.md, section 16). The oracle host was
+// v1.9.7.12.J273 because that is the build the installed launcher runs; the
+// functions used by these tests are byte-identical at their remapped
+// addresses, with the one exception noted on Lerp.
 //
 // Nothing in this header includes Lua: the value type and the arithmetic are
 // usable (and testable) without an interpreter.
@@ -54,14 +59,24 @@ struct Vector {
 [[nodiscard]] Vector vector_sub(const Vector& a, const Vector& b) noexcept;
 [[nodiscard]] Vector vector_negate(const Vector& v) noexcept;
 
-// Scalar multiplication and division. Dividing by zero yields a zero vector
-// rather than an infinity, because the game's own vector type is a plain
-// float pair and a NaN would silently poison every later computation.
+// Scalar multiplication and division.
 [[nodiscard]] Vector vector_scale(const Vector& v, f32 factor) noexcept;
-[[nodiscard]] Vector vector_divide(const Vector& v, f32 divisor) noexcept;
+
+// Component-wise multiplication and division, the `Vector * Vector` and
+// `Vector / Vector` metamethods. The oracle run confirmed both are
+// component-wise rather than scalar products.
+[[nodiscard]] Vector vector_multiply(const Vector& a, const Vector& b) noexcept;
+[[nodiscard]] Vector vector_divide(const Vector& a, const Vector& b) noexcept;
+
+// Scalar division. The binary's `Vector / number` path was not disassembled;
+// this keeps the earlier documented rule of returning the zero vector for a
+// zero divisor rather than introducing an infinity.
+[[nodiscard]] Vector vector_scale_divide(const Vector& v, f32 divisor) noexcept;
 
 // -- products ---------------------------------------------------------------
 
+// Both products are accumulated the way the native x87 code does: in double
+// precision, then rounded once to float.
 [[nodiscard]] f32 vector_dot(const Vector& a, const Vector& b) noexcept;
 
 // The z component of the 3D cross product of two 2D vectors. This is the
@@ -77,21 +92,47 @@ struct Vector {
 
 // -- interpolation and reshaping -------------------------------------------
 
-// Linear interpolation: a at t = 0, b at t = 1.
-[[nodiscard]] Vector vector_lerp(const Vector& a, const Vector& b, f32 t) noexcept;
+// Vector:Lerp. The native routine (0xa10210) mutates the receiver:
+//
+//     v += (goal - v) * t
+//
+// The fourth Lua argument is a clamp flag: when it is truthy the native code
+// runs `t = min(max(t, 0), 1)` before the interpolation. The Repentogon build
+// used as the oracle has a two-argument version of this routine, which is why
+// the clamp flag is established by the reference binary's disassembly and not
+// by the oracle.
+void vector_lerp(Vector& v, const Vector& goal, f32 t, bool clamp) noexcept;
 
-// The unit vector with the same direction, or the zero vector when `v` has no
-// length to preserve.
+// The unit vector with the same direction, or `v` unchanged when it has no
+// length to preserve. The native guard is `length > 0`, so a zero vector and a
+// NaN vector are both copied through; `1/length` is the scale factor.
 [[nodiscard]] Vector vector_normalized(const Vector& v) noexcept;
 
-// `v` scaled by `factor`.
+// `v` scaled to the given length, or `v` unchanged when it has no length.
 [[nodiscard]] Vector vector_resized(const Vector& v, f32 factor) noexcept;
 
-// `v` rotated counter-clockwise by `degrees`.
+// `v` rotated counter-clockwise by `degrees`. The native code converts the
+// angle with the float constant 0.017453292f, then evaluates cos/sin in
+// double precision on that promoted float, then rounds both to float.
 [[nodiscard]] Vector vector_rotated(const Vector& v, f32 degrees) noexcept;
 
-// The direction of `v` in degrees, in the range (-180, 180].
+// Vector.FromAngle: the unit vector at `degrees`, a class-table static rather
+// than an instance method in the binary.
+[[nodiscard]] Vector vector_from_angle(f32 degrees) noexcept;
+
+// The direction of `v` in degrees, in the range (-180, 180]. The native code
+// is `float(atan2(y, x)) * 57.29578f`; in particular there is no
+// `-180 -> 180` remap.
 [[nodiscard]] f32 vector_angle_degrees(const Vector& v) noexcept;
+
+// -- clamping ---------------------------------------------------------------
+
+// Vector:Clamp. The native routine (0xa103c0) clamps in place with
+// `MINSS(MAXSS(value, min), max)` per component. Vector:Clamped
+// (0xa103f0) does the same into a fresh vector.
+void vector_clamp(Vector& v, f32 min_x, f32 min_y, f32 max_x, f32 max_y) noexcept;
+[[nodiscard]] Vector vector_clamped(const Vector& v, f32 min_x, f32 min_y, f32 max_x,
+                                    f32 max_y) noexcept;
 
 }  // namespace isaec::api
 

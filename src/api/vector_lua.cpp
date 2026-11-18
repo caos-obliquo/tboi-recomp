@@ -78,14 +78,17 @@ int vector_distance_squared(lua_State* L) {
     return 1;
 }
 
-// Vector:Lerp(other, t). The original also reads a fourth argument, a
-// boolean, and passes it to the game's own vector routine; its meaning is not
-// known, so this port ignores it.
+// Vector:Lerp(goal, t[, clamp]). The native routine mutates the receiver and
+// returns a handle that aliases it; the oracle confirmed that the Lua value
+// compares equal to the receiver and that writing through either name is
+// visible through the other. Returning the receiver itself reproduces that.
 int vector_lerp(lua_State* L) {
-    const Vector* self = check_vector(L, 1);
-    const Vector* other = check_vector(L, 2);
+    Vector* self = check_vector(L, 1);
+    const Vector* goal = check_vector(L, 2);
     const f32 t = static_cast<f32>(luaL_checknumber(L, 3));
-    push_vector(L, vector_lerp(*self, *other, t));
+    const bool clamp = lua_toboolean(L, 4) != 0;
+    vector_lerp(*self, *goal, t, clamp);
+    lua_pushvalue(L, 1);
     return 1;
 }
 
@@ -134,6 +137,36 @@ int vector_get_angle_degrees(lua_State* L) {
     return 1;
 }
 
+// Vector:Clamp(minX, minY, maxX, maxY) clamps the receiver in place and
+// returns nothing.
+int vector_clamp_lua(lua_State* L) {
+    Vector* self = check_vector(L, 1);
+    const f32 min_x = static_cast<f32>(luaL_checknumber(L, 2));
+    const f32 min_y = static_cast<f32>(luaL_checknumber(L, 3));
+    const f32 max_x = static_cast<f32>(luaL_checknumber(L, 4));
+    const f32 max_y = static_cast<f32>(luaL_checknumber(L, 5));
+    vector_clamp(*self, min_x, min_y, max_x, max_y);
+    return 0;
+}
+
+// Vector:Clamped(minX, minY, maxX, maxY) returns a new clamped vector.
+int vector_clamped_lua(lua_State* L) {
+    const Vector* self = check_vector(L, 1);
+    const f32 min_x = static_cast<f32>(luaL_checknumber(L, 2));
+    const f32 min_y = static_cast<f32>(luaL_checknumber(L, 3));
+    const f32 max_x = static_cast<f32>(luaL_checknumber(L, 4));
+    const f32 max_y = static_cast<f32>(luaL_checknumber(L, 5));
+    push_vector(L, vector_clamped(*self, min_x, min_y, max_x, max_y));
+    return 1;
+}
+
+// Vector.FromAngle(degrees): a class-table static, not an instance method.
+int vector_from_angle_lua(lua_State* L) {
+    const f32 degrees = static_cast<f32>(luaL_checknumber(L, 1));
+    push_vector(L, vector_from_angle(degrees));
+    return 1;
+}
+
 // -- properties -------------------------------------------------------------
 
 // The X and Y properties. The original reaches the field through a per
@@ -179,7 +212,7 @@ int vector_meta_sub(lua_State* L) {
     return 1;
 }
 
-// Vector * number and number * Vector.
+// Vector * number, number * Vector, and Vector * Vector.
 int vector_meta_mul(lua_State* L) {
     if (lua_type(L, 1) == LUA_TNUMBER) {
         const f32 factor = static_cast<f32>(lua_tonumber(L, 1));
@@ -188,16 +221,26 @@ int vector_meta_mul(lua_State* L) {
         return 1;
     }
     const Vector* v = check_vector(L, 1);
-    const f32 factor = static_cast<f32>(luaL_checknumber(L, 2));
-    push_vector(L, vector_scale(*v, factor));
+    if (lua_type(L, 2) == LUA_TNUMBER) {
+        const f32 factor = static_cast<f32>(lua_tonumber(L, 2));
+        push_vector(L, vector_scale(*v, factor));
+        return 1;
+    }
+    const Vector* other = check_vector(L, 2);
+    push_vector(L, vector_multiply(*v, *other));
     return 1;
 }
 
-// Vector / number.
+// Vector / number and Vector / Vector.
 int vector_meta_div(lua_State* L) {
     const Vector* v = check_vector(L, 1);
-    const f32 divisor = static_cast<f32>(luaL_checknumber(L, 2));
-    push_vector(L, vector_divide(*v, divisor));
+    if (lua_type(L, 2) == LUA_TNUMBER) {
+        const f32 divisor = static_cast<f32>(lua_tonumber(L, 2));
+        push_vector(L, vector_scale_divide(*v, divisor));
+        return 1;
+    }
+    const Vector* other = check_vector(L, 2);
+    push_vector(L, vector_divide(*v, *other));
     return 1;
 }
 
@@ -244,6 +287,8 @@ void install_vector_class(Binding& binding) {
         lua_CFunction fn;
     };
     static const Method kMethods[] = {
+        {"Clamp", vector_clamp_lua},
+        {"Clamped", vector_clamped_lua},
         {"Cross", vector_cross},
         {"Distance", vector_distance},
         {"DistanceSquared", vector_distance_squared},
@@ -262,6 +307,21 @@ void install_vector_class(Binding& binding) {
         binding.register_method(kVectorClassName, method.name,
                                  reinterpret_cast<NativeFunction>(method.fn));
     }
+
+    // Vector.FromAngle is registered on the class table itself, not on the
+    // method __index table: the original pushes the closure with the class
+    // table as its target. There is no Binding API for a class-table static,
+    // so the registry entry the binding created is used directly.
+    lua_getfield(L, LUA_REGISTRYINDEX, kVectorClassName);
+    if (lua_istable(L, -1)) {
+        lua_pushcfunction(L, vector_from_angle_lua);
+        lua_setfield(L, -2, "FromAngle");
+        // The original exposes the class table as the global `Vector`, which
+        // is also how Vector.FromAngle is reached from a script.
+        lua_pushvalue(L, -1);
+        lua_setglobal(L, kVectorClassName);
+    }
+    lua_pop(L, 1);
 
     // The X and Y properties. The original installs a getter under __propget
     // and a setter under __propset, with the same closure body for both
