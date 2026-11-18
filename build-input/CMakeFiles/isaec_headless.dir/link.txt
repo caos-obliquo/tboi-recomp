@@ -1,0 +1,1 @@
+/usr/bin/c++ -O2 -g -DNDEBUG -Wl,--dependency-file=CMakeFiles/isaec_headless.dir/link.d CMakeFiles/isaec_headless.dir/src/platform/null_renderer.cpp.o CMakeFiles/isaec_headless.dir/src/platform/null_main.cpp.o -o isaec_headless  libisaec_core.a libisaec_lua.a /usr/lib/libpng.so /usr/lib/libz.so third_party/libisaec_lua_interp.a

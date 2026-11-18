@@ -119,63 +119,140 @@ def decode_assets(
 
 
 class _BitReader:
+    """MSB-first bit reader matching the game's at VA 0xa85090.
+
+    Byte-accumulator form (acc = acc<<8 | byte; code = acc >> (bits-width)),
+    recovered from disassembly. Bit-for-bit equivalent to reading MSB-first,
+    but identical in structure to the binary so the two cannot drift.
+    """
+
     def __init__(self, data: bytes) -> None:
         self._data = data
-        self._bit = 0
+        self._pos = 0
+        self._acc = 0
+        self._bits = 0
 
-    def read(self, count: int) -> int | None:
-        value = 0
-        for _ in range(count):
-            if self._bit >= len(self._data) * 8:
+    def read(self, width: int) -> int | None:
+        while self._bits < width:
+            if self._pos >= len(self._data):
                 return None
-            byte = self._data[self._bit >> 3]
-            value = (value << 1) | ((byte >> (7 - (self._bit & 7))) & 1)
-            self._bit += 1
-        return value
+            self._acc = ((self._acc << 8) | self._data[self._pos]) & U32
+            self._pos += 1
+            self._bits += 8
+        self._bits -= width
+        return (self._acc >> self._bits) & ((1 << width) - 1)
 
 
-def decode_lzw_codes(data: bytes) -> bytes:
-    """Variable-width LZW, most significant bit first, 8 bits to start.
+class _LzwState:
+    """Dictionary state for one mode-0x01 entry (VA 0xa850f0 init).
 
-    Width grows once the table outgrows the current width, which is what makes
-    this a fixed-point-of-growth variant rather than plain GIF/TIFF LZW.
+    The state PERSISTS across the 4-byte-length-prefixed chunks of an entry:
+    refill_buffer (0xa69090) passes the same dictionary object into every
+    chunk's decode (0xa85320); only the bit reader is per-chunk.
+
+    Mirrors the binary's layout: 4096 slots of (prefix, chain_head,
+    next_in_chain, first_char). Entries are reached through prefix chains, so
+    emit() of a not-yet-defined or stale code walks whatever chain is there
+    rather than failing — the same bytes the game produces.
     """
-    out = bytearray()
-    reader = _BitReader(data)
-    width = 8
-    table = [bytes([i]) for i in range(256)]
-    previous: bytes | None = None
+
+    def __init__(self) -> None:
+        self.next_code = 0x100
+        self.width = 8
+        # [-1 prefix, -1 chain head, -1 next, first_char]
+        self.entries: list[list[int]] = [
+            [-1, -1, -1, i & 0xFF] for i in range(0x1000)
+        ]
+
+    def reset(self) -> None:
+        # 0xa85320 clears chain heads only (prefixes stay stale, as in the
+        # binary), then reads one code at width 8 and continues.
+        for slot in self.entries:
+            slot[1] = -1
+        self.next_code = 0x100
+        self.width = 8
+
+    def emit(self, code: int, out: bytearray) -> int:
+        """a85020: walk the prefix chain backwards, emit, return first char."""
+        scratch: list[int] = []
+        c = code
+        while c != -1 and len(scratch) < 0x1000:
+            scratch.append(self.entries[c][3])
+            c = self.entries[c][0]
+        scratch.reverse()
+        out += bytes(scratch)
+        return scratch[0] if scratch else 0
+
+    def insert(self, prefix: int, first_char: int) -> None:
+        if prefix == -1 or self.next_code > 0xFFF:
+            return
+        slot = self.entries[self.next_code]
+        slot[0] = prefix
+        slot[1] = -1
+        slot[3] = first_char
+        slot[2] = self.entries[prefix][1]
+        self.entries[prefix][1] = self.next_code
+        self.next_code += 1
+
+
+def _decode_lzw_chunk(state: _LzwState, chunk: bytes, out: bytearray) -> None:
+    """Decode one compressed chunk (one 0xa85320 call).
+
+    Width grows BEFORE each read (while (1 << width) <= next_code), not after
+    an insert. A code above next_code aborts the chunk, mirroring the binary's
+    "ERROR! wrong code %u" early return.
+    """
+    reader = _BitReader(chunk)
+    code = reader.read(state.width)
+    if code is None:
+        return
+    if code >= 0x1000:
+        return
+    first_char = state.emit(code, out)
+    prev = code
     while True:
-        code = reader.read(width)
+        if state.next_code + 1 >= 0x1000:
+            state.reset()
+            c8 = reader.read(8)
+            if c8 is None:
+                break
+            first_char = state.emit(c8, out)
+            prev = c8
+        while (1 << state.width) <= state.next_code:
+            state.width += 1
+        code = reader.read(state.width)
         if code is None:
             break
-        if previous is None:
-            if code >= len(table):
-                break
-            entry = table[code]
-        elif code < len(table):
-            entry = table[code]
-            table.append(previous + entry[:1])
+        if code > state.next_code:
+            break
+        if code == state.next_code:
+            # KwKwK: insert the pending entry, then emit it.
+            state.insert(prev, first_char)
+            first_char = state.emit(code, out)
         else:
-            entry = previous + previous[:1]
-            table.append(entry)
-        out += entry
-        previous = entry
-        if len(table).bit_length() > width:
-            width += 1
-    return bytes(out)
+            first_char = state.emit(code, out)
+            state.insert(prev, first_char)
+        prev = code
 
 
-def decode_lzw(blob: bytes, offset: int, size: int) -> bytes:
+def decode_lzw(blob: bytes, offset: int, span: int) -> bytes:
+    """Decode one mode-0x01 entry over its COMPRESSED byte span.
+
+    ``span`` is the compressed length: the next entry's offset minus this
+    entry's (the last entry runs to the index). The entry table's ``size``
+    field is the DECOMPRESSED length and must not be used as the walk limit —
+    doing so runs into the next entry's payload and over-produces (#52).
+    """
     out = bytearray()
+    state = _LzwState()
     cursor = offset
-    end = offset + size
-    while cursor < end:
-        length = struct.unpack_from("<i", blob, cursor)[0]
+    end = offset + span
+    while cursor + 4 <= end:
+        (length,) = struct.unpack_from("<i", blob, cursor)
         cursor += 4
         if length <= 0 or cursor + length > end:
             break
-        out += decode_lzw_codes(blob[cursor : cursor + length])
+        _decode_lzw_chunk(state, blob[cursor : cursor + length], out)
         cursor += length
     return bytes(out)
 
@@ -325,7 +402,14 @@ def decode_entry(
 ) -> bytes:
     _, special_hash, offset, size, _ = entry
     if mode == MODE_LZW:
-        return decode_lzw(blob, offset, size)
+        if span is None:
+            raise Malformed(
+                "mode 0x01 needs the compressed span (next entry's offset "
+                "minus this one's): the size column is the DECOMPRESSED "
+                "length, and walking it over-produces into the next entry "
+                "(#52)"
+            )
+        return decode_lzw(blob, offset, span)
     if mode == MODE_PRNG:
         if is_stored(blob, entry):
             return blob[

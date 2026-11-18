@@ -1,0 +1,9 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/caos/src/isaac-engine/build-input/cmake_install.cmake",
+		"/home/caos/src/isaac-engine/build-input/third_party/cmake_install.cmake",
+		"/home/caos/src/isaac-engine/build-input/tests/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

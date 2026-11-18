@@ -1,0 +1,120 @@
+Start testing: Nov 15 23:54 -03
+----------------------------------------------------------
+1/1 Testing: isaec_tests
+1/1 Test: isaec_tests
+Command: "/home/caos/src/isaac-engine/build-input/tests/isaec_tests"
+Directory: /home/caos/src/isaac-engine/build-input/tests
+"isaec_tests" start time: Nov 15 23:54 -03
+Output:
+----------------------------------------------------------
+ok    binding_starts_empty_and_detached
+ok    binding_registers_classes_and_rejects_duplicates
+ok    binding_tracks_parent_links
+ok    binding_resolves_inherited_methods
+ok    binding_child_override_wins
+ok    binding_lineage_survives_a_cycle
+ok    binding_properties_distinguish_constant_from_readwrite
+ok    binding_properties_resolve_through_the_parent_chain
+ok    binding_effective_methods_are_the_sorted_union
+ok    binding_effective_methods_deduplicate_overrides
+ok    binding_rejects_registration_into_unknown_classes
+ok    binding_registers_constructors
+ok    spec_recovers_the_expected_surface
+ok    spec_applies_to_the_binding_core
+ok    spec_preserves_recovered_inheritance
+ok    spec_carries_the_measured_shape_census
+ok    spec_registers_every_method_and_property_as_resolvable
+ok    vector_length_is_the_euclidean_norm
+ok    vector_products_follow_the_documented_rules
+ok    vector_lerp_interpolates_linearly
+ok    vector_normalize_and_resize_keep_the_direction
+ok    vector_division_by_zero_yields_the_zero_vector
+ok    vector_rotation_is_counter_clockwise_in_degrees
+ok    vector_angle_is_reported_in_degrees
+ok    vector_class_is_reachable_from_a_script
+ok    vector_members_that_are_not_implemented_still_refuse
+ok    vector_rejects_a_foreign_userdata
+ok    color_fields_sit_at_the_recovered_offsets
+ok    color_fields_can_be_written
+ok    color_properties_are_reachable_from_a_script
+ok    color_members_that_are_not_implemented_still_refuse
+ok    color_ignores_a_foreign_userdata
+ok    posvel_fields_sit_at_the_recovered_offsets
+ok    posvel_properties_are_reachable_from_a_script
+ok    posvel_properties_can_be_written
+ok    posvel_getter_hands_out_a_copy
+ok    posvel_refuses_a_value_that_is_not_a_vector
+ok    string_fields_round_trip
+ok    field_tables_sit_at_the_recovered_offsets
+ok    field_properties_are_reachable_from_a_script
+ok    field_properties_can_be_written
+ok    field_bool_members_read_and_write
+ok    kcolor_fields_round_trip
+ok    object_members_keep_the_loud_stub
+ok    generated_classes_work_without_a_hand_written_table
+ok    wide_fields_keep_their_width
+ok    codec_xor_is_deterministic
+ok    codec_xor_changes_data
+ok    codec_xor_depends_on_seed
+ok    codec_xor_empty_input
+ok    codec_xor_matches_reference_fixtures
+ok    codec_xor_cipher_span_changes_the_tail
+ok    codec_xor_rejects_span_beyond_buffer
+ok    codec_xor_leaves_bytes_past_span_untouched
+ok    codec_lzw_matches_reference_decoder
+ok    codec_lzw_ignores_seed
+ok    codec_lzw_short_input_is_unchanged
+ok    codec_prng_is_deterministic
+ok    codec_prng_depends_on_seed
+ok    codec_prng_keystream_continues_past_1024_bytes
+ok    codec_prng_preserves_length
+ok    codec_prng_empty_input
+ok    codec_name_maps_modes
+ok    codec_rejects_unknown_mode
+ok    codec_prng_matches_reference_decoder
+ok    archive_open_reports_a_missing_file
+ok    archive_open_rejects_bad_magic
+ok    archive_open_rejects_zero_entry_count
+ok    archive_open_rejects_an_index_that_does_not_match_the_file_size
+ok    archive_open_rejects_a_first_payload_offset_below_the_header
+ok    archive_open_rejects_an_unsorted_offset_column
+ok    archive_open_parses_the_header_and_the_entry_table
+ok    archive_cipher_span_reaches_the_next_entry_not_the_asset_length
+ok    archive_record_header_exposes_the_stored_flag
+ok    archive_stored_predicate_needs_every_length_field_to_agree
+ok    archive_stored_predicate_is_ignored_outside_mode_0x02
+ok    archive_decode_returns_a_stored_payload_verbatim
+ok    archive_decode_refuses_the_modes_this_build_cannot_verify
+ok    archive_decode_rejects_an_index_outside_the_entry_table
+ok    archive_decode_of_a_xor_entry_matches_the_reference_decoder
+ok    resource_name_hash_matches_the_shipped_entry_hashes
+ok    resource_name_hash_folds_case_and_starts_from_5381
+ok    archive_name_is_empty_until_a_manifest_is_loaded
+ok    archive_load_names_resolves_a_known_hash
+ok    archive_name_is_empty_for_a_hash_the_manifest_does_not_hold
+ok    archive_load_names_ignores_blank_lines_and_carriage_returns
+ok    archive_load_names_rejects_an_unreadable_source_and_clears_the_table
+ok    input_default_state_is_zero
+ok    input_publish_bumps_packet_on_change_and_not_otherwise
+ok    input_publish_rejects_out_of_range_slot
+ok    input_deadzone_zeroes_small_axes_and_passes_large_ones
+ok    input_publish_applies_deadzone_before_compare
+ok    input_axis_to_i16_clamps
+ok    input_axis_to_u8_trigger_maps_range
+ok    input_button_bits_match_xinput_layout
+ok    image_decode_png_produces_expected_dimensions
+ok    image_decode_png_returns_expected_pixels
+ok    image_decode_png_rejects_truncated_input
+ok    image_decode_png_rejects_garbage
+ok    image_decode_png_rejects_empty_input
+
+100 cases, 0 failed
+<end of output>
+Test time =   0.16 sec
+----------------------------------------------------------
+Test Passed.
+"isaec_tests" end time: Nov 15 23:54 -03
+"isaec_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Nov 15 23:54 -03

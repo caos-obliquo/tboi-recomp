@@ -1,0 +1,1 @@
+/usr/bin/c++ -O2 -g -DNDEBUG -Wl,--dependency-file=CMakeFiles/isaec_window.dir/link.d CMakeFiles/isaec_window.dir/src/platform/sdl_renderer.cpp.o CMakeFiles/isaec_window.dir/src/platform/sdl_main.cpp.o CMakeFiles/isaec_window.dir/src/platform/sdl_input.cpp.o -o isaec_window  libisaec_core.a /usr/lib/libSDL2-2.0.so.0.3200.74 /usr/lib/libpng.so /usr/lib/libz.so
