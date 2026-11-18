@@ -2182,3 +2182,119 @@ The nine generated field classes plus the three hand written ones cover 37
 of the 64 classes. The members that are still stubs are the ones whose
 value lives in the game's C++ (the methods) or in the game's heap (the
 object fields).
+
+## 25. Fourth implementation: the RNG class
+
+`RNG` is the first translated class whose state is *mutated* by its methods
+and whose constructor is a callable class table. It is small enough to read
+end to end: five native methods, a constructor, a destructor and a 16-byte
+payload.
+
+### 25.1 Registration and native table
+
+The name string `RNG` is at `0x00b70764`. The class registrar is
+`0x008a6d90`; the shared registration function `0x00866960` builds the class
+scope around `0x0086773d`..`0x008677c7`. The methods are bound by small
+helpers: `0x008765a0` (`GetSeed`), `0x00876650` (`SetSeed`), `0x008766b0`
+(`RandomInt`), `0x00876710` (`RandomFloat`) and `0x00876770` (`Next`).
+`0x00876550` installs `__call`; the destructor body is `0x008c31b0`.
+
+| member | name string | native | closure |
+| --- | --- | --- | --- |
+| `GetSeed` | 0x00b70768 | **0x0040c3a0** | 0x008aa0d0 |
+| `SetSeed` | 0x00b70750 | **0x007e8fe0** | 0x008aa130 |
+| `RandomInt` | 0x00b70758 | **0x007e9020** | 0x008aa1b0 |
+| `RandomFloat` | 0x00b70730 | **0x007e9080** | 0x008aa230 |
+| `Next` | 0x00b61210 | **0x007e90f0** | 0x008aa2a0 |
+| `__call` (constructor) | — | — | 0x008bbcf0 |
+| `__gc` | 0x00b753b4 | — | 0x008c31b0 |
+
+The payload is 16 bytes:
+
+```
++0x00  u32 seed
++0x04  u32 shift0
++0x08  u32 shift1
++0x0c  u32 shift2
+```
+
+The constructor allocates 24 bytes, stores the luabridge vtable and a payload
+pointer, then writes the seed `0xaa17414f` and the shift row `{5, 9, 7}`.
+**It ignores every constructor argument**, so `RNG(seed)` does not seed the
+instance.
+
+### 25.2 SetSeed and the shift table
+
+`SetSeed(seed, shift_index)` stores the seed and copies three `u32` values
+from the table at `0x00b1f4c8`:
+
+```
+row = min(shift_index, 80)          ; base v1.9.7.17 clamps
+state[1..3] = table[row]            ; 12 bytes
+```
+
+The table has **81 rows**, row 0 `{1,3,10}`, row 35 `{5,9,7}` and row 80
+`{17,15,26}`. The full table is transcribed in `src/api/rng.cpp`; it was
+extracted as 972 bytes from the reference binary and matched row by row.
+
+The Repentogon v1.9.7.12 host differs: `0x7df450` logs
+`RNG: Invalid ShiftIdx` for an index above 80 but then reads the table
+anyway, out of bounds. The reference binary clamps. The reimplementation
+follows the reference and clamps.
+
+### 25.3 The xorshift step
+
+All three advancing methods use the same step. The seed is the only state
+that changes; the shifts stay fixed until the next `SetSeed`.
+
+```
+s = state.seed
+if s == 0:  error path
+s ^= s >> (state.shift0 & 31)
+s ^= s << (state.shift1 & 31)
+s ^= s >> (state.shift2 & 31)
+state.seed = s
+return s
+```
+
+`Next()` returns the new seed. `RandomInt(n)` returns `s % n`, with `n == 0`
+returning `0` **after** advancing. `RandomFloat()` converts the new seed as
+an unsigned 32-bit integer to `float` and multiplies by the float at
+`0x00ba9ff0` (`0x2f7ffffe`, 2.3283062e-10), producing `[0, 1)`.
+
+The zero seed is fatal in the original: it prints `RNG Seed is zero!` and
+executes `INT3`. The reimplementation deliberately leaves the state at zero
+and returns zero instead, because a recompilation must not abort the
+process. This is the only intentional behavioural difference; it is
+unobservable in the original, which never returns.
+
+### 25.4 Lua surface
+
+`RNG` is a **callable class table**, not a global constructor function. The
+methods are:
+
+| call | returns | mutates |
+| --- | --- | --- |
+| `r:GetSeed()` | integer seed | no |
+| `r:SetSeed(seed, row)` | nil | seed and shifts |
+| `r:Next()` | integer, the new seed | state |
+| `r:RandomInt(bound)` | integer in `[0, bound)` | state |
+| `r:RandomFloat()` | float in `[0, 1)` | state |
+
+`RNG()` returns the default state; `RNG(anything)` ignores the arguments.
+`__gc` has no observable effect in the port.
+
+### 25.5 Tests and what is not established
+
+`tests/test_rng.cpp` covers the default state, all 81-row clamp edges, fixed
+seed streams, `RandomInt(0)`, the exact float bit pattern, zero-seed
+non-crash, constructor argument ignoring, callable-table shape and foreign
+userdata refusal. The suite is 128 cases, 0 failed.
+
+The RNG oracle probe was written and installed, but the game instance used
+for the Vector/Color probe could not be started again in this session: the
+Repentogon launcher stayed at validation and never produced an
+`isaac-ng.exe` process. No RNG numeric oracle fixtures were captured. The
+algorithm above is therefore static-only; the host-version difference in
+`SetSeed` is recorded, and a v1.9.7.17 host remains the next probe. This is
+the one acceptance criterion of #97 that is not yet met.
