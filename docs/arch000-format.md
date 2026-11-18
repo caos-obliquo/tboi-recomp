@@ -143,12 +143,51 @@ The mode dispatch lives at VA `0xa68c50`. Byte 7 of the header selects the arm:
 | mode | path |
 |---|---|
 | `0x01` | `0xa850f0` — LZW (section 6) |
-| `0x02` | `0xa89c90` — PRNG keystream (this section) |
+| `0x02` | `0xa89c90` → `0xaa93e0` PRNG + `0xa89f80` MiniZ wrapper (this section) |
 | `0x00` | inline at `0xa68cc5` — XOR (section 4) |
 
 All three arms end with the same virtual call
 `output_buffer->vtbl[3](field_c->field_c, 0)`; the per-mode transform runs
 before it.
+
+### 9.0 Correction: mode 0x02 is MiniZ, not a whole-entry PRNG stream
+
+**Retraction.** Earlier revisions of this section — and the C++/Python code that
+followed it — described mode 0x02 as "PRNG keystream XOR over every payload".
+That is wrong. REA/Ghidra analysis of the shipped `isaac-ng.exe`
+(SHA256 `3bdfc8bae0dc7e334b76009d0ad45dfbb16ee5f00c06ffbc3a0094e34d44616b`)
+shows the actual chain:
+
+1. `0xa68c50` dispatch (`ev_9734722ed3d254f67bf9738cc450c60c4beb597c8633a43d6a067455d3ed8e20`,
+   `ev_bad9d9a1137734961bdae624e1dc17cf7a185b13441441e20f76bc1ab5e72209`)
+   calls `0xa89c90` with `*(entry+8)`, the per-entry cipher seed.
+2. `0xa89c90` wrapper (`ev_4957dbced24eeaf09e969600de5891fbe57209d27da4f2897048a737dda1c670`,
+   `ev_9c59863125a5cf25186dcc2f2d0ae03fb1b74a85172d6b116d6c9baadb865b6a`)
+   allocates the PRNG buffer and calls `0xaa93e0(seed)`; it does not decode the
+   entry itself.
+3. `0xa694a0` vtbl[3] (`ev_c46289808951fff4cdb4f2dbbe0e6884131cf7a3b438e7d31465c38b57c655db`)
+   routes refill to `0xa69090`.
+4. `0xa69090` refill (`ev_9bb8bfe6a9261ddc23a7a22df21e6a7c1aecce7cab5b1c1a911903a8f4ba21ab`)
+   reads each chunk's 32-bit length, takes `len = raw & 0x7fffffff` and
+   `flag = raw >> 31`, rejects `len > 0x7ff`, then calls
+   `0xa89f80(dst=state+0x81c, dst_size=0x400, compressed, len, flag)`.
+5. `0xa89f80` MiniZ wrapper (`ev_f2927f0f8983277f6d9771f90bb46f4ecb4989990d3add4a69fc5477e24c2881`)
+   has two paths:
+   - **stored flag** (or length equal to the 0x400 destination): `memcpy` then
+     `0xa89d70` XORs the stored bytes with the PRNG stream prepared in step 2;
+   - **compressed flag**: `0xa85710` MiniZ decompression (`ev_cd61b34462953efeb4a0ae3a963ac5321ee9b8f9e31e996f0a648a34d174436a`),
+     with **no PRNG XOR at all**.
+
+Therefore the PRNG at `0xaa93e0` is only a stored-block XOR aid; it is not the
+mode 0x02 decoder. `0xa89d70` stored-block XOR:
+`ev_6ec6deefdee9729772e73b4b5f3e026a7da44d6ae54da659a501a9f4d51b460a`.
+The constructor `0xa68a50`
+(`ev_1f71bbfaa663e6632037be161fbf91467c97674c8fa92ee89d51b8c6ae6e0f7f`)
+and vtable `0xba05bc`
+(`ev_9e134804f283f794b99483209d4e7876e8ff89b8a8d3053c978c169537ccda1f`)
+establish that the 0x14-byte subobject at `[ESI+0x14]` is the PRNG holder used
+by the wrapper. Full MiniZ porting is tracked separately; this verification
+turn establishes only the native chain and the two transcription errors below.
 
 ### 9.1 Wrapper at `0xa89c90`
 
@@ -164,7 +203,14 @@ mode dispatch to be wired to the wrong algorithm while 34 tests passed green,
 because those tests were written from the implementation rather than from the
 disassembly.
 
-Seed preparation (32-bit):
+Seed preparation (32-bit), corrected from the bytes at `0xaa93eb`
+(`ev_dd72ecf227305aee7420801d63a464968849b03d5ed1e79714a10fbbeb85f833`):
+
+```
+h = (((seed << 15) ^ seed) << 8) ^ (seed >> 9) ^ seed
+```
+
+The earlier transcription
 
 ```
 h  = (seed << 15) ^ seed
@@ -172,12 +218,25 @@ h ^= (seed >> 9)
 h  = (h << 8) ^ seed
 ```
 
-The 64-bit LCG state is initialised to `state_lo = h`, `state_hi = seed`.
+is **wrong**: it shifts the `seed >> 9` term left by 8 as well. That error is
+preserved in `src/data/codec.cpp` and `tools/isaac-archive.py`; correcting it is
+an implementation task, not a verification-first change.
+
+The 64-bit LCG state is initialised to `state_lo = h`, `state_hi = seed`
+(bytes at `0xaa9406`; `XOR EAX,ESI` then `ADD EAX,ECX / ADC ECX,ESI`).
 Each of the 256 iterations performs:
 
 ```
-state = state * 0x4c957f2d5851f42d + 0x7f      (64-bit)
+state = state * 0x5851f42d4c957f2d + 0x7f      (64-bit)
 ```
+
+The multiplier was previously documented as `0x4c957f2d5851f42d`. The native
+code pushes `0x5851f42d` first and `0x4c957f2d` second
+(`ev_f45a036bf54ad8e5388809fdfe279f2481726b8b312bc91c570720e1db193d97`,
+`ev_ff92aeb65ab4dd4497213617bee2c070fb258db5c9385a3087470008bdbe9446`);
+under cdecl argument order these are the high and low words of the standard PCG
+multiplier `0x5851f42d4c957f2d`. Both the C++ and the Python mirror the
+word-swapped value.
 
 and emits one 32-bit word:
 
@@ -243,26 +302,31 @@ single-implementation mistake described in 9.2 passed its own tests. Agreement
 with a second implementation written from the same disassembly is the available
 check; a real packed archive from a game install would be the stronger one.
 
-### 9.5 Status: unverified, and the stronger check has now failed
+### 9.5 Status: unverified; the earlier "wrong generator" conclusion is retracted
 
-That stronger check has been run. The mode 0x02 decoder does not reproduce real
-payloads.
+The stronger real-archive check did fail: 1406 obfuscated entries from
+`repentance.a` and `afterbirthp.a` decoded to noise, with no PNG/OGG/BMF magic
+at any tried offset. That observation remains evidence. The **explanation**
+previously written here — "the generator in 9.2 is not the one the game
+applies" — is retracted. REA analysis now shows two independent defects:
 
-Over 1406 decrypted entries drawn from `repentance.a` and `afterbirthp.a`:
+1. the decode chain is missing the MiniZ stage (§9.0), so a whole-entry PRNG
+   XOR cannot reproduce compressed mode 0x02 entries even with a correct PRNG;
+2. the PRNG transcription itself has two errors (wrong word order in the
+   multiplier, wrongly shifted `seed >> 9` in seed preparation), so even the
+   stored-block XOR path is wrong.
 
-- the first decoded byte is uniformly distributed, the commonest value appearing
-  13 times where uniform would predict about 5;
-- `decoded[0:4] == raw[0:4]` holds for 0 of 1406 entries, so the keystream is
-  never accidentally inert;
-- no decoded entry opens with a PNG, OGG or BMF magic, at any of four tried
-  payload offsets (`offset`, `offset + size`, `offset + 9`, `offset + 9 + span`).
+A four-variant probe over the installed `repentance.a` compares the old and
+corrected multiplier/seed-preparation combinations against the record-header
+predicate from §10.4. It is a negative control: if none of the four variants
+produces record headers, that confirms a missing stage rather than a single
+mistyped constant. The result is reported in the issue trail, not copied into
+this document as a permanent number.
 
-The output is indistinguishable from noise, so the generator in 9.2 is not the
-one the game applies. The C++ and the Python agree because both transcribe the
-same disassembly reading — the exact weakness 9.2 records, now demonstrated on
-real data instead of merely anticipated. What *is* externally verified is mode
-0x00, by PNG chunk CRCs and zlib inflation, and the record header in section 10.
-Treat every mode 0x02 decode as unvalidated until this is resolved.
+What *is* externally verified is mode 0x00, by PNG chunk CRCs and zlib
+inflation, and the record header in section 10. Treat every mode 0x02 decode
+as unvalidated until the MiniZ stage and the corrected PRNG are implemented and
+checked against a real archive.
 
 ## 10. The mode 0x02 record header
 
