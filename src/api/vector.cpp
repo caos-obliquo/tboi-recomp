@@ -5,9 +5,20 @@
 #include "isaec/api/vector.hpp"
 
 #include <cmath>
+#include <cstring>
 
 namespace isaec::api {
 namespace {
+
+// 0xa10660 flips the sign bit rather than negating the value, so -0.0 and a
+// NaN keep their payload and only change sign.
+f32 flip_sign(f32 value) noexcept {
+    u32 bits = 0;
+    std::memcpy(&bits, &value, sizeof(bits));
+    bits ^= 0x80000000u;
+    std::memcpy(&value, &bits, sizeof(value));
+    return value;
+}
 
 // The binary's square-root helper at 0x00435a50 promotes the float to double,
 // calls the CRT sqrt and rounds the result back to float. Doing the same keeps
@@ -31,21 +42,18 @@ Vector vector_add(const Vector& a, const Vector& b) noexcept { return Vector{a.x
 
 Vector vector_sub(const Vector& a, const Vector& b) noexcept { return Vector{a.x - b.x, a.y - b.y}; }
 
-Vector vector_negate(const Vector& v) noexcept { return Vector{-v.x, -v.y}; }
+Vector vector_negate(const Vector& v) noexcept { return Vector{flip_sign(v.x), flip_sign(v.y)}; }
 
 Vector vector_scale(const Vector& v, f32 factor) noexcept { return Vector{v.x * factor, v.y * factor}; }
 
+// 0xa104e0: both components are scaled by the other vector's x component.
 Vector vector_multiply(const Vector& a, const Vector& b) noexcept {
-    return Vector{a.x * b.x, a.y * b.y};
+    return Vector{a.x * b.x, a.y * b.x};
 }
 
+// 0xa105a0: both components are divided by the other vector's x component.
 Vector vector_divide(const Vector& a, const Vector& b) noexcept {
-    return Vector{a.x / b.x, a.y / b.y};
-}
-
-Vector vector_scale_divide(const Vector& v, f32 divisor) noexcept {
-    if (divisor == 0.0f) return Vector{0.0f, 0.0f};
-    return Vector{v.x / divisor, v.y / divisor};
+    return Vector{a.x / b.x, a.y / b.x};
 }
 
 // 0xa10180. The native code loads both products into the x87 stack, adds them

@@ -1013,3 +1013,27 @@ Next probes, in order:
    `__unm`); only their oracles were checked.
 3. Close #97 only when the RNG oracle is captured; the implementation and
    tests are already in the branch.
+
+## 28. The Vector arithmetic metamethods are translated; #100
+
+The five arithmetic metamethods and `__tostring` are now translated from the
+reference binary on `feature/100-vector-metamethods` (issue #100):
+
+| Metamethod | Native | Reference behaviour |
+| --- | --- | --- |
+| `__sub` | `0x00a10480` | component-wise subtraction |
+| `__mul` | `0x00a104e0` | scale both components by `other.x` |
+| `__div` | `0x00a105a0` | divide both components by `other.x` |
+| `__unm` | `0x00a10660` | flip each sign bit |
+| `__tostring` | `0x0085e630` | `sprintf(buf, 256, "%g %g", ...)` |
+
+`__mul`/`__div` are **not** component-wise, and the shared closure `0x8a8740`
+rejects a number operand: `v * 2`, `2 * v` and `v / 2` are Lua errors in the
+reference. The v1.9.7.12 oracle host accepted them and returned component-wise
+results; that host divergence is recorded in `docs/binding-surface-findings.md`
+§18.3 and the reference binary is authoritative.
+
+`tests/test_vector.cpp` now covers the corrected products, scalar rejection,
+sign-bit negation and `__tostring`; the suite is 128 cases, 0 failed. The
+authoritative write-up is §18.2/§18.4. The next work is the remaining
+`__add`-family metadata or the next class, not a re-probe of these natives.

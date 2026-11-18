@@ -1477,7 +1477,7 @@ The class is registered by the giant function at `0x00866960`.
 | Methods (15) | `Clamp`, `Clamped`, `Cross`, `Distance`, `DistanceSquared`, `Dot`, `GetAngleDegrees`, `Length`, `LengthSquared`, `Lerp`, `Normalize`, `Normalized`, `Resize`, `Resized`, `Rotated` |
 | Class-table function (1) | `Vector.FromAngle(degrees)` |
 | Properties (2) | `X` (get and set), `Y` (get and set) |
-| Metamethods (5) | `__add`, `__sub`, `__mul`, `__div`, `__unm` |
+| Metamethods (6) | `__add`, `__sub`, `__mul`, `__div`, `__unm`, `__tostring` |
 
 `FromAngle` is not an instance method: the registration at `0x00866b38`
 writes it to the class table, and the oracle confirms `Vector.FromAngle` is a
@@ -1513,6 +1513,11 @@ the complete table:
 | `Clamp` | `0x00b70290` | `0x00a103c0` |
 | `Clamped` | `0x00b70298` | `0x00a103f0` |
 | `__add` | `0x00b70268` | `0x00a10420` |
+| `__sub` | `0x00b70270` | `0x00a10480` |
+| `__mul` | `0x00b70258` | `0x00a104e0` |
+| `__div` | `0x00b70260` | `0x00a105a0` |
+| `__unm` | `0x00b702f8` | `0x00a10660` |
+| `__tostring` | `0x00b70300` | `0x0085e630` |
 
 The arithmetic was read instruction by instruction. The parts the Lua
 programmer can observe:
@@ -1533,7 +1538,12 @@ programmer can observe:
 | `FromAngle` | `(cos(r), sin(r))` for `r = degrees * 0.017453292f` |
 | `GetAngleDegrees` | `float(atan2(y, x)) * 57.29578f`; no `-180 → 180` remap |
 | `Clamp` / `Clamped` | per component `min(max(value, min), max)` with the `MINSS`/`MAXSS` operand order of the binary |
-| `__add` | component-wise `this + other` |
+| `__add` | component-wise `this + other` (0xa10420) |
+| `__sub` | component-wise `this - other` (0xa10480) |
+| `__mul` | `f = other.x; out = (this.x * f, this.y * f)` (0xa104e0) |
+| `__div` | `f = other.x; out = (this.x / f, this.y / f)` (0xa105a0) |
+| `__unm` | flips the sign bit of each float (0xa10660) |
+| `__tostring` | `sprintf(buf, 256, "%g %g", (double)x, (double)y)` (0x85e630) |
 
 `Vector:Lerp` deserves the detail: the native returns the receiver pointer, and
 the closure wraps it in an 8-byte `LerpValue` userdata (tag `0x00b753c8`,
@@ -1541,12 +1551,12 @@ registry key `0x00c8297f`) that aliases the receiver. The port returns the
 receiver userdata itself. The observable behaviour is the same: the receiver
 mutates, the result reads the same fields, and `result == receiver`.
 
-The five metamethods are registered by the binary, but only `__add` was read
-as a native. `__mul` and `__div` were checked against the oracle
-(component-wise for two Vectors, scalar on one side), and `__sub`/`__unm` are
-ordinary component-wise subtraction and negation. `__div` by zero on the
-scalar path keeps the port's old documented rule (zero vector); that rule is
-not from the binary.
+The arithmetic metamethods share closure body `0x008a8740`. Its second operand
+is fetched through `0x008baa50`, which checks `lua_isuserdata` and the Vector
+metatable; a number is rejected with a Lua error. The reference therefore has
+no scalar `v * 2`, `2 * v` or `v / 2`, and the port does not offer one either.
+This contradicts the v1.9.7.12 oracle host, which accepted scalars and used
+component-wise products; the reference binary is authoritative (see §18.3).
 
 ### 18.3 The Wine oracle
 
@@ -1564,6 +1574,12 @@ The exception is `Lerp`: the oracle host's native has no third parameter and
 no clamp branch. The reference binary's `0x008a8310` closure reads
 `lua_toboolean(L, 4)` and `0x00a10210` clamps `t`; the reference disassembly
 is authoritative for the fourth argument.
+
+`__mul` and `__div` are a second divergence. The host returned component-wise
+products and accepted a scalar operand; the reference natives at `0x00a104e0`
+and `0x00a105a0` read only `other.x` and the shared closure rejects numbers.
+The host numbers below are kept as the host measurement, not as the reference
+behaviour.
 
 Measured outputs:
 
@@ -1583,8 +1599,11 @@ Measured outputs:
   the order `(minx, miny, maxx, maxy)`.
 * `h:Lerp(goal, 0.5)` mutates `h`, returns a Vector-typed userdata aliasing
   `h`, and `result == h` is true.
-* Arithmetic: `(1,2)*(3,4) = (3,8)`, `(1,2)/(3,4) = (0.33333334, 0.5)`,
-  `v*2 = (2,4)`, `2*v = (2,4)`, `v/2 = (0.5,1)`, `-v = (-1,-2)`.
+* Arithmetic, **host values**: `(1,2)*(3,4) = (3,8)`, `(1,2)/(3,4) =
+  (0.33333334, 0.5)`, `v*2 = (2,4)`, `2*v = (2,4)`, `v/2 = (0.5,1)`,
+  `-v = (-1,-2)`. The reference binary, not the host, defines the port:
+  `(1,2)*(3,4) = (3,6)`, `(1,2)/(3,4) = (0.33333334, 0.6666667)`, and the
+  scalar forms are Lua errors.
 * Non-finite: `inf:Length() = inf`; `inf:Normalized() = (nan, 0)`;
   `nan:Length() = nan`; `nan:Normalized() = (nan, 1)` (the guard leaves the
   copy alone); `nan:Resize(2)` leaves the vector; `nan:GetAngleDegrees() =
@@ -1595,10 +1614,9 @@ Measured outputs:
 * The **metatable plumbing** is the port's own: the original uses patched Lua
   pseudo-indices (§14.6) and per-member closures, while the port uses the
   shared value-class dispatch.
-* `__div` by a zero scalar returns a zero vector; the rule predates the
-  binary work and is kept for the documented API.
-* `__tostring` is not implemented: the original's format string is not
-  recoverable from its closure.
+* `__tostring`'s native writes into a process-global buffer at `0x00c82878`;
+  the port formats into a local buffer and copies it into a Lua string. The
+  `%g %g` text is the same.
 * `Vector:Lerp`'s Lua-visible result is the receiver, not the original's
   private `LerpValue` wrapper. The alias and mutation are reproduced; the
   wrapper's type identity is not.
@@ -1606,9 +1624,9 @@ Measured outputs:
 ### 18.5 The honest count
 
 `Vector` now contributes 15 methods, one class-table function, two properties
-and five metamethods. The arithmetic of the 17 native functions in the table
-above is translated, not guessed. Still **0 of the 911 closure bodies** are
-translated: the closures are glue, and the work they call is not a closure
+and six metamethods. The arithmetic of the 22 native function bodies in the
+tables above is translated, not guessed. Still **0 of the 911 closure bodies**
+are translated: the closures are glue, and the work they call is not a closure
 body.
 
 ## 19. Second implementation: the Color class
