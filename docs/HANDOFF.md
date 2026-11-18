@@ -983,3 +983,33 @@ at all, so its behaviour is static-only.
    but their native bodies were not disassembled; read them the same way.
 3. The remaining `Color` colorize float values have no Lua getter; a probe
    would need a native field read or a `SetColorize`/`__mul` differential.
+
+## 27. The RNG class is translated; its oracle is still open
+
+`RNG` is implemented on `feature/97-rng-native-methods`: five native methods
+(`GetSeed` `0x0040c3a0`, `SetSeed` `0x007e8fe0`, `RandomInt` `0x007e9020`,
+`RandomFloat` `0x007e9080`, `Next` `0x007e90f0`), the callable constructor and
+the 16-byte state. The authoritative write-up is
+`docs/binding-surface-findings.md` §25. `tests/test_rng.cpp` brings the suite
+to 128 cases, 0 failed.
+
+What is **not** established: no RNG numeric fixtures were captured from the
+game. The probe mod was installed and the launcher reached
+`InstallationData::Validate`, but no `Repentogon/isaac-ng.exe` process started;
+`LaunchMode = 0` auto-start did not fire either. The launcher setting and the
+probe mod were removed afterwards (the setting is back to 1). RNG remains
+static-only until a v1.9.7.17 host is available.
+
+Dead end recorded: do not use the v1.9.7.12 Repentogon `SetSeed` to probe the
+clamp path. Its `0x7df450` logs `RNG: Invalid ShiftIdx` for an index above 80
+and then reads the table out of bounds; the reference binary clamps to row 80.
+
+Next probes, in order:
+
+1. Start a v1.9.7.17 host and run the RNG probe in
+   `/tmp/opencode/isaec-oracle-rng/main.lua`; compare `Next`, `RandomInt` and
+   `RandomFloat` streams, and the default seed `0xaa17414f`.
+2. Disassemble the remaining Vector metamethods (`__mul`, `__div`, `__sub`,
+   `__unm`); only their oracles were checked.
+3. Close #97 only when the RNG oracle is captured; the implementation and
+   tests are already in the branch.
