@@ -19,8 +19,8 @@ aims to be compatible with.
 
 > **Status: nothing here plays the game.** The binding surface is fully mapped
 > (64 classes + 3 namespaces, 1003 methods + 461 properties) and all 911 recovered
-> bodies are decompiled. **15 members of one class** -- the `Vector` class -- are
-> implemented; the other 1449 still refuse loudly. Read
+> bodies are decompiled. **356 members** are implemented, led by the binary-derived
+> `Vector` and `Color` value classes; the rest still refuse loudly. Read
 > [Progress](#progress) before getting excited.
 
 ---
@@ -198,7 +198,7 @@ Two things in it matter here:
 | Technique | **clean-room reimplementation** | **static recompilation** via ReXGlue | **runtime injection** into the shipping game |
 | Reads the original by | recovering the interface, writing fresh behaviour | translating the code ahead of time | leaving the code alone |
 | You must own | your own Steam copy | your own Xbox 360 disc dump | your own Steam copy |
-| Scale | 911 bodies mapped, **342 members implemented** | 1.6k stars, playable end to end | 1.2k stars, GPL-3.0 |
+| Scale | 911 bodies mapped, **356 members implemented** | 1.6k stars, playable end to end | 1.2k stars, GPL-3.0 |
 | Renderer | `NullRenderer` — counts calls, draws nothing | native D3D12/Vulkan, **>2x fps at ~¼ GPU power** | inherits the original's |
 
 ### What skate3recomp proves is possible
@@ -270,7 +270,7 @@ established from the shipped DLL rather than assumed — see
 |---|---|
 | Class registry, metatable model, inheritance | **done** — 16 tests green |
 | Declarative `ApiSpec` → `Binding` codegen | **done** |
-| Recovered surface registers and resolves | **done** (as stubs) — 64 classes + 3 namespaces, 1003 methods + 461 properties, all behind `not_implemented_trampoline` except the 342 implemented members |
+| Recovered surface registers and resolves | **done** (as stubs) — 64 classes + 3 namespaces, 1003 methods + 461 properties, all behind `not_implemented_trampoline` except the 356 implemented members |
 | Directory-backed data source | **done** |
 | Headless renderer (counts, draws nothing) | **done** |
 | **Playtesting box (white-box sandbox)** | **done** — controllable room, no game data: a square entity moved by arrows/WASD or the stick of XInput-shaped pad 0 (deadzone applied in the engine layer), 60 Hz fixed-step movement in `src/engine/sandbox.cpp` clamped to the room, unit-covered in `tests/test_sandbox.cpp`; `./build/isaec_window slice`, `frames=0` plays until Esc — supersedes #67's fixed marker; see [#67](https://github.com/caos-obliquo/tboi-recomp/issues/67), [#79](https://github.com/caos-obliquo/tboi-recomp/issues/79) |
@@ -284,10 +284,10 @@ established from the shipped DLL rather than assumed — see
 | → method / property / metamethod split | **method 1026 · property 861 · metamethod 125** — read off the helper that performs each registration ([§16.5](docs/binding-surface-findings.md)) |
 | **Body shape census** | **911 bodies measured** — `argc` bound 0…8 (52 unmeasured), `returns` 0 → 359 · 1 → 534 · unknown → 18 ([§17](docs/binding-surface-findings.md)) |
 | **Generated binding surface** | **64 classes + 3 namespaces, 1003 methods + 461 properties** — generated from the code-derived table, all trampolines |
-| **Implemented classes** | **`Vector`** — 13 methods, the `X`/`Y` properties, 5 arithmetic metamethods; `Clamp`/`Clamped` stay loud stubs ([§18](docs/binding-surface-findings.md)). **`Color`** — the 7 colour properties `R` `G` `B` `A` `RO` `GO` `BO`, with the game's own field offsets; its 4 methods and `__mul` stay loud stubs ([§19](docs/binding-surface-findings.md)). **`PosVel`** — the `Position` and `Velocity` properties, with the game's own field offsets; the first class that is fully recovered from the binary ([§20](docs/binding-surface-findings.md)). **45 field classes** — every class whose properties are plain fields, generated from the measured layout: 327 fields with the game's own offsets, types and widths (including the 17 string fields), `ActiveItemDesc`, `KColor`, `Entity`, `ProjectileParams`, `TearParams`, `Sprite` and 37 more ([§24](docs/binding-surface-findings.md)) |
+| **Implemented classes** | **`Vector`** — 15 methods plus the class-table `FromAngle`, the `X`/`Y` properties and 5 arithmetic metamethods; the 17 native functions are translated from the reference binary, `Clamp`/`Clamped` included ([§18](docs/binding-surface-findings.md)). **`Color`** — the 7 colour properties, 5 methods (`Reset`, `SetTint`, `SetColorize`, `SetOffset`, the undocumented `Lerp`) and `__mul`, from their native functions; the colorize block at offsets 16..28 is named ([§19](docs/binding-surface-findings.md)). **`PosVel`** — the `Position` and `Velocity` properties, with the game's own field offsets ([§20](docs/binding-surface-findings.md)). **45 field classes** — every class whose properties are plain fields, generated from the measured layout: 327 field entries with the game's own offsets, types and widths (including the 17 string fields), `ActiveItemDesc`, `KColor`, `Entity`, `ProjectileParams`, `TearParams`, `Sprite` and 37 more ([§24](docs/binding-surface-findings.md)) |
 | **Field layout cross-check** | **105 recovered field offsets confirmed** against the Repentogon `.zhl` layouts — 11 under another name, 3 moved; **187 method names confirmed** ([§21](docs/binding-surface-findings.md)) |
 | Field layout | **21 classes with a complete layout**, 434 fields with an offset and a type (174 int, 104 float, 48 bool, 75 object) — **44 of the classes are implemented** as plain field objects, with 310 plain fields ([§24](docs/binding-surface-findings.md)) |
-| **Closure bodies implemented** | **0 / 911 translated** — the 342 implemented members cover 222 bodies; the `Vector` arithmetic is reimplemented from the public API, the `Color` and `PosVel` field offsets are recovered from the binary |
+| **Closure bodies implemented** | **0 / 911 translated** — the closures are glue; 23 native methods behind them are now translated from the binary (17 `Vector`, 6 `Color`) |
 | **Packed archive (`ARCH000`) container** | **container solved**, codec open |
 | → `ARCH000` payload codec | **not started** — see [#2](https://github.com/caos-obliquo/tboi-recomp/issues/2) |
 | → `ARCH000` 64-bit name hash | **not started** — see [#1](https://github.com/caos-obliquo/tboi-recomp/issues/1) |
@@ -297,9 +297,12 @@ established from the shipped DLL rather than assumed — see
 | **Repentance+ (2024 co-op update) API** | **not examined at all** — see [#6](https://github.com/caos-obliquo/tboi-recomp/issues/6) |
 
 Every recovered member resolves to a `not_implemented_trampoline` unless it is
-one of the 15 implemented `Vector` members. That is the honest state: the
-*names* are recovered, the *dispatch* works, the *bodies* are read — and almost
-nothing does anything yet.
+one of the 356 implemented members: 327 generated field entries, 15 `Vector`
+methods, `Vector.FromAngle`, 5 `Vector` metamethods, 5 `Color` methods,
+`Color.__mul`, and the 2 `PosVel` properties. That is the honest state: the
+*names* are recovered, the *dispatch* works, the *bodies* are read, and the
+`Vector`/`Color` arithmetic is translated — and almost nothing else does
+anything yet.
 
 The last three rows of the "located / decompiled / named / implemented" block are
 four different states and are deliberately not collapsed. **An address is not an

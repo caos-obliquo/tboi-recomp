@@ -1460,139 +1460,188 @@ binary at all.
 
 ## 18. First implementation: the Vector class
 
-Everything up to here was a table. This section is the first part of the
-surface that actually runs.
+`Vector` is the class whose Lua face and arithmetic are both recovered from the
+reference build. The closures only fetch arguments and call a native C++
+method; the methods themselves were read out of the binary, so this is a
+translation of the game's own arithmetic rather than a reimplementation of the
+public API.
 
-`Vector` is the natural first class: it is pure arithmetic, it has no
-dependencies on the game's state, and the game itself hands out Vector
-instances to Lua (they come out of `Entity.Position` and friends), so the
-binding only has to recognise them.
+Reference build: `isaac-ng.exe` v1.9.7.17.J460, sha256
+`3bdfc8bae0dc7e334b76009d0ad45dfbb16ee5f00c06ffbc3a0094e34d44616b`.
+The class is registered by the giant function at `0x00866960`.
 
 ### 18.1 What is implemented
 
-15 members of the `Vector` class, plus the five arithmetic metamethods:
-
 | Kind | Members |
 | --- | --- |
-| Methods (13) | `Cross`, `Distance`, `DistanceSquared`, `Dot`, `GetAngleDegrees`, `Length`, `LengthSquared`, `Lerp`, `Normalize`, `Normalized`, `Resize`, `Resized`, `Rotated` |
+| Methods (15) | `Clamp`, `Clamped`, `Cross`, `Distance`, `DistanceSquared`, `Dot`, `GetAngleDegrees`, `Length`, `LengthSquared`, `Lerp`, `Normalize`, `Normalized`, `Resize`, `Resized`, `Rotated` |
+| Class-table function (1) | `Vector.FromAngle(degrees)` |
 | Properties (2) | `X` (get and set), `Y` (get and set) |
 | Metamethods (5) | `__add`, `__sub`, `__mul`, `__div`, `__unm` |
 
-Two members of the class are deliberately **not** implemented: `Clamp` and
-`Clamped`. Section 18.3 says why.
+`FromAngle` is not an instance method: the registration at `0x00866b38`
+writes it to the class table, and the oracle confirms `Vector.FromAngle` is a
+function while `Vector.Clamp` is `nil` and `v:FromAngle` is missing. The other
+fifteen are registered as methods.
 
-The code is `include/isaec/api/vector.hpp` (the value type and the
-arithmetic), `src/api/vector.cpp` (the arithmetic), and
-`include/isaec/api/vector_lua.hpp` / `src/api/vector_lua.cpp` (the Lua face).
-`tests/test_vector.cpp` drives both halves: the arithmetic on its own, and
-the class from a script through a real `lua_State`.
+The code is `include/isaec/api/vector.hpp` (value type and arithmetic),
+`src/api/vector.cpp` (arithmetic), and `src/api/vector_lua.cpp` (the Lua face).
+`tests/test_vector.cpp` drives both.
 
-### 18.2 What came from the binary
+### 18.2 The native method table
 
-| Fact | Source |
+The registration pushes a 4-byte userdata holding the native function pointer
+as the closure's upvalue (the mechanism of §14). Reading those literals gives
+the complete table:
+
+| Method | Name pointer | Native function |
+| --- | --- | --- |
+| `Length` | `0x00b70278` | `0x00a0fea0` |
+| `LengthSquared` | `0x00b70280` | `0x00a0fed0` |
+| `Distance` | `0x00b7024c` | `0x00a0ff30` |
+| `DistanceSquared` | `0x00b7022c` | `0x00a0ff90` |
+| `Normalize` | `0x00b701c0` | `0x00a0ffc0` |
+| `Normalized` | `0x00b701cc` | `0x00a10030` |
+| `Resize` | `0x00b70200` | `0x00a100b0` |
+| `Resized` | `0x00b70208` | `0x00a10100` |
+| `Dot` | `0x00b701b4` | `0x00a10180` |
+| `Cross` | `0x00b701b8` | `0x00a101a0` |
+| `Lerp` | `0x00b70244` | `0x00a10210` |
+| `Rotated` | `0x00b7023c` | `0x00a102e0` |
+| `FromAngle` | `0x00b70210` | `0x00a10350` |
+| `GetAngleDegrees` | `0x00b7021c` | `0x00a10390` |
+| `Clamp` | `0x00b70290` | `0x00a103c0` |
+| `Clamped` | `0x00b70298` | `0x00a103f0` |
+| `__add` | `0x00b70268` | `0x00a10420` |
+
+The arithmetic was read instruction by instruction. The parts the Lua
+programmer can observe:
+
+| Method | Behaviour |
 | --- | --- |
-| The member names of the class | the registration code, §15 and §16 |
-| The receiver is the first argument | the closures read index 1, §14 |
-| The visible arguments start at index 2 | the closures, §14 and §17 |
-| A method returns zero or one value | the return count census, §17 |
-| A method that returns a vector allocates a fresh userdata | `lua_newuserdata(L, 0x10)` in the bodies |
-| The userdata is 16 bytes with two floats at offset 0 | `lua_newuserdata(L, 0x10)` and the property upvalue (the field offset) |
-| `X` and `Y` are the same closure body with a different upvalue | the upvalue is the field offset: 0 for X, 4 for Y |
-| `Normalize` and `Resize` mutate the receiver and return nothing | the return count census: `returns = 0` |
-| The class has the five arithmetic metamethods | the metamethod names in the registration code |
+| `Length` | `sqrtf(x*x + y*y)` in single precision; the native square root is a double `SQRTSD` rounded back to float (`0x00435a50`) |
+| `LengthSquared` | `x*x + y*y` |
+| `Distance` / `DistanceSquared` | the same, on `(other.x - x, other.y - y)` |
+| `Normalize` | in place; `len = sqrtf(...)`; only `if (len > 0) v *= 1/len`; zero and NaN are left unchanged |
+| `Normalized` | copies the receiver, applies the same guarded scale to the copy |
+| `Resize` | in place; only `if (len > 0) v *= factor/len` |
+| `Resized` | the same into a fresh Vector; when `len <= 0` it is a plain copy |
+| `Dot` | `other.x*x + other.y*y` |
+| `Cross` | `x*other.y - y*other.x` |
+| `Lerp` | mutates the receiver: `v += (goal - v) * t`; when the fourth argument is true, `t` is clamped to [0,1] with `MAXSS`/`MINSS` first |
+| `Rotated` | `r = degrees * 0.017453292f`; `c = cos(r)`, `s = sin(r)` evaluated in double and rounded to float; result `(x*c - y*s, y*c + x*s)` |
+| `FromAngle` | `(cos(r), sin(r))` for `r = degrees * 0.017453292f` |
+| `GetAngleDegrees` | `float(atan2(y, x)) * 57.29578f`; no `-180 → 180` remap |
+| `Clamp` / `Clamped` | per component `min(max(value, min), max)` with the `MINSS`/`MAXSS` operand order of the binary |
+| `__add` | component-wise `this + other` |
 
-The nine closure bodies that these 15 members sit on are known by address:
+`Vector:Lerp` deserves the detail: the native returns the receiver pointer, and
+the closure wraps it in an 8-byte `LerpValue` userdata (tag `0x00b753c8`,
+registry key `0x00c8297f`) that aliases the receiver. The port returns the
+receiver userdata itself. The observable behaviour is the same: the receiver
+mutates, the result reads the same fields, and `result == receiver`.
 
-| Member(s) | Body |
-| --- | --- |
-| `Cross`, `Distance`, `DistanceSquared`, `Dot` | `0x008a8270` |
-| `GetAngleDegrees`, `Length`, `LengthSquared` | `0x008a8510` |
-| `Lerp` | `0x008a8310` |
-| `Normalize` | `0x008a8180` |
-| `Normalized` | `0x008a81d0` |
-| `Resize` | `0x008a8580` |
-| `Resized`, `Rotated` | `0x008a8430` |
-| `X`, `Y` getter | `0x008bb2e0` |
-| `X`, `Y` setter | `0x008bb340` |
+The five metamethods are registered by the binary, but only `__add` was read
+as a native. `__mul` and `__div` were checked against the oracle
+(component-wise for two Vectors, scalar on one side), and `__sub`/`__unm` are
+ordinary component-wise subtraction and negation. `__div` by zero on the
+scalar path keeps the port's old documented rule (zero vector); that rule is
+not from the binary.
 
-One body serves several members: the game reuses a single closure for
-`Cross`, `Distance`, `DistanceSquared` and `Dot`. The recomp implements the
-four separately, because in the original the shared body dispatches on the
-upvalue it was given.
+### 18.3 The Wine oracle
 
-### 18.3 What did not come from the binary
+The owned game was run through REPENTOGON's launcher with a probe mod that
+prints deterministic cases with `Isaac.DebugString` into the save `log.txt`.
+The probe is not part of the repository; the captured output is
+`/tmp/opencode/isaec-oracle/raw.log` (91 `ISAEC94` lines).
 
-**The arithmetic is not in the binary.** The original's closures do not
-compute anything: they fetch the receiver, push the arguments and call the
-game's C++ `Vector` through a vtable pointer. What that C++ code does is
-outside the Lua surface, and it is not in the closure bodies either. The
-arithmetic in `vector.hpp` is the **documented Isaac API reimplemented from
-scratch** (`Vector:Cross` returns the z component of the 3D cross product,
-`Vector:Rotated` turns counter-clockwise, and so on). A discrepancy against
-the shipped build would show up in `vector.cpp` first.
+The host was **v1.9.7.12.J273** (sha256
+`ceb598b4e5e03dabbd2da6ea322a9aa6ffc66fcc377aeea4391f008403b7faa4`), not
+the reference v1.9.7.17.J460. Most natives are byte-identical after a constant
+shift of **-0x2a640** in the Vector region (and **-0x4880** for the two Color
+functions below), which is why the oracle is usable with a version caveat.
+The exception is `Lerp`: the oracle host's native has no third parameter and
+no clamp branch. The reference binary's `0x008a8310` closure reads
+`lua_toboolean(L, 4)` and `0x00a10210` clamps `t`; the reference disassembly
+is authoritative for the fourth argument.
 
-**Two members stay loud stubs.** The original's `Clamp` and `Clamped`
-closures read **four** numbers from the Lua stack, through the shared helper
-`0x8ba890` (verified in the disassembly: `luaL_checknumber` at indices 2, 3,
-4 and 5), while the public API documents two arguments (a minimum and a
-maximum). The argument count of the original is therefore not the one the
-documentation describes, and the *meaning* of four numbers is unknown. Rather
-than guess, `Clamp` and `Clamped` stay as `not_implemented_trampoline()` and
-raise `isaec: Vector:Clamp is not implemented`. This is tracked as issue
-[#37](https://github.com/caos-obliquo/tboi-recomp/issues/37).
+Measured outputs:
 
-**`Vector.__tostring` is not implemented.** The original's `__tostring`
-closure formats the vector with the game's own text; the format string is not
-recoverable from the closure, so the recomp does not install a `__tostring`.
+* `Length(3,4) = 5`, `LengthSquared = 25`, `GetAngleDegrees(3,4) =
+  53.130100250244141`, `Dot((3,4),(1,0)) = 3`, `Cross((3,4),(1,0)) = -4`.
+* `Normalize` mutates `(3,4)` to `(0.60000002384185791, 0.80000001192092896)`
+  and returns nothing; `Normalized` returns a fresh Vector.
+* `Resize(10)` turns `(3,4)` into `(6,8)`; `Resized(10)` returns `(6,8)`.
+* `Rotated((1,0), 90) = (-4.3711388286737929e-08, 1)`;
+  `Rotated((1,0), 180) = (-1, -8.7422776573475858e-08)`;
+  `Rotated((3,4), 45) = (-0.7071068286895752, 4.9497470855712891)`.
+  `FromAngle(0) = (1,0)`, `FromAngle(90) = (-4.3711388286737929e-08, 1)`.
+* `GetAngleDegrees` returns `180` for `(-1,0)` and `-126.86989593505859` for
+  `(-3,-4)`: no remap.
+* `Clamp((50,5), 0, 10, 20, 30)` mutates to `(20,10)` and returns nothing;
+  `Clamped` returns `(20,10)` and leaves the receiver. Four numbers confirm
+  the order `(minx, miny, maxx, maxy)`.
+* `h:Lerp(goal, 0.5)` mutates `h`, returns a Vector-typed userdata aliasing
+  `h`, and `result == h` is true.
+* Arithmetic: `(1,2)*(3,4) = (3,8)`, `(1,2)/(3,4) = (0.33333334, 0.5)`,
+  `v*2 = (2,4)`, `2*v = (2,4)`, `v/2 = (0.5,1)`, `-v = (-1,-2)`.
+* Non-finite: `inf:Length() = inf`; `inf:Normalized() = (nan, 0)`;
+  `nan:Length() = nan`; `nan:Normalized() = (nan, 1)` (the guard leaves the
+  copy alone); `nan:Resize(2)` leaves the vector; `nan:GetAngleDegrees() =
+  nan`.
 
-**`Vector:Lerp`'s fourth argument is ignored.** The original's `Lerp` reads
-a fourth argument, a boolean, and passes it to the game's own vector
-routine. What it means is unknown, so the recomp reads three arguments and
-ignores a fourth if one is given. This is tracked as issue
-[#38](https://github.com/caos-obliquo/tboi-recomp/issues/38).
+### 18.4 What did not come from the binary
 
-**The receiver index differs.** The original reaches the receiver through a
-patched pseudo-index (`0xfff0b9d7`) rather than index 1. This port uses the
-standard index 1; the patched slot semantics are issue #12.
-
-### 18.4 The rest of the surface still refuses
-
-The implementation is installed *after* the generated spec is applied, and it
-replaces only the members it implements. Every other member of every other
-class still resolves to `not_implemented_trampoline()` and raises
-`isaec: <Class>:<Member> is not implemented` when a script touches it. A
-script that calls `Vector:Clamp` gets that error, not a wrong answer.
+* The **metatable plumbing** is the port's own: the original uses patched Lua
+  pseudo-indices (§14.6) and per-member closures, while the port uses the
+  shared value-class dispatch.
+* `__div` by a zero scalar returns a zero vector; the rule predates the
+  binary work and is kept for the documented API.
+* `__tostring` is not implemented: the original's format string is not
+  recoverable from its closure.
+* `Vector:Lerp`'s Lua-visible result is the receiver, not the original's
+  private `LerpValue` wrapper. The alias and mutation are reproduced; the
+  wrapper's type identity is not.
 
 ### 18.5 The honest count
 
-- **15 of 1464** members of the recovered surface are implemented, all of
-  them in one class.
-- Those 15 members sit on **9 of the 911** closure bodies.
-- **0 of 911** bodies are *translated*: the implementations are
-  reimplementations of the public API, not ports of the original code. The
-  original's arithmetic is a C++ vtable call that this project does not
-  reproduce.
+`Vector` now contributes 15 methods, one class-table function, two properties
+and five metamethods. The arithmetic of the 17 native functions in the table
+above is translated, not guessed. Still **0 of the 911 closure bodies** are
+translated: the closures are glue, and the work they call is not a closure
+body.
 
 ## 19. Second implementation: the Color class
 
-The `Color` class was the second choice, because its properties turned out to
-be fully determined by the binary: the game reaches every colour field
-through a per-field accessor, and the accessor is a plain field read, so the
-offsets are the game's own.
+The `Color` class is a fixed block of **11 floats**: RGBA at offsets 0, 4, 8,
+12; the colorize RGBA at 16, 20, 24, 28; the offset RGB at 32, 36, 40. The
+object is 44 bytes. Every field was recovered from the binary's per-field
+accessors and the method table from the registration literals.
 
 ### 19.1 What is implemented
 
-The seven colour properties, `R`, `G`, `B`, `A` and the three overlay
-channels `RO`, `GO`, `BO`, each with a getter and a setter. The four
-methods (`Reset`, `SetColorize`, `SetTint`, `SetOffset`) and the `__mul`
-metamethod keep the loud stub of the generated spec.
+The seven visible properties, `R`, `G`, `B`, `A`, `RO`, `GO`, `BO`, each with a
+getter and a setter, plus five methods and one metamethod:
+
+| Member | Native function |
+| --- | --- |
+| `Reset()` | `0x00682ed0` |
+| `SetTint(r,g,b,a)` | `0x00682f20` |
+| `SetColorize(r,g,b,a)` | `0x00682fb0` |
+| `SetOffset(x,y,z)` | `0x00682fe0` |
+| `Lerp(goal, t)` | `0x006832e0` |
+| `__mul` | `0x006831c0` |
+
+`Color:Lerp` is **not in the public API documentation**. It is registered at
+`0x0086716c` (closure `0x0089f2b0`) and exists in the reference build; it is
+absent from the oracle host v1.9.7.12, so its behaviour is from static
+analysis only. The function pointers quoted in issue #40
+(`0x00682BE0`, `0x00682C60`, `0x00682B40`, `0x00682CC0`, `0x00682D40`) are
+vtable slots, not the registration-time pointers in the table above.
 
 ### 19.2 What came from the binary
 
-Every colour property shares one getter body (`0x0089f590`) and one setter
-body (`0x0089f500`); the two are told apart by their upvalue, and the
-getter's upvalue is a per-field accessor routine that reads one float at a
-fixed offset of the object:
+The property accessors are plain field reads:
 
 | Property | Accessor | Offset |
 |----------|----------|--------|
@@ -1604,39 +1653,49 @@ fixed offset of the object:
 | `GO` | `0x004072c0` | 36 |
 | `BO` | `0x004072d0` | 40 |
 
-The accessors read the field and return; the getter body checks the
-receiver, calls the accessor and pushes the float (one return value), the
-setter body checks the receiver, reads the value with `luaL_checknumber`
-and stores it (no return value). The offsets 16..31 are read by no
-recovered accessor, so the recomp leaves them reserved.
+Offsets 16..28 are the **colorize RGBA** block, written by `SetColorize` and
+read by `__mul`. They have no property accessor in the recovered surface, so
+they are only observable through the methods.
 
-### 19.3 What did not come from the binary
+Measured method behaviour:
 
-`Reset`, `SetColorize`, `SetTint` and `SetOffset` are calls into the game's
-own C++ colour object through a vtable slot, and that C++ is not in the
-binary. What the binary does say is the shape of their arguments:
-`SetColorize` and `SetTint` read four numbers (through the shared helper
-`0x8ba890`), `SetOffset` reads three, `Reset` takes none, and `__mul`
-multiplies with another colour. The semantics are therefore unknown, and
-the four methods and the metamethod refuse loudly.
+* `Reset`: sets RGBA to 1.0 and zeroes the other seven floats.
+* `SetTint` / `SetColorize` / `SetOffset`: assign 4, 4 and 3 floats.
+* `Lerp`: `out = t * goal + (1 - t) * receiver` for all 11 floats, no
+  mutation. The native takes `(out*, A*, B*, t)` and the closure allocates a
+  new Color for the result.
+* `__mul`: mutates the receiver. RGBA is multiplied component-wise; offsets
+  are added. Colorize: if the other colour's `r+g+b` is non-zero, then if the
+  receiver's sum is zero the other's colorize block is copied, otherwise each
+  channel is averaged `(receiver + other) * 0.5`; if the other's sum is zero,
+  the receiver's colorize is left alone. The sum test treats NaN as non-zero
+  (the assembly uses the unordered `LAHF`/`JNP` idiom).
+
+The oracle confirms `Reset`/`SetTint`/`SetOffset`, the `__mul` result
+(`RGBA (0.1,0.2,0.4,0.5)`, offsets `(0.5, 0.7, 0.9)`), receiver mutation and
+result aliasing, with the right operand untouched. `Color:Lerp` could not be
+run: the oracle host does not have the method.
+
+### 19.3 The colorize block
+
+`Color`'s `reserved` bytes in the first implementation were not reserved:
+offsets 16..31 are the colorize RGBA, and `SetColorize` writes them. The
+header now names the field `colorize[4]` and asserts every offset with
+`static_assert`, including `sizeof(Color) == 44`.
 
 ### 19.4 The shared value-class support
 
-`Vector` and `Color` are both userdata types with a metatable, a property
-table and a method table, so the dispatch now lives in one place
-(`include/isaec/api/lua_value.hpp`): one `__index` function reads the
-class name from the instance's metatable, looks the class table up in the
-registry and decides between a property (in `__propget`) and a method (in
-`__index`), and one `__newindex` function writes through `__propset`. A
-class that adds metamethods gets the metatable from the same support.
+`Vector`, `Color` and `PosVel` are userdata types with a metatable, a property
+table and a method table, so the dispatch lives in one place
+(`include/isaec/api/lua_value.hpp`): `__index` reads the class name from the
+instance's metatable, looks the class table up in the registry and decides
+between a property and a method; `__newindex` writes through `__propset`.
 
 ### 19.5 The honest count
 
-22 of the 1464 registered members now do something: the 15 `Vector`
-members of §18 and the 7 `Color` properties. They cover 11 of the 911
-bodies. Still 0 of the 911 bodies are translated: the colour *fields* are
-recovered from the binary, but every method of the class is a call into
-code that is not there.
+`Color` contributes seven properties, five methods and one metamethod. Six
+native functions are translated. As with `Vector`, the closure bodies are glue
+and remain untranslated.
 
 ## 20. Third implementation: the PosVel class
 
