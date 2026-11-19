@@ -1022,6 +1022,46 @@ Refs #90. Note: this PR deliberately does not start #64/#66/#52/#3/#4/#35 (not m
 - `docs/handoff.md`
 
 
+## [0.1.18] - 2026-11-19
+
+### Merged: [#118](https://github.com/caos-obliquo/tboi-recomp/pull/118) — docs(android): record the APK that exists and the on-device gap [#66]
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-19  **Files:** 3 changed, +56/-8.
+
+<details>
+<summary>Pull request body</summary>
+
+Docs-only. Updates README (APK packaging, #16 resolved), HANDOFF §12 (10 required contexts incl. android-apk), new HANDOFF §31 (measured APK contents, missing device run, Maven flake lesson), roadmap Phase 6.
+
+No code. Issue: #66.
+
+</details>
+
+#### Closes
+
+- [`x`] [#16](https://github.com/caos-obliquo/tboi-recomp/issues/16) Android builds link the host libpng; a cross-built one is required to ship (closed)
+- [` `] [#66](https://github.com/caos-obliquo/tboi-recomp/issues/66) Epic: Linux x86_64 and Android arm64 as first-class targets (packaging, on-device verification, frame pacing, docs) (open)
+
+#### Commits
+
+- `c5de400f` docs(android): record the APK that exists and the on-device gap [#66]…
+  …(https://github.com/caos-obliquo/tboi-recomp/issues/66)
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `README.md` | 12 | 3 |
+| `docs/HANDOFF.md` | 40 | 2 |
+| `docs/roadmap.md` | 4 | 3 |
+
+#### Documentation
+
+- `README.md`
+- `docs/HANDOFF.md`
+- `docs/roadmap.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
