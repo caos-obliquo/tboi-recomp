@@ -1022,6 +1022,190 @@ Refs #90. Note: this PR deliberately does not start #64/#66/#52/#3/#4/#35 (not m
 - `docs/handoff.md`
 
 
+## [0.1.18] - 2026-11-19
+
+### Merged: [#106](https://github.com/caos-obliquo/tboi-recomp/pull/106) — fix(tools): port the game's LZW chunk dictionary
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-19  **Files:** 100 changed, +29843/-3.
+
+<details>
+<summary>Pull request body</summary>
+
+## Summary
+
+Brings the C++ LZW path to parity with the Python reference and the natives recovered from the shipped binary:
+
+- one dictionary persists across the 4-byte-length-prefixed chunks of a mode-0x01 entry (only the bit reader is per-chunk)
+- code width grows **before** each read (`while (1 << width) <= next_code`), never after an insert
+- a code above `next_code` aborts the chunk, mirroring the binary's `"ERROR! wrong code %u"` early return
+- `decode_lzw` walks the **compressed** span (next entry's offset minus this one's; last entry runs to end of archive), not the recorded size (the DECOMPRESSED length, 51228 for items.xml)
+- the byte-accumulator bit reader (`acc = acc<<8 | byte; code = acc >> bits-width`) is structurally identical to `0xa85090`
+
+Native VAs (static, in disassembly): `0xa85020` emit / chain walk, `0xa850f0` dictionary init (4096 slots, `next_code=0x100`, width 8), `0xa85090` bit reader, `0xa85320` chunk decode, `0xa69090` refill buffer (passes the same dictionary object per chunk), `0xa68c50` mode dispatch.
+
+New in commit `be382ba` (previous commit `69a25ab` was Python-only):
+
+- `src/data/codec.cpp` is now the same state machine as the reference; `Archive::decode` accepts mode 0x01, passes the compressed span, and truncates to the recorded size. The old "diverges on real archives" refusal is removed.
+- `tools/gen_lzw_fixtures.py` generates six synthetic fixtures (no game bytes committed) covering width growth, multi-chunk dictionary persistence, span-vs-size behaviour and the container truncation path. Generated expectations come from `tools/isaac-archive.py`, so the C++ port is checked against the reference rather than itself.
+- `docs/arch000-format.md` §6/§6.1/§8/§9, `docs/HANDOFF.md`, `tools/README.md` and `README.md` no longer describe LZW as unrecovered; they cite the REA/Ghidra Evidence IDs for the four natives above.
+
+## Verified
+
+- `./build/tests/isaec_tests`: **141 cases, 0 failed**; `ctest --test-dir build --output-on-failure`: 1/1 passed.
+- Negative control: reinstating per-chunk `state.reset()` fails `codec_lzw_matches_reference_decoder`, `codec_lzw_dictionary_persists_across_chunks` and `archive_decode_of_an_lzw_entry_matches_the_reference_decoder`. The line was restored and the suite re-run green.
+- Python reference result (unchanged from `69a25ab`): `config.a` entry 14 (`resources/items.xml`) decodes to exactly **51228 bytes** of valid XML, first item `The Sad Onion` id=1. All 24 `config.a` entries extract at recorded sizes.
+
+## Known gaps
+
+- No game-side oracle run against the running game; agreement is between disassembly, Python and C++. A witnessed run is still needed (#79 covers the interactive-witness question). **#52 stays open** (partially advanced).
+- Mode 0x02 remains unverified and is still refused by `Archive::decode`.
+- This PR also contains `HANDOFF.md` (deepseek's handoff note, already stale) and `build-input/` (~20 MB of CMake output), committed at the owner's explicit instruction. The "commit the tool, not its output" rule is knowingly overridden by the owner for those files; the new LZW fixtures are synthetic only.
+
+Refs #52.
+
+</details>
+
+#### Closes
+
+- [`x`] [#52](https://github.com/caos-obliquo/tboi-recomp/issues/52) LZW (mode 0x01): the decoder over-produces past the recorded size; chunks after the first produce garbage (closed)
+- [` `] [#79](https://github.com/caos-obliquo/tboi-recomp/issues/79) Playtesting box: the mandatory next deliverable (definition and scope) (open)
+
+#### Commits
+
+- `25b57f1e` fix(tools): port the game's LZW chunk dictionary [#52](https://github…
+  ….com/caos-obliquo/tboi-recomp/issues/52)
+  The game's mode-0x01 decoder keeps one dictionary across the
+  4-byte-length-prefixed chunks of an entry; only the bit reader is
+  per-chunk. Code width grows BEFORE each read (while (1 << width) <=
+  next_code), never after an insert, and a code above next_code aborts
+  the chunk like the binary's "ERROR! wrong code" early return. The old
+  port reset the table per chunk and grew width after insert, so output
+  was garbage from byte 1024 = end of chunk 0 onward.
+  Verified against config.a (reference exe's install): entry 14
+  (items.xml) decodes to exactly 51228 bytes of valid XML (Sad Onion id=1
+  first); all 22 XML entries parse (ambush.xml and entry 11 are
+  multi-root, not corrupt); all 24 entries extract at recorded sizes;
+  old decoder produces garbage from byte 1024.
+  Refs #52. The C++ codec (src/data/codec.cpp decode_lzw) still carries
+  the old logic — Python reference and C++ now diverge by design; parity
+  and the arch000-format doc update are follow-ups, #52 stays open.
+  Also commits deepseek's top-level HANDOFF.md and build-input/ at the
+  owner's explicit instruction. build-input/ is CMake build output
+  (~20 MB cache/makefiles/binaries), not source.
+- `df77ea6c` fix(codec): port the reference LZW dictionary to C++ [#52]
+  The Python reference rebuilt the dictionary per chunk, grew the code width after insertion, and walked the recorded decompressed size as if it were the compressed span. The C++ codec still did all three, and Archive::decode refused mode 0x01 outright.\n\nNative evidence from REA/Ghidra on isaac-ng.exe (sha256 3bdfc8ba...): init 0xa850f0, bit reader 0xa85090, emit 0xa85020, chunk loop 0xa85320, dispatch 0xa68c50. Evidence IDs and VAs are recorded in docs/arch000-format.md 6.1 and docs/HANDOFF.md 30.\n\nC++ now mirrors the native/Python state machine, walks the compressed span, and the archive layer truncates to the recorded size. Generated fixtures and tests cover width growth, multi-chunk persistence, span-vs-size, and the container path. Negative control (per-chunk reset) fails 3 LZW tests; suite is 141 cases, 0 failed.
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `HANDOFF.md` | 40 | 0 |
+| `README.md` | 3 | 3 |
+| `build-input/CMakeCache.txt` | 454 | 0 |
+| `build-input/CMakeFiles/4.4.5/CMakeCCompiler.cmake` | 86 | 0 |
+| `build-input/CMakeFiles/4.4.5/CMakeCXXCompiler.cmake` | 103 | 0 |
+| `build-input/CMakeFiles/4.4.5/CMakeDetermineCompilerABI_C.bin` | 0 | 0 |
+| `build-input/CMakeFiles/4.4.5/CMakeDetermineCompilerABI_CXX.bin` | 0 | 0 |
+| `build-input/CMakeFiles/4.4.5/CMakeSystem.cmake` | 15 | 0 |
+| `build-input/CMakeFiles/4.4.5/CompilerIdC/CMakeCCompilerId.c` | 945 | 0 |
+| `build-input/CMakeFiles/4.4.5/CompilerIdC/a.out` | 0 | 0 |
+| `build-input/CMakeFiles/4.4.5/CompilerIdCXX/CMakeCXXCompilerId.cpp` | 954 | 0 |
+| `build-input/CMakeFiles/4.4.5/CompilerIdCXX/a.out` | 0 | 0 |
+| `build-input/CMakeFiles/CMakeConfigureLog.yaml` | 5104 | 0 |
+| `build-input/CMakeFiles/CMakeDirectoryInformation.cmake` | 16 | 0 |
+| `build-input/CMakeFiles/InstallScripts.json` | 9 | 0 |
+| `build-input/CMakeFiles/Makefile.cmake` | 169 | 0 |
+| `build-input/CMakeFiles/Makefile2` | 340 | 0 |
+| `build-input/CMakeFiles/TargetDirectories.txt` | 27 | 0 |
+| `build-input/CMakeFiles/cmake.check_cache` | 1 | 0 |
+| `build-input/CMakeFiles/isaec_core.dir/DependInfo.cmake` | 30 | 0 |
+| `build-input/CMakeFiles/isaec_core.dir/build.make` | 226 | 0 |
+| `build-input/CMakeFiles/isaec_core.dir/cmake_clean.cmake` | 25 | 0 |
+| `build-input/CMakeFiles/isaec_core.dir/cmake_clean_target.cmake` | 3 | 0 |
+| `build-input/CMakeFiles/isaec_core.dir/compiler_depend.internal` | 1430 | 0 |
+| `build-input/CMakeFiles/isaec_core.dir/compiler_depend.make` | 2048 | 0 |
+| `build-input/CMakeFiles/isaec_core.dir/compiler_depend.ts` | 2 | 0 |
+| `build-input/CMakeFiles/isaec_core.dir/depend.make` | 2 | 0 |
+| `build-input/CMakeFiles/isaec_core.dir/flags.make` | 12 | 0 |
+| `build-input/CMakeFiles/isaec_core.dir/link.txt` | 2 | 0 |
+| `build-input/CMakeFiles/isaec_core.dir/progress.make` | 10 | 0 |
+| `build-input/CMakeFiles/isaec_core.dir/src/data/archive.cpp.o.d` | 192 | 0 |
+| `build-input/CMakeFiles/isaec_core.dir/src/data/codec.cpp.o.d` | 90 | 0 |
+| `build-input/CMakeFiles/isaec_core.dir/src/data/collection.cpp.o.d` | 115 | 0 |
+| `build-input/CMakeFiles/isaec_core.dir/src/data/image.cpp.o.d` | 96 | 0 |
+| `build-input/CMakeFiles/isaec_core.dir/src/data/source.cpp.o.d` | 190 | 0 |
+| `build-input/CMakeFiles/isaec_core.dir/src/engine/clock.cpp.o.d` | 111 | 0 |
+| `build-input/CMakeFiles/isaec_core.dir/src/engine/engine.cpp.o.d` | 154 | 0 |
+| `build-input/CMakeFiles/isaec_core.dir/src/engine/input.cpp.o.d` | 41 | 0 |
+| `build-input/CMakeFiles/isaec_headless.dir/DependInfo.cmake` | 25 | 0 |
+| `build-input/CMakeFiles/isaec_headless.dir/build.make` | 135 | 0 |
+| `build-input/CMakeFiles/isaec_headless.dir/cmake_clean.cmake` | 14 | 0 |
+| `build-input/CMakeFiles/isaec_headless.dir/compiler_depend.internal` | 410 | 0 |
+| `build-input/CMakeFiles/isaec_headless.dir/compiler_depend.make` | 893 | 0 |
+| `build-input/CMakeFiles/isaec_headless.dir/compiler_depend.ts` | 2 | 0 |
+| `build-input/CMakeFiles/isaec_headless.dir/depend.make` | 2 | 0 |
+| `build-input/CMakeFiles/isaec_headless.dir/flags.make` | 10 | 0 |
+| `build-input/CMakeFiles/isaec_headless.dir/link.d` | 124 | 0 |
+| `build-input/CMakeFiles/isaec_headless.dir/link.txt` | 1 | 0 |
+| `build-input/CMakeFiles/isaec_headless.dir/progress.make` | 4 | 0 |
+| `build-input/CMakeFiles/isaec_headless.dir/src/platform/null_main.cpp.o.d` | 150 | 0 |
+| `build-input/CMakeFiles/isaec_headless.dir/src/platform/null_renderer.cpp.o.d` | 110 | 0 |
+| `build-input/CMakeFiles/isaec_lua.dir/DependInfo.cmake` | 32 | 0 |
+| `build-input/CMakeFiles/isaec_lua.dir/build.make` | 258 | 0 |
+| `build-input/CMakeFiles/isaec_lua.dir/cmake_clean.cmake` | 29 | 0 |
+| `build-input/CMakeFiles/isaec_lua.dir/cmake_clean_target.cmake` | 3 | 0 |
+| `build-input/CMakeFiles/isaec_lua.dir/compiler_depend.internal` | 1314 | 0 |
+| `build-input/CMakeFiles/isaec_lua.dir/compiler_depend.make` | 1774 | 0 |
+| `build-input/CMakeFiles/isaec_lua.dir/compiler_depend.ts` | 2 | 0 |
+| `build-input/CMakeFiles/isaec_lua.dir/depend.make` | 2 | 0 |
+| `build-input/CMakeFiles/isaec_lua.dir/flags.make` | 10 | 0 |
+| `build-input/CMakeFiles/isaec_lua.dir/link.txt` | 2 | 0 |
+| `build-input/CMakeFiles/isaec_lua.dir/progress.make` | 12 | 0 |
+| `build-input/CMakeFiles/isaec_lua.dir/src/api/binding.cpp.o.d` | 135 | 0 |
+| `build-input/CMakeFiles/isaec_lua.dir/src/api/color.cpp.o.d` | 24 | 0 |
+| `build-input/CMakeFiles/isaec_lua.dir/src/api/color_lua.cpp.o.d` | 123 | 0 |
+| `build-input/CMakeFiles/isaec_lua.dir/src/api/field_class.cpp.o.d` | 126 | 0 |
+| `build-input/CMakeFiles/isaec_lua.dir/src/api/field_classes_generated.cpp.o.d` | 24 | 0 |
+| `build-input/CMakeFiles/isaec_lua.dir/src/api/lua_value.cpp.o.d` | 39 | 0 |
+| `build-input/CMakeFiles/isaec_lua.dir/src/api/posvel_lua.cpp.o.d` | 125 | 0 |
+| `build-input/CMakeFiles/isaec_lua.dir/src/api/registry.cpp.o.d` | 121 | 0 |
+| `build-input/CMakeFiles/isaec_lua.dir/src/api/vector.cpp.o.d` | 80 | 0 |
+| `build-input/CMakeFiles/isaec_lua.dir/src/api/vector_lua.cpp.o.d` | 123 | 0 |
+| `build-input/CMakeFiles/isaec_window.dir/DependInfo.cmake` | 26 | 0 |
+| `build-input/CMakeFiles/isaec_window.dir/build.make` | 150 | 0 |
+| `build-input/CMakeFiles/isaec_window.dir/cmake_clean.cmake` | 16 | 0 |
+| `build-input/CMakeFiles/isaec_window.dir/compiler_depend.internal` | 955 | 0 |
+| `build-input/CMakeFiles/isaec_window.dir/compiler_depend.make` | 1912 | 0 |
+| `build-input/CMakeFiles/isaec_window.dir/compiler_depend.ts` | 2 | 0 |
+| `build-input/CMakeFiles/isaec_window.dir/depend.make` | 2 | 0 |
+| `build-input/CMakeFiles/isaec_window.dir/flags.make` | 10 | 0 |
+| `build-input/CMakeFiles/isaec_window.dir/link.d` | 124 | 0 |
+| `build-input/CMakeFiles/isaec_window.dir/link.txt` | 1 | 0 |
+| `build-input/CMakeFiles/isaec_window.dir/progress.make` | 5 | 0 |
+| `build-input/CMakeFiles/isaec_window.dir/src/platform/sdl_input.cpp.o.d` | 236 | 0 |
+| `build-input/CMakeFiles/isaec_window.dir/src/platform/sdl_main.cpp.o.d` | 185 | 0 |
+| `build-input/CMakeFiles/isaec_window.dir/src/platform/sdl_renderer.cpp.o.d` | 281 | 0 |
+| `build-input/CMakeFiles/progress.marks` | 1 | 0 |
+| `build-input/CTestTestfile.cmake` | 8 | 0 |
+| `build-input/Makefile` | 905 | 0 |
+| `build-input/Testing/Temporary/CTestCostData.txt` | 2 | 0 |
+| `build-input/Testing/Temporary/LastTest.log` | 120 | 0 |
+| `build-input/cmake_install.cmake` | 88 | 0 |
+| `build-input/isaec_headless` | 0 | 0 |
+| `build-input/isaec_window` | 0 | 0 |
+| `build-input/tests/CMakeFiles/CMakeDirectoryInformation.cmake` | 16 | 0 |
+| `build-input/tests/CMakeFiles/isaec_tests.dir/DependInfo.cmake` | 34 | 0 |
+| `build-input/tests/CMakeFiles/isaec_tests.dir/build.make` | 279 | 0 |
+| `build-input/tests/CMakeFiles/isaec_tests.dir/cmake_clean.cmake` | 32 | 0 |
+| `build-input/tests/CMakeFiles/isaec_tests.dir/compiler_depend.internal` | 2211 | 0 |
+| `build-input/tests/CMakeFiles/isaec_tests.dir/compiler_depend.make` | 2959 | 0 |
+
+#### Documentation
+
+- `HANDOFF.md`
+- `README.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
