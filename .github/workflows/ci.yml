@@ -78,16 +78,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # No Android libpng exists in the sysroot, so the REQUIRED pkg-config
-      # fallback resolves against the runner's host packages. This job only
-      # verifies that our own objects are AArch64 and never runs tests, so this
-      # makes the codegen check reachable. It does not make the resulting binary
-      # shippable -- a real Android build needs a cross-built libpng.
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libpng-dev
-
+      # No host packages are installed on purpose. Anything the cross build
+      # needs must come from the NDK or be fetched at configure time; a host
+      # libpng here would hide the exact failure this job exists to catch.
       - name: Install NDK
         uses: nttld/setup-ndk@v1
         with:
@@ -159,6 +152,36 @@ jobs:
 
       - name: Build
         run: cmake --build build-android -j
+
+      # Closes the half of issue #16 that used to be invisible: a configure
+      # with PNG forced off succeeded, so nothing proved the Android build
+      # could decode an image. Now the cache must say PNG was found, and the
+      # fetched library must itself be arm64-v8a rather than a host .so.
+      - name: Verify cross-built libpng
+        run: |
+          grep -q '^ISAEC_PNG_FOUND:BOOL=ON$' build-android/CMakeCache.txt || {
+            echo "::error::ISAEC_PNG_FOUND is not ON; the Android build cannot decode PNG"
+            grep '^ISAEC_PNG' build-android/CMakeCache.txt || true
+            exit 1
+          }
+          lib="$(find build-android -name 'libpng*.a' -print -quit)"
+          if [ -z "$lib" ]; then
+            echo "::error::no static libpng under build-android"
+            exit 1
+          fi
+          echo "libpng: $lib"
+          # Extract a real member rather than assuming a byte offset: GNU ar
+          # may put a symbol table first, and a thin archive has no members at
+          # all. ar p writes the member to stdout.
+          member="$(ar t "$lib" | head -1)"
+          echo "libpng member: $member"
+          ar p "$lib" "$member" > /tmp/libpng.o
+          e_machine="$(od -An -tx1 -j18 -N2 /tmp/libpng.o | tr -d '[:space:]')"
+          echo "libpng e_machine=0x$e_machine (b700 = AArch64)"
+          if [ "$e_machine" != "b700" ]; then
+            echo "::error::libpng member is not AArch64"
+            exit 1
+          fi
 
       # Reads EI_CLASS (offset 4) and e_machine (offset 0x12 LE) as bytes rather
       # than trusting objdump's format string: on this runner objdump printed

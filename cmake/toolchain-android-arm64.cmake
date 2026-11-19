@@ -57,14 +57,7 @@ set(ANDROID_NDK_ROOT  "${ANDROID_NDK}")
 # find system Lua, X11, or any other host library.
 set(ISAEC_WITH_LUA OFF CACHE BOOL "" FORCE)
 
-# The Android sysroot ships no libpng. Leaving this ON makes the REQUIRED
-# pkg-config fallback resolve against the *host* packages: configure then
-# succeeds and the link fails later with `ld.lld: unable to find library
-# -lpng16`, which is exactly the failure CI hit. Measured, not predicted.
-#
-# Consequence of turning it off: nothing decodes images on Android. That is a
-# real gap, not a workaround -- see issue #16. Until a cross-built libpng
-# exists for arm64-v8a, an Android build cannot read the archives' PNGs, and
-# this file makes that explicit rather than producing a binary that links a
-# host library it cannot use.
-set(ISAEC_WITH_PNG OFF CACHE BOOL "" FORCE)
+# PNG stays enabled. The NDK sysroot ships no libpng, so CMakeLists.txt
+# FetchContents a pinned libpng and builds it static for arm64-v8a. Turning
+# this off used to be the only way to configure at all; that gap is issue #16
+# and the cross-built library is what closes it.

@@ -387,18 +387,16 @@ pacing ≈ 60 Hz (est 59.75 Hz windowed; ~57 Hz under `SDL_VIDEODRIVER=dummy`,
 not the game and draws no Isaac assets. GPU rendering proper is still
 [#5](https://github.com/caos-obliquo/tboi-recomp/issues/5).
 
-Cross-compiling for Android (requires the NDK):
+Cross-compiling for Android (requires the NDK). The NDK sysroot ships zlib but
+no libpng, so the configure step fetches a pinned libpng and builds it static
+for arm64-v8a; nothing host-side is linked into the target. CI asserts the
+resulting library and our own objects are AArch64.
 
 ```sh
 cmake -S . -B build-android \
   -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-android-arm64.cmake \
   -DANDROID_NDK=$ANDROID_NDK_HOME
 ```
-
-The Android toolchain turns `ISAEC_WITH_PNG` off, because the sysroot ships no
-libpng and the alternative is linking a host x86-64 archive into an AArch64
-binary. Nothing decodes images on Android until that is solved — see
-[#16](https://github.com/caos-obliquo/tboi-recomp/issues/16).
 
 CI builds on Linux (gcc and clang) and macOS, configures against the Android NDK,
 and additionally gates on `-Werror`, ASan+UBSan, spec freshness, and the binding
@@ -456,7 +454,7 @@ milestone `M1 Foundation` covers the current blockers.
 | [#6](https://github.com/caos-obliquo/tboi-recomp/issues/6) | Repentance+ API surface | **partially advanced** |
 | [#7](https://github.com/caos-obliquo/tboi-recomp/issues/7) | Purge HUD/Isaac contamination | **resolved** — the code-derived surface replaces the contaminated one |
 | [#12](https://github.com/caos-obliquo/tboi-recomp/issues/12) | Name the patched-Lua anchored value | **open** — the last gap in the ABI |
-| [#16](https://github.com/caos-obliquo/tboi-recomp/issues/16) | Cross-built libpng for Android | **open** |
+| [#16](https://github.com/caos-obliquo/tboi-recomp/issues/16) | Cross-built libpng for Android | **partially advanced** — static arm64 libpng fetched at configure; CI check pending |
 | [#17](https://github.com/caos-obliquo/tboi-recomp/issues/17) | Name the 372 anonymous bodies | **resolved** — all 911 bodies are named and class-attributed |
 | [#18](https://github.com/caos-obliquo/tboi-recomp/issues/18) | `macos-arm64` never dispatches | **resolved** — the required context was removed, the job is gone |
 | [#19](https://github.com/caos-obliquo/tboi-recomp/issues/19) | Graphics + performance epic | **scoped, not started** |
