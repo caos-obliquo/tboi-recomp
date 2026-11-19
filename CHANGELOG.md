@@ -1022,6 +1022,66 @@ Refs #90. Note: this PR deliberately does not start #64/#66/#52/#3/#4/#35 (not m
 - `docs/handoff.md`
 
 
+## [0.1.18] - 2026-11-19
+
+### Merged: [#114](https://github.com/caos-obliquo/tboi-recomp/pull/114) — feat(android): package the slice as an arm64 debug APK [#66]
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-19  **Files:** 9 changed, +242/-15.
+
+<details>
+<summary>Pull request body</summary>
+
+Stacked on #113 (libpng). Retarget to main once #113 merges.
+
+- CMake: SDL2 2.32.10 via FetchContent on Android, shared; new `main` shared library target containing the slice.
+- src/platform/android_main.cpp: SDL_main adapter starting the white-box slice at 1280x720, play-until-close. No game data, no archive picker.
+- src/platform/sdl_main.cpp: main() renamed isaec_window_main; desktop main() kept behind ISAEC_ANDROID.
+- android/: Gradle project, one Activity extending SDLActivity, arm64-v8a, no vendored SDL Java (CI passes -PsdlJavaDir).
+- CI: new android-apk job builds the APK, asserts libmain.so + libSDL2.so, uploads the artifact.
+
+Not yet: on-device run, touch input, sideload doc. Those stay open on #66.
+
+</details>
+
+#### Closes
+
+- [` `] [#66](https://github.com/caos-obliquo/tboi-recomp/issues/66) Epic: Linux x86_64 and Android arm64 as first-class targets (packaging, on-device verification, frame pacing, docs) (open)
+- [` `] [#113](https://github.com/caos-obliquo/tboi-recomp/pull/113) fix(android): cross-build a static libpng for arm64-v8a [#16] (merged)
+
+#### Commits
+
+- `2a265b7e` feat(android): package the slice as an arm64 debug APK [#66](https://…
+  …github.com/caos-obliquo/tboi-recomp/issues/66)
+  The Android build produced an object file and nothing runnable: no SDL2,
+  no Activity, no APK. This adds the missing packaging while keeping every
+  third-party source out of the tree.
+  - CMake fetches SDL2 2.32.10 on Android and builds it shared, because
+    SDLActivity loads libSDL2.so by name.
+  - src/platform/android_main.cpp supplies SDL_main and starts the white-box
+    slice; sdl_main.cpp exposes isaec_window_main and keeps main() for the
+    desktop binary only.
+  - android/ is a minimal Gradle project: one Activity extending SDLActivity,
+    arm64-v8a only, no assets and no game data.
+  - A new android-apk CI job downloads SDL2 and Gradle, builds the debug APK,
+    asserts libmain.so and libSDL2.so are packaged, and uploads the artifact.
+  Still open on #66: running it on a physical device and sideload docs.
+  Touch input is not implemented; the slice is pad/keyboard only for now.
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `.github/workflows/ci.yml` | 61 | 0 |
+| `CMakeLists.txt` | 44 | 13 |
+| `android/app/build.gradle` | 51 | 0 |
+| `android/app/src/main/AndroidManifest.xml` | 19 | 0 |
+| `android/app/src/main/java/org/caos/isaec/MainActivity.java` | 15 | 0 |
+| `android/build.gradle` | 3 | 0 |
+| `android/settings.gradle` | 15 | 0 |
+| `src/platform/android_main.cpp` | 26 | 0 |
+| `src/platform/sdl_main.cpp` | 8 | 2 |
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
