@@ -156,8 +156,19 @@ bool Archive::decode(usize index, std::vector<u8>& out) {
                     "partial decode");
     }
     if (mode_ == kModePrng) {
-        return fail("mode 0x02 PRNG keystream is unverified against real archives; "
-                    "refusing to return noise");
+        // Chunked DEFLATE behind four-byte chunk headers. The first chunk
+        // starts at the entry offset; there is no nine-byte record header
+        // unless is_stored() matched above (stored entries are whole PNGs in
+        // the clear, which is what that arm handles).
+        const usize span = cipher_span(index);
+        std::vector<u8> payload(blob_.begin() + static_cast<std::ptrdiff_t>(entry.offset),
+                                blob_.begin() +
+                                    static_cast<std::ptrdiff_t>(entry.offset + span));
+        if (!ArchiveCodec::decode_chunked(payload.data(), payload.size(), size, out)) {
+            return fail("mode 0x02 chunk stream in entry " + std::to_string(index) +
+                        " is truncated or not DEFLATE");
+        }
+        return true;
     }
     if (mode_ != kModeAssets) {
         return fail("unknown codec mode " + std::to_string(mode_));

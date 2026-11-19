@@ -72,6 +72,12 @@ else()
   message(STATUS "isaec: ISAEC_WITH_PNG=OFF, decode_png() will always report failure")
 endif()
 
+# zlib is a core dependency: mode-0x02 archive entries are chunked raw
+# DEFLATE, so the container reader needs inflate on every platform, including
+# Android whose NDK sysroot ships libz. It is not tied to ISAEC_WITH_PNG.
+find_package(ZLIB REQUIRED)
+message(STATUS "isaec: zlib ${ZLIB_VERSION_STRING}")
+
 set(ISAEC_SDL_FOUND OFF)
 if(ISAEC_WITH_WINDOW)
   find_package(SDL2 CONFIG QUIET)
@@ -110,6 +116,8 @@ target_include_directories(isaec_core PUBLIC
 if(ISAEC_PNG_FOUND)
   target_link_libraries(isaec_core PUBLIC ${ISAEC_PNG_TARGET})
 endif()
+
+target_link_libraries(isaec_core PUBLIC ZLIB::ZLIB)
 
 target_compile_options(isaec_core PRIVATE
   $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall -Wextra>

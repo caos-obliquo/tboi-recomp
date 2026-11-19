@@ -25,4 +25,8 @@ add_executable(isaec_tests ${ISAEC_TEST_SRC})
 target_include_directories(isaec_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(isaec_tests PRIVATE isaec_core isaec_lua)
 
+if(ISAEC_PNG_FOUND)
+  target_compile_definitions(isaec_tests PRIVATE ISAEC_TEST_PNG=1)
+endif()
+
 add_test(NAME isaec_tests COMMAND isaec_tests)

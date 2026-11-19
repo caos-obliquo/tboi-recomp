@@ -99,6 +99,12 @@ could not match it; they could not match it because they were being asked for a
 
 ## 6. The codec is not zlib or deflate
 
+**Scope correction.** The negative results below were measured on entries that
+turned out to be mode 0x01 (LZW), and they remain true for that arm. They do
+**not** apply to mode 0x02: those payloads are a chunked raw-DEFLATE stream, and
+`wbits = -15` inflates them directly (section 9.6). Read this section as "not
+deflate at the entry offset" rather than "not deflate anywhere".
+
 Ruled out by measurement, not by assumption:
 
 - No `ESC Lua` signature appears in any of the 23 archives (1.5 GB scanned).
@@ -143,12 +149,59 @@ The mode dispatch lives at VA `0xa68c50`. Byte 7 of the header selects the arm:
 | mode | path |
 |---|---|
 | `0x01` | `0xa850f0` — LZW (section 6) |
-| `0x02` | `0xa89c90` — PRNG keystream (this section) |
+| `0x02` | `0xa89c90` → `0xaa93e0` PRNG + `0xa89f80` MiniZ wrapper (this section) |
 | `0x00` | inline at `0xa68cc5` — XOR (section 4) |
 
 All three arms end with the same virtual call
 `output_buffer->vtbl[3](field_c->field_c, 0)`; the per-mode transform runs
 before it.
+
+### 9.0 Correction: mode 0x02 is MiniZ, not a whole-entry PRNG stream
+
+**Retraction.** Earlier revisions of this section — and the C++/Python code that
+followed it — described mode 0x02 as "PRNG keystream XOR over every payload".
+That is wrong. REA/Ghidra analysis of the shipped `isaac-ng.exe`
+(SHA256 `3bdfc8bae0dc7e334b76009d0ad45dfbb16ee5f00c06ffbc3a0094e34d44616b`)
+shows the actual chain:
+
+1. `0xa68c50` dispatch (`ev_9734722ed3d254f67bf9738cc450c60c4beb597c8633a43d6a067455d3ed8e20`,
+   `ev_bad9d9a1137734961bdae624e1dc17cf7a185b13441441e20f76bc1ab5e72209`)
+   calls `0xa89c90` with `*(entry+8)`, the per-entry cipher seed.
+2. `0xa89c90` wrapper (`ev_4957dbced24eeaf09e969600de5891fbe57209d27da4f2897048a737dda1c670`,
+   `ev_9c59863125a5cf25186dcc2f2d0ae03fb1b74a85172d6b116d6c9baadb865b6a`)
+   allocates the PRNG buffer and calls `0xaa93e0(seed)`; it does not decode the
+   entry itself.
+3. `0xa694a0` vtbl[3] (`ev_c46289808951fff4cdb4f2dbbe0e6884131cf7a3b438e7d31465c38b57c655db`)
+   routes refill to `0xa69090`.
+4. `0xa69090` refill (`ev_9bb8bfe6a9261ddc23a7a22df21e6a7c1aecce7cab5b1c1a911903a8f4ba21ab`)
+   reads each chunk's 32-bit length, takes `len = raw & 0x7fffffff` and
+   `flag = raw >> 31`, rejects `len > 0x7ff`, then calls
+   `0xa89f80(dst=state+0x81c, dst_size=0x400, compressed, len, flag)`.
+5. `0xa89f80` MiniZ wrapper (`ev_f2927f0f8983277f6d9771f90bb46f4ecb4989990d3add4a69fc5477e24c2881`)
+   has two paths:
+   - **stored flag** (or length equal to the 0x400 destination): `memcpy` then
+     `0xa89d70` XORs the stored bytes with the PRNG stream prepared in step 2;
+   - **compressed flag**: `0xa85710` MiniZ decompression (`ev_cd61b34462953efeb4a0ae3a963ac5321ee9b8f9e31e996f0a648a34d174436a`),
+     with **no PRNG XOR at all**.
+
+Therefore the PRNG at `0xaa93e0` is only a stored-block XOR aid; it is not the
+mode 0x02 decoder. `0xa89d70` stored-block XOR:
+`ev_6ec6deefdee9729772e73b4b5f3e026a7da44d6ae54da659a501a9f4d51b460a`.
+The constructor `0xa68a50`
+(`ev_1f71bbfaa663e6632037be161fbf91467c97674c8fa92ee89d51b8c6ae6e0f7f`)
+and vtable `0xba05bc`
+(`ev_9e134804f283f794b99483209d4e7876e8ff89b8a8d3053c978c169537ccda1f`)
+establish that the 0x14-byte subobject at `[ESI+0x14]` is the PRNG holder used
+by the wrapper.
+
+**The XOR half of that reading is contradicted by the data.** In mode 0x02,
+chunks whose header length is exactly `0x400` are copied verbatim: 203 entries
+that mix `0x400` chunks with DEFLATE chunks decode to PNGs whose every chunk CRC
+and IDAT inflate validate (section 9.6). If those bytes carried a PRNG XOR they
+could not be valid PNG payload. Either `0xa89f80` takes the stored arm only under
+a condition not yet identified, or the PRNG applies to the 2647 still-unresolved
+entries only. Until that is settled, the production decoder does not apply any
+XOR and the PRNG path above is an unexercised reading, not a behaviour.
 
 ### 9.1 Wrapper at `0xa89c90`
 
@@ -164,7 +217,14 @@ mode dispatch to be wired to the wrong algorithm while 34 tests passed green,
 because those tests were written from the implementation rather than from the
 disassembly.
 
-Seed preparation (32-bit):
+Seed preparation (32-bit), corrected from the bytes at `0xaa93eb`
+(`ev_dd72ecf227305aee7420801d63a464968849b03d5ed1e79714a10fbbeb85f833`):
+
+```
+h = (((seed << 15) ^ seed) << 8) ^ (seed >> 9) ^ seed
+```
+
+The earlier transcription
 
 ```
 h  = (seed << 15) ^ seed
@@ -172,12 +232,27 @@ h ^= (seed >> 9)
 h  = (h << 8) ^ seed
 ```
 
-The 64-bit LCG state is initialised to `state_lo = h`, `state_hi = seed`.
+is **wrong**: it shifts the `seed >> 9` term left by 8 as well. That error was
+preserved in `src/data/codec.cpp` and `tools/isaac-archive.py` until the mode
+0x02 retraction removed the PRNG path from production; the Python reference is
+the surviving copy.
+
+The 64-bit LCG state is initialised to `state_lo = h`, `state_hi = seed`
+(bytes at `0xaa9406`; `XOR EAX,ESI` then `ADD EAX,ECX / ADC ECX,ESI`).
 Each of the 256 iterations performs:
 
 ```
-state = state * 0x4c957f2d5851f42d + 0x7f      (64-bit)
+state = state * 0x5851f42d4c957f2d + 0x7f      (64-bit)
 ```
+
+The multiplier was previously documented as `0x4c957f2d5851f42d`. The native
+code pushes `0x5851f42d` first and `0x4c957f2d` second
+(`ev_f45a036bf54ad8e5388809fdfe279f2481726b8b312bc91c570720e1db193d97`,
+`ev_ff92aeb65ab4dd4497213617bee2c070fb258db5c9385a3087470008bdbe9446`);
+under cdecl argument order these are the high and low words of the standard PCG
+multiplier `0x5851f42d4c957f2d`. Both the C++ and the Python mirrored the
+word-swapped value at the time of the finding; the C++ PRNG path has since been
+deleted with the rest of the retracted whole-entry model.
 
 and emits one 32-bit word:
 
@@ -215,7 +290,9 @@ for i in range(0, size, 4):        # NOT range(0, size - size % 4, 4)
 
 Dropping the trailing partial group instead — the superficially equivalent
 `size - size % 4` — diverges from the real decoder on precisely those payloads.
-The differential test below was written because of that bug.
+The differential test written for that bug was removed with the retracted model;
+this section is retained as the record of the PRNG reading, not as behaviour the
+build performs.
 
 A `specialHash` of exactly 0 makes the first emitted word `0x00000000` (the seed
 prep leaves `h` at 0 and the first state is `0x7f`), so such an entry would have
@@ -225,50 +302,91 @@ its first four payload bytes unobfuscated. Real name hashes are non-zero.
 
 | implementation | file |
 |---|---|
-| production C++ | `src/data/codec.cpp` (`ArchiveCodec::decode`, `PrngStream`) |
-| reference Python | `tools/isaac-archive.py` (`decode_prng`, `PrngStream`) |
+| production C++ | `src/data/codec.cpp` (`ArchiveCodec::decode_chunked`) |
+| reference walker | `tools/probe_mode2_chunks.py` (`walk`) |
 
-Both implementations are exercised differentially: `tests/test_codec.cpp`
-contains `codec_lzw_matches_reference_decoder` and
-`codec_prng_matches_reference_decoder`, which feed identical fixtures to the C++
-and Python decoders and compare outputs byte-for-byte. Expected bytes in
-`tests/lzw_fixtures.inc` and `tests/prng_fixtures.inc` are generated by the
-Python side. Regenerate them with `tools/gen_bogocrypt1_fixtures.py` and the sibling
-generators in `tools/` rather than hand-editing. Note the limitation
-those fixtures inherit: they pin the two implementations to each other,
-not to the game. Section 9.5 is what that gap costs.
+`decode_chunked` takes the entry span and the declared size: it reads four-byte
+chunk headers, copies `0x400`-length chunks verbatim, inflates every other chunk
+with `inflateInit2(-15)`, and stops when the declared size is reached. It does not
+require a deflate end marker on the final chunk, because the native decoder is
+driven by the output buffer and stops as soon as the buffer is full.
 
-Keeping two independent implementations matters here specifically because the
-single-implementation mistake described in 9.2 passed its own tests. Agreement
-with a second implementation written from the same disassembly is the available
-check; a real packed archive from a game install would be the stronger one.
+The mode 0x02 PRNG implementation and its fixtures were removed with the
+retraction in section 9.5. The old `codec_prng_matches_reference_decoder`
+fixture pinned two implementations to each other while both were wrong; that is
+exactly the failure mode section 9.2 describes. Chunk tests use
+`tests/zip_fixture.hpp`, which builds real raw-DEFLATE streams with zlib, so the
+assertions are against a third-party inflater rather than against our own output.
 
-### 9.5 Status: unverified, and the stronger check has now failed
+### 9.5 Measured status on the installed archives
 
-That stronger check has been run. The mode 0x02 decoder does not reproduce real
-payloads.
+Measured with `tools/probe_mode2_chunks.py` and the opt-in test
+`archive_real_container_decodes_the_chunked_mode_0x02_arm`, which is silent in CI
+and runs when `ISAEC_TBOI_ARCHIVE` names a real container.
 
-Over 1406 decrypted entries drawn from `repentance.a` and `afterbirthp.a`:
+`repentance.a` (4180 mode 0x02 entries):
 
-- the first decoded byte is uniformly distributed, the commonest value appearing
-  13 times where uniform would predict about 5;
-- `decoded[0:4] == raw[0:4]` holds for 0 of 1406 entries, so the keystream is
-  never accidentally inert;
-- no decoded entry opens with a PNG, OGG or BMF magic, at any of four tried
-  payload offsets (`offset`, `offset + size`, `offset + 9`, `offset + 9 + span`).
+| arm | entries | result |
+|---|---|---|
+| stored record header (§10) | 378 | copied verbatim; 378/378 are PNGs and 378/378 pass libpng |
+| chunked, decoded | 1155 | 203 PNG, 859 XML, 20 text, 17 RIFF, 56 other; 203/203 PNGs pass full CRC + IDAT |
+| chunked, unresolved | 2647 | no output: see below |
 
-The output is indistinguishable from noise, so the generator in 9.2 is not the
-one the game applies. The C++ and the Python agree because both transcribe the
-same disassembly reading — the exact weakness 9.2 records, now demonstrated on
-real data instead of merely anticipated. What *is* externally verified is mode
-0x00, by PNG chunk CRCs and zlib inflation, and the record header in section 10.
-Treat every mode 0x02 decode as unvalidated until this is resolved.
+Both arms are covered by one command: the opt-in test reports
+`4180 entries, 1533 decoded, 581 PNG, 581 PNG valid, 378 stored PNG`. The 581 is
+203 chunked + 378 stored, and every one validates.
 
-## 10. The mode 0x02 record header
+Two earlier claims in this document are retracted:
 
-Mode 0x02 entries do not begin with their payload. Every one carries a nine-byte
-header, and for a subset the header declares the payload to be *stored* —
-present in the archive in the clear, with no cipher applied at all.
+1. "Every mode 0x02 entry carries a nine-byte record header" — false. Only the
+   378 stored entries match the header predicate; a chunked entry starts
+   directly with its first four-byte chunk header.
+2. "Stored flag (or `len == 0x400`) means memcpy then PRNG XOR" — the `0x400`
+   chunks are verbatim, as the 203 PNG CRCs show. See section 9.0.
+
+The header top bit (`raw >> 31`) is **not** a stored flag in the data: across all
+1155 decoded entries it is set on the final chunk and nowhere else (`only_last =
+1155`, `other = 0`, `noflag = 0`). It is treated as an end-of-entry marker and the
+decoder ignores it, because the declared size already says where output stops.
+
+### 9.6 Chunk framing (measured)
+
+Chunked entries have no entry-level header. Their payload is a sequence of:
+
+```
+u32 LE  raw
+        len  = raw & 0x7fffffff
+        last = raw >> 31          (observed: final chunk only)
+        len > 0x7ff                -> reject
+len     bytes  payload
+
+if len == 0x400: output += payload                      (verbatim, no XOR)
+else:            output += inflate(payload, wbits=-15)  (independent stream)
+stop when output size >= entry.size; truncate overshoot to entry.size
+```
+
+The stop condition is **output bytes**, never the sum of chunk lengths: a naive
+sum walks past the entry and reads the next entry's table as a chunk header.
+Chunk lengths in `repentance.a` are either `0x400` (stored) or 1..1024
+(compressed); none exceeds `0x7ff`.
+
+The 2647 unresolved entries contain `0x400` chunks, assemble to exactly their
+declared size, and yet match none of PNG/OggS/RIFF/BMF/XML/zip/GIF/DDS/ID3/MThd/
+PDF/Lua/ANM2 magics, with no printable-text variant. Their checksum column is not
+a CRC32 of that plaintext. A brute force over 15 seed formulas × 3 seed
+preparations × 2 multipliers × 5 state initialisations × 4 rotation/output
+variants (1826 candidate entries, all scanning for an 8-byte magic) found zero
+hits, as did mode 0x00 bogocrypt1 over the same bytes. They are therefore an
+unresolved third arm. The decoder fails them explicitly instead of returning
+noise, and no claim in this document depends on them.
+
+## 10. The mode 0x02 stored-record header
+
+Some mode 0x02 entries do not begin with their payload. Those carry a nine-byte
+header that declares the payload to be *stored* — present in the archive in the
+clear, with no cipher applied at all. The other entries start directly with a
+four-byte chunk header (section 9.6); a previous revision of this section said
+every entry carries this header, which was wrong.
 
 ### 10.1 Layout
 
@@ -284,7 +402,10 @@ present in the archive in the clear, with no cipher applied at all.
 
 `size` is the recorded entry size. For a stored entry the payload is exactly
 `size` bytes starting at `offset + 9`. Verified on 13 entries: the PNG chunk walk
-ends at `offset + 9 + size` every time.
+ends at `offset + 9 + size` every time. Measured across the whole archive, 378 of
+4180 `repentance.a` entries match the predicate in 10.2 and all 378 payloads are
+PNG in the clear; the same test finds 378/378 pass libpng, so the header and the
+plaintext arm are both confirmed rather than inferred.
 
 ### 10.2 The stored predicate
 
