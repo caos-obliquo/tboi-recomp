@@ -56,14 +56,44 @@ endif()
 # reports failure, and the tests that need it are not built.
 set(ISAEC_PNG_FOUND OFF)
 if(ISAEC_WITH_PNG)
-  find_package(PNG QUIET)
-  if(NOT PNG_FOUND)
+  if(ANDROID)
+    # The NDK sysroot ships zlib but no libpng, so a cross build has to bring
+    # its own. FetchContent keeps libpng out of the repository (no vendored
+    # third-party tree, AGENTS.md) while still producing a static arm64-v8a
+    # library that links into isaec_core. zlib is the NDK's, found here before
+    # libpng configures because libpng's CMake requires a ZLIB target.
+    find_package(ZLIB REQUIRED)
+    # libpng is static here and gets linked into PIE executables and into
+    # libmain.so, so its objects must be position independent.
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+    include(FetchContent)
+    set(PNG_SHARED OFF CACHE BOOL "" FORCE)
+    set(PNG_STATIC ON CACHE BOOL "" FORCE)
+    set(PNG_TESTS OFF CACHE BOOL "" FORCE)
+    set(PNG_TOOLS OFF CACHE BOOL "" FORCE)
+    set(PNG_EXECUTABLES OFF CACHE BOOL "" FORCE)
+    FetchContent_Declare(libpng
+      GIT_REPOSITORY https://github.com/pnggroup/libpng.git
+      GIT_TAG v1.6.44
+      GIT_SHALLOW TRUE)
+    FetchContent_MakeAvailable(libpng)
+    # When libpng is a subproject it defines png_static, not the PNG::PNG
+    # imported alias that find_package(PNG) creates.
+    set(ISAEC_PNG_TARGET png_static)
+    # Cache, not a plain variable: CI asserts this value, and a normal
+    # variable never reaches CMakeCache.txt.
+    set(ISAEC_PNG_FOUND ON CACHE BOOL "libpng available" FORCE)
+    message(STATUS "isaec: libpng via FetchContent (Android static)")
+  else()
+    find_package(PNG QUIET)
+  endif()
+  if(NOT ISAEC_PNG_FOUND AND NOT ANDROID)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(ISAEC_PNG REQUIRED IMPORTED_TARGET libpng16)
     set(ISAEC_PNG_TARGET PkgConfig::ISAEC_PNG)
     set(ISAEC_PNG_FOUND ON)
     message(STATUS "isaec: libpng via pkg-config ${ISAEC_PNG_VERSION}")
-  else()
+  elseif(NOT ANDROID)
     set(ISAEC_PNG_TARGET PNG::PNG)
     set(ISAEC_PNG_FOUND ON)
     message(STATUS "isaec: libpng via find_package ${PNG_VERSION}")
