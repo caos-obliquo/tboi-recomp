@@ -110,12 +110,27 @@ message(STATUS "isaec: zlib ${ZLIB_VERSION_STRING}")
 
 set(ISAEC_SDL_FOUND OFF)
 if(ISAEC_WITH_WINDOW)
-  find_package(SDL2 CONFIG QUIET)
-  if(SDL2_FOUND)
+  if(ANDROID)
+    # Android has no SDL2 in the NDK. Fetch a pinned release and build it as a
+    # shared library so SDLActivity can load libSDL2.so the normal way.
+    include(FetchContent)
+    set(SDL_TEST OFF CACHE BOOL "" FORCE)
+    set(SDL2_DISABLE_INSTALL ON CACHE BOOL "" FORCE)
+    FetchContent_Declare(SDL2
+      GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+      GIT_TAG release-2.32.10
+      GIT_SHALLOW TRUE)
+    FetchContent_MakeAvailable(SDL2)
     set(ISAEC_SDL_FOUND ON)
-    message(STATUS "isaec: SDL2 ${SDL2_VERSION} via SDL2Config.cmake")
+    message(STATUS "isaec: SDL2 via FetchContent (Android shared)")
   else()
-    message(STATUS "isaec: SDL2 not found, isaec_window will not be built")
+    find_package(SDL2 CONFIG QUIET)
+    if(SDL2_FOUND)
+      set(ISAEC_SDL_FOUND ON)
+      message(STATUS "isaec: SDL2 ${SDL2_VERSION} via SDL2Config.cmake")
+    else()
+      message(STATUS "isaec: SDL2 not found, isaec_window will not be built")
+    endif()
   endif()
 endif()
 
@@ -210,15 +225,31 @@ target_compile_options(isaec_headless PRIVATE
 # the test run are meant to stay simple.
 # ---------------------------------------------------------------------------
 if(ISAEC_SDL_FOUND)
-  add_executable(isaec_window
-    src/platform/sdl_renderer.cpp
-    src/platform/sdl_main.cpp
-    src/platform/sdl_input.cpp
-  )
-  target_link_libraries(isaec_window PRIVATE isaec_core SDL2::SDL2)
-  target_compile_options(isaec_window PRIVATE
-    $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall -Wextra>
-  )
+  if(ANDROID)
+    # SDLActivity loads "SDL2" and then "main", and calls SDL_main in the
+    # latter. The executable form does not exist on Android.
+    add_library(main SHARED
+      src/platform/android_main.cpp
+      src/platform/sdl_renderer.cpp
+      src/platform/sdl_main.cpp
+      src/platform/sdl_input.cpp
+    )
+    target_compile_definitions(main PRIVATE ISAEC_ANDROID=1)
+    target_link_libraries(main PRIVATE isaec_core SDL2::SDL2)
+    target_compile_options(main PRIVATE
+      $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall -Wextra>
+    )
+  else()
+    add_executable(isaec_window
+      src/platform/sdl_renderer.cpp
+      src/platform/sdl_main.cpp
+      src/platform/sdl_input.cpp
+    )
+    target_link_libraries(isaec_window PRIVATE isaec_core SDL2::SDL2)
+    target_compile_options(isaec_window PRIVATE
+      $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall -Wextra>
+    )
+  endif()
 endif()
 
 # ---------------------------------------------------------------------------

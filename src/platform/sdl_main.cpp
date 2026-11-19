@@ -187,7 +187,7 @@ int run_slice(isaec::i32 width, isaec::i32 height, isaec::u64 frame_budget) {
     return 0;
 }
 
-int main(int argc, char** argv) {
+int isaec_window_main(int argc, char** argv) {
     int cursor = 1;
     const std::string source = next_arg(argc, argv, cursor, "");
     if (source.empty()) {
@@ -353,3 +353,9 @@ int main(int argc, char** argv) {
     std::printf("textures  %lld live\n", static_cast<long long>(renderer.live_textures()));
     return 0;
 }
+// The desktop binary keeps the ordinary entry point. Android's SDLActivity
+// looks for SDL_main in libmain.so instead, so the shared build leaves main()
+// out and android_main.cpp supplies the adapter.
+#ifndef ISAEC_ANDROID
+int main(int argc, char** argv) { return isaec_window_main(argc, argv); }
+#endif

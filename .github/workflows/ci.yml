@@ -382,3 +382,64 @@ jobs:
           echo "bumped ${before} -> ${after}, restored to ${restored}"
           test "$before" != "$after"
           test "$before" = "$restored"
+
+  android-apk:
+    name: android-apk
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r26d
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # SDL's Java layer is third-party source and stays out of the repository.
+      # Pin the release so the APK is reproducible; the C library is fetched by
+      # CMake from the same tag.
+      - name: Fetch SDL2 sources
+        run: |
+          curl -fsSL -o /tmp/SDL2.tar.gz \
+            https://github.com/libsdl-org/SDL/releases/download/release-2.32.10/SDL2-2.32.10.tar.gz
+          tar -xzf /tmp/SDL2.tar.gz -C /tmp
+
+      - name: Fetch Gradle
+        run: |
+          curl -fsSL -o /tmp/gradle.zip \
+            https://services.gradle.org/distributions/gradle-8.7-bin.zip
+          unzip -q /tmp/gradle.zip -d /tmp
+
+      - name: Assemble debug APK
+        env:
+          ISAEC_NDK_VERSION: 26.1.10909125
+        run: |
+          /tmp/gradle-8.7/bin/gradle -p android :app:assembleDebug --no-daemon \
+            -PsdlJavaDir=/tmp/SDL2-2.32.10/android-project/app/src/main/java
+
+      - name: Verify APK contents
+        run: |
+          apk="$(find android/app/build/outputs/apk/debug -name '*.apk' -print -quit)"
+          if [ -z "$apk" ]; then
+            echo "::error::no debug APK produced"
+            exit 1
+          fi
+          echo "apk: $apk"
+          unzip -l "$apk" | tee /tmp/apk-list.txt
+          for lib in lib/arm64-v8a/libmain.so lib/arm64-v8a/libSDL2.so; do
+            grep -q "$lib" /tmp/apk-list.txt || {
+              echo "::error::APK is missing $lib"
+              exit 1
+            }
+          done
+          echo "ok  arm64 libmain.so and libSDL2.so packaged"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: isaec-android-debug
+          path: android/app/build/outputs/apk/debug/*.apk
+
