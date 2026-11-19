@@ -1205,3 +1205,30 @@ is not identified.
 What this does **not** establish: the reimplementation has not been run against
 the game's own decoder as an oracle. Agreement is between the disassembly, the
 Python port and the C++ port.
+
+---
+
+## 31. Game-side oracle for LZW is #107, on its own branch
+
+[#107](https://github.com/caos-obliquo/tboi-recomp/issues/107) tracks the missing
+oracle from §30. It is a separate issue and a separate branch
+(`feature/107-lzw-oracle`), deliberately not folded into #52's branch or PR
+#106: the user asked for separate branches and no PR merges until each piece is
+evidenced on its own.
+
+The probe is a C++ decode of every entry of a user-supplied real `config.a`
+through `Archive::decode`, compared byte-for-byte and by SHA256 with
+`tools/isaac-archive.py` on the same archive. Acceptance is all 24 entries
+matching, plus a negative control that fails when either per-chunk dictionary
+reset or size-as-span is reintroduced. No game bytes may be committed; the
+archive path is supplied at run time. The issue body cites the REA/Ghidra
+Evidence IDs from §30, so the native side of the claim is auditable without
+re-running REA.
+
+Built and run 2026-11-19 against the Steam `config.a`: `tools/check_lzw_oracle.py`
+reported `24/24 entries match`, exit 0, sizes and SHA256 prefixes equal entry by
+entry. The negative control was run for real: moving `LzwState` inside the chunk
+loop (the defect #52 removed) makes the oracle exit 1 with
+`entry 0: codec produced 1087 bytes for entry 0, expected 25894`. The control was
+then reverted and the positive run repeated. No game bytes are in the tree; the
+archive path is an argument.

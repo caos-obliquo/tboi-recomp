@@ -12,6 +12,7 @@ a binary **you** already own, from a path **you** pass in.
 | `gen-api-spec.py` | Turns the code-derived surface into `bindings/isaac-api-spec.json` + a generated C++ header (methods, properties, metamethods). | no |
 | `gen_body_seeds.py` | Regenerates the REA/Ghidra seed list of closure bodies (911) from the code-derived attribution table. | no |
 | `gen_lzw_fixtures.py` | Regenerates `tests/lzw_fixtures.inc` from `tools/isaac-archive.py`: six synthetic streams covering width growth, persistent dictionary across chunks and truncation back to recorded size. No game bytes are committed. | no |
+| `check_lzw_oracle.py` | Runs `build/isaec_lzw_oracle` over a config.a you pass in and compares all entries byte-for-byte with `tools/isaac-archive.py`. Reports per-entry size/sha256 and exits nonzero on any mismatch. Reads the archive at runtime; commits no game bytes. Does not exercise mode 0x02. | no (needs config.a path at runtime) |
 | `pe_vaddr.py` | PE section reader. Translates addresses and **refuses to guess** when a VA is ambiguous. | yes |
 | `probe_metatable_keys.py` | Locates the nine recovered metatable keys in `.rdata`. | yes |
 | `probe_xrefs.py` | Counts `.text` references to each metatable key address. | yes |

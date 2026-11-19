@@ -217,6 +217,15 @@ target_compile_options(isaec_headless PRIVATE
   $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall -Wextra>
 )
 
+# Game-side oracle for mode 0x01 (issue #107): decodes every entry of a
+# runtime-supplied mode-0x01 archive and writes a framed binary stream for
+# tools/check_lzw_oracle.py to compare byte-for-byte with the Python reference.
+add_executable(isaec_lzw_oracle src/tools/lzw_oracle.cpp)
+target_link_libraries(isaec_lzw_oracle PRIVATE isaec_core)
+target_compile_options(isaec_lzw_oracle PRIVATE
+  $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall -Wextra>
+)
+
 # ---------------------------------------------------------------------------
 # Reference platform: windowed SDL2 backend
 #

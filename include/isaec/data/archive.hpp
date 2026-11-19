@@ -115,9 +115,10 @@ public:
     // Materialise one entry into `out`, exactly `size` bytes long.
     //
     // Mode 0x02 entries whose header validates are returned verbatim. Mode
-    // 0x01 LZW and non-stored mode 0x02 are known to diverge on real data, so
-    // they fail with a reason instead of handing back noise for a renderer to
-    // draw.
+    // 0x01 LZW is decoded over the entry's compressed span (the distance to the
+    // next entry's offset) and truncated back to `size`; the recorded size is
+    // the DECOMPRESSED length. Non-stored mode 0x02 is still refused, because
+    // its PRNG keystream has no ground truth and would hand a renderer noise.
     //
     // Returns false and fills error() with the reason on any failure.
     bool decode(usize index, std::vector<u8>& out);
