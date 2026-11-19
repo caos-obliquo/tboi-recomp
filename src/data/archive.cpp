@@ -136,7 +136,15 @@ bool Archive::decode(usize index, std::vector<u8>& out) {
 
     const ArchiveEntry& entry = entries_[index];
     const usize size = entry.size;
-    if (static_cast<usize>(entry.offset) + size > blob_.size()) {
+    const usize span = cipher_span(index);
+    if (span == 0 || static_cast<usize>(entry.offset) + span > blob_.size()) {
+        return fail("entry " + std::to_string(index) + " runs past the end of the file");
+    }
+    // For mode 0x01 the size column is the DECOMPRESSED length, so it can be
+    // larger than the bytes present in the file. Bounding the entry by `size`
+    // here would reject every real LZW asset (#52).
+    if (mode_ != kModeLzw &&
+        static_cast<usize>(entry.offset) + size > blob_.size()) {
         return fail("entry " + std::to_string(index) + " runs past the end of the file");
     }
 
@@ -151,10 +159,6 @@ bool Archive::decode(usize index, std::vector<u8>& out) {
         return true;
     }
 
-    if (mode_ == kModeLzw) {
-        return fail("mode 0x01 LZW diverges on real archives; refusing to return a "
-                    "partial decode");
-    }
     if (mode_ == kModePrng) {
         // Chunked DEFLATE behind four-byte chunk headers. The first chunk
         // starts at the entry offset; there is no nine-byte record header
@@ -170,16 +174,24 @@ bool Archive::decode(usize index, std::vector<u8>& out) {
         }
         return true;
     }
-    if (mode_ != kModeAssets) {
+    if (mode_ != kModeAssets && mode_ != kModeLzw) {
         return fail("unknown codec mode " + std::to_string(mode_));
     }
 
-    const usize span = cipher_span(index);
     std::vector<u8> buffer(blob_.begin() + static_cast<std::ptrdiff_t>(entry.offset),
                            blob_.begin() +
                                static_cast<std::ptrdiff_t>(entry.offset + span));
     if (!ArchiveCodec::decode(buffer, mode_, entry.special, span)) {
         return fail("codec rejected entry " + std::to_string(index));
+    }
+    if (buffer.size() < size) {
+        // Under-producing is as wrong as over-producing: padding the shortfall
+        // with zeros would hand the caller plausible-looking but fabricated
+        // bytes. rooms.a entry 7 does this on the current port, so it is not a
+        // hypothetical (#52).
+        return fail("codec produced " + std::to_string(buffer.size()) +
+                    " bytes for entry " + std::to_string(index) + ", expected " +
+                    std::to_string(size));
     }
     buffer.resize(size);
     out = std::move(buffer);

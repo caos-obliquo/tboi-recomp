@@ -1,0 +1,2 @@
+/usr/bin/ar qc libisaec_lua.a CMakeFiles/isaec_lua.dir/src/api/binding.cpp.o CMakeFiles/isaec_lua.dir/src/api/registry.cpp.o CMakeFiles/isaec_lua.dir/src/api/lua_value.cpp.o CMakeFiles/isaec_lua.dir/src/api/vector.cpp.o CMakeFiles/isaec_lua.dir/src/api/vector_lua.cpp.o CMakeFiles/isaec_lua.dir/src/api/color.cpp.o CMakeFiles/isaec_lua.dir/src/api/color_lua.cpp.o CMakeFiles/isaec_lua.dir/src/api/posvel_lua.cpp.o CMakeFiles/isaec_lua.dir/src/api/field_class.cpp.o CMakeFiles/isaec_lua.dir/src/api/field_classes_generated.cpp.o
+/usr/bin/ranlib libisaec_lua.a

@@ -21,15 +21,21 @@ public:
     // Decode a buffer in-place using the specified mode.
     // `seed` is the entry's specialHash field.
     //
-    // `cipher_span` is how many payload bytes the cipher must cover. For mode
-    // 0x00 this must be the entry's cipher span -- the next entry's offset
-    // minus this entry's offset -- and not the entry's recorded size. The
-    // format borrows those trailing bytes to fill the final 1024-byte block,
-    // and they change the decoded tail; 1982 of the 2300 graphics.a entries
-    // come out with a corrupt IEND CRC if you pass the size instead. Slice
-    // `cipher_span` bytes out of the archive, decode, then truncate yourself
-    // to the asset length. Bytes at or beyond `cipher_span` are left
-    // untouched. Pass 0 to decode the whole buffer.
+    // `cipher_span` is how many payload bytes the codec must cover. For both
+    // ciphered modes it must be the entry's span -- the next entry's offset
+    // minus this entry's offset -- and not the entry's recorded `size` field.
+    //
+    // Mode 0x00 borrows trailing bytes to fill the final 1024-byte block; 1982
+    // of the 2300 graphics.a entries get a corrupt IEND CRC if you pass the
+    // size instead. Bytes at or beyond `cipher_span` are left untouched.
+    //
+    // Mode 0x01 has no keystream: `span` is the COMPRESSED byte length and
+    // bounds the walk over 4-byte-prefixed chunks. `size` is the DECOMPRESSED
+    // length; walking `size` bytes runs into the next entry and over-produces
+    // (#52). The result replaces the whole buffer, so callers must truncate
+    // to `size` after decoding.
+    //
+    // Pass 0 to use the whole buffer as the span.
     //
     // Returns false for an unknown mode or a span larger than the buffer.
     static bool decode(std::vector<u8>& data, u8 mode, u32 seed, usize cipher_span = 0);

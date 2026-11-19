@@ -18,6 +18,7 @@
 #include <zlib.h>
 
 #include <algorithm>
+#include <array>
 #include <cstring>
 
 namespace isaec::data {
@@ -93,112 +94,164 @@ u32 bogocrypt1(u8* bytes, usize offset, usize count, u32 key) {
     return key;
 }
 
-void decode_lzw_codes(const u8* data, usize size, std::vector<u8>& out);
+// ---------------------------------------------------------------------------
+// LZW (mode 0x01): faithful port of the game's natives, not a fresh algorithm.
+//
+// REA/Ghidra on isaac-ng.exe (SHA256 3bdfc8bae0dc7...), pseudocode evidence:
+//   0xa850f0  ev_2ba7fae00f476b26809b438919f98d5f79ea9ab52bb30d9d99b40a3ff9939edd
+//   0xa85090  ev_022dd8441b68bb8c05295291c706d5d4c3ce7141b14d471b0290afe8c337b690
+//   0xa85020  ev_7e10cbc6d1e68acef69eb4da7e34bfa2845aa5793a7b77352d107fc3a0414a99
+//   0xa85320  ev_8f84fe3f86c05c3868f6e941f6039201a6865ca0993510ef59215363fb12152e
+//
+// The dictionary PERSISTS across the 4-byte-prefixed chunks of one entry;
+// only the bit reader is per-chunk. Growing the width before the read and
+// aborting on an out-of-range code are both native behaviour. The previous
+// C++ decoder rebuilt a fresh byte-vector table per chunk and grew the width
+// after insertion, which is why it produced garbage from byte 1024 on.
+// ---------------------------------------------------------------------------
 
-void decode_lzw(std::vector<u8>& data) {
-    const usize size = data.size();
-    if (size < 4) return;
+constexpr usize kLzwSlots = 0x1000;
 
-    std::vector<u8> out;
-    usize cursor = 0;
+struct LzwEntry {
+    i32 prefix = -1;         // native slot 0
+    i32 chain_head = -1;     // native slot 1
+    i32 next_in_chain = -1;  // native slot 2
+    u8 first = 0;            // native slot 3
+};
 
-    while (cursor + 4 <= size) {
-        i32 length = static_cast<i32>(data[cursor]) |
-                     (static_cast<i32>(data[cursor + 1]) << 8) |
-                     (static_cast<i32>(data[cursor + 2]) << 16) |
-                     (static_cast<i32>(data[cursor + 3]) << 24);
-        cursor += 4;
-
-        if (length <= 0 || cursor + static_cast<usize>(length) > size) {
-            break;
+class LzwState {
+public:
+    LzwState() {
+        for (usize i = 0; i < kLzwSlots; ++i) {
+            entries_[i].first = static_cast<u8>(i & 0xFF);
         }
-
-        decode_lzw_codes(data.data() + cursor, static_cast<usize>(length), out);
-        cursor += static_cast<usize>(length);
     }
 
-    data = std::move(out);
-}
+    void reset() {
+        // Native 0xa85320 clears the chain heads only; stale prefixes are
+        // harmless because insertion overwrites them as next_code grows.
+        for (usize i = 0; i < kLzwSlots; ++i) {
+            entries_[i].chain_head = -1;
+        }
+        next_code_ = 0x100;
+        width_ = 8;
+    }
 
-class BitReader {
+    // 0xa85020: walk the prefix chain backwards, then reverse it into `out`.
+    i32 emit(i32 code, std::vector<u8>& out) {
+        u8 scratch[kLzwSlots];
+        usize count = 0;
+        while (code != -1 && count < kLzwSlots) {
+            scratch[count++] = entries_[static_cast<usize>(code)].first;
+            code = entries_[static_cast<usize>(code)].prefix;
+        }
+        for (usize i = count; i > 0; --i) {
+            out.push_back(scratch[i - 1]);
+        }
+        // The scratch holds the string backwards; after reversing, its first
+        // element is the ROOT's first byte. That is what the native returns and
+        // what a KwKwK insert consumes.
+        return count != 0 ? scratch[count - 1] : 0;
+    }
+
+    void insert(i32 prefix, u8 first_char) {
+        if (prefix < 0 || prefix >= static_cast<i32>(kLzwSlots) ||
+            next_code_ > 0xFFF) {
+            return;
+        }
+        LzwEntry& slot = entries_[static_cast<usize>(next_code_)];
+        slot.prefix = prefix;
+        slot.chain_head = -1;
+        slot.first = first_char;
+        slot.next_in_chain = entries_[static_cast<usize>(prefix)].chain_head;
+        entries_[static_cast<usize>(prefix)].chain_head =
+            static_cast<i32>(next_code_);
+        ++next_code_;
+    }
+
+    i32 next_code() const { return next_code_; }
+    usize width() const { return width_; }
+    void set_width(usize width) { width_ = width; }
+
+private:
+    std::array<LzwEntry, kLzwSlots> entries_;
+    i32 next_code_ = 0x100;
+    usize width_ = 8;
+};
+
+// 0xa85090: byte-accumulator, MSB-first, capped at 32 accumulated bits.
+class LzwBitReader {
 public:
-    BitReader(const u8* data, usize size) : data_(data), size_(size), bit_(0) {}
+    LzwBitReader(const u8* data, usize size) : data_(data), size_(size) {}
 
     i32 read(usize count) {
-        i32 value = 0;
-        for (usize i = 0; i < count; ++i) {
-            if (bit_ >= size_ * 8) return -1;
-            const usize byte = bit_ >> 3;
-            const usize shift = 7 - (bit_ & 7);
-            value = (value << 1) | static_cast<i32>((data_[byte] >> shift) & 1);
-            ++bit_;
+        while (bits_ < count) {
+            if (pos_ >= size_) return -1;
+            acc_ = (acc_ << 8) | data_[pos_++];
+            bits_ += 8;
         }
-        return value;
+        bits_ -= count;
+        return static_cast<i32>((acc_ >> bits_) & ((1u << count) - 1u));
     }
 
 private:
     const u8* data_;
     usize size_;
-    usize bit_;
+    usize pos_ = 0;
+    u32 acc_ = 0;
+    u32 bits_ = 0;
 };
 
-// Significant-bit count, matching Python's int.bit_length() which the
-// reference decoder (tools/isaac-archive.py) uses to drive width growth.
-usize bit_length(usize value) {
-    usize bits = 0;
-    while (value != 0) {
-        ++bits;
-        value >>= 1;
+void decode_lzw_chunk(LzwState& state, const u8* chunk, usize size,
+                      std::vector<u8>& out) {
+    LzwBitReader reader(chunk, size);
+    i32 code = reader.read(state.width());
+    if (code < 0 || code >= static_cast<i32>(kLzwSlots)) return;
+
+    i32 first_char = state.emit(code, out);
+    i32 prev = code;
+    while (true) {
+        if (state.next_code() + 1 >= static_cast<i32>(kLzwSlots)) {
+            state.reset();
+            code = reader.read(8);
+            if (code < 0) break;
+            first_char = state.emit(code, out);
+            prev = code;
+        }
+        while ((1u << state.width()) <= static_cast<u32>(state.next_code())) {
+            state.set_width(state.width() + 1);
+        }
+        code = reader.read(state.width());
+        if (code < 0 || code > state.next_code()) break;
+        if (code == state.next_code()) {
+            state.insert(prev, static_cast<u8>(first_char));
+            first_char = state.emit(code, out);
+        } else {
+            first_char = state.emit(code, out);
+            state.insert(prev, static_cast<u8>(first_char));
+        }
+        prev = code;
     }
-    return bits;
 }
 
-void decode_lzw_codes(const u8* data, usize size, std::vector<u8>& out) {
-    BitReader reader(data, size);
-    usize width = 8;
+void decode_lzw(std::vector<u8>& data, usize span) {
+    if (span > data.size() || span < 4) return;
 
-    std::vector<std::vector<u8>> table;
-    table.reserve(4096);
-    for (int i = 0; i < 256; ++i) {
-        table.push_back({static_cast<u8>(i)});
+    std::vector<u8> out;
+    LzwState state;
+    usize cursor = 0;
+    while (cursor + 4 <= span) {
+        i32 length = static_cast<i32>(data[cursor]) |
+                     (static_cast<i32>(data[cursor + 1]) << 8) |
+                     (static_cast<i32>(data[cursor + 2]) << 16) |
+                     (static_cast<i32>(data[cursor + 3]) << 24);
+        cursor += 4;
+        if (length <= 0 || cursor + static_cast<usize>(length) > span) break;
+        decode_lzw_chunk(state, data.data() + cursor,
+                         static_cast<usize>(length), out);
+        cursor += static_cast<usize>(length);
     }
-
-    std::vector<u8> previous;
-    bool have_previous = false;
-
-    while (true) {
-        const i32 code = reader.read(width);
-        if (code < 0) break;
-
-        // Copied by value: the table is appended to below, which can
-        // reallocate and invalidate a reference into it.
-        std::vector<u8> entry;
-        if (!have_previous) {
-            if (static_cast<usize>(code) >= table.size()) break;
-            entry = table[static_cast<usize>(code)];
-        } else if (static_cast<usize>(code) < table.size()) {
-            entry = table[static_cast<usize>(code)];
-            table.push_back(previous);
-            table.back().push_back(entry[0]);
-        } else {
-            // KwKwK: the encoder emitted a code it had not defined yet, which
-            // by construction is `previous` followed by its own first byte.
-            entry = previous;
-            entry.push_back(previous[0]);
-            table.push_back(entry);
-        }
-
-        out.insert(out.end(), entry.begin(), entry.end());
-        previous = entry;
-        have_previous = true;
-
-        // Runs after every code, including the first. With 256 initial
-        // entries bit_length() is 9, so the width steps to 9 immediately
-        // rather than tracking table size exactly.
-        if (bit_length(table.size()) > width) {
-            ++width;
-        }
-    }
+    data = std::move(out);
 }
 
 }  // namespace
@@ -281,9 +334,10 @@ bool ArchiveCodec::decode(std::vector<u8>& data, u8 mode, u32 seed, usize cipher
             return true;
         }
         case 0x01: {
-            // LZW decompress only. The original arm (0xa850f0) does not
-            // obfuscate; mode 0x01 carries no keystream.
-            decode_lzw(data);
+            // LZW decompress over the entry's COMPRESSED span, not its
+            // recorded DECOMPRESSED size. Dictionary state is per entry and
+            // survives across its chunks; the seed is unused by the native arm.
+            decode_lzw(data, span);
             return true;
         }
         case 0x02: {
