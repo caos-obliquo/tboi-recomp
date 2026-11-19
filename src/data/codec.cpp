@@ -5,13 +5,17 @@
 //
 //   0x00 -> XOR         (inline at 0xa68cc5, section 4)
 //   0x01 -> LZW         (0xa850f0, section 6)
-//   0x02 -> PRNG stream (0xa89c90 -> PRNG at 0xaa93e0, section 9)
+//   0x02 -> chunked DEFLATE (0xa89f80 -> miniz at 0xa85710, section 9)
 //
 // Bogocrypt1 (section 4) follows the Gibbed.Rebirth reference
 //   projects/Gibbed.Rebirth.FileFormats/ArchiveFile.cs
-// The mode-0x02 keystream is the 64-bit LCG at 0xaa93e0 -- NOT ISAAC.
+// The mode-0x02 stream is *not* a whole-entry keystream: the earlier PRNG
+// model was retracted in section 9.0 and disproved by decoding the retail
+// archives (see section 10).
 
 #include "isaec/data/codec.hpp"
+
+#include <zlib.h>
 
 #include <algorithm>
 #include <cstring>
@@ -19,52 +23,12 @@
 namespace isaec::data {
 namespace {
 
-// ---------------------------------------------------------------------------
-// Bogocrypt2 table removed: not a documented mode arm.
-// Mode 0x02 is the PRNG keystream below; see docs/arch000-format.md section 9.
-// ---------------------------------------------------------------------------
-
-// Mode 0x02 (VA 0xa89c90 -> PRNG at 0xaa93e0). The wrapper seeds the PRNG with
-// the entry's specialHash, then XORs the payload with the emitted keystream.
-// The PRNG yields 256 dwords (1024 bytes) per Generate(); callers re-invoke it
-// for longer payloads, so the LCG state persists across calls.
-class PrngStream {
-public:
-    explicit PrngStream(u32 seed) {
-        // Seed prep as disassembled (docs/arch000-format.md section 9.2,
-        // corrected 2026-11-17): the <<8 applies BEFORE the ^(seed>>9).
-        // Earlier revision applied it after, transcribing the bytes in the
-        // wrong order; the emitted hash stream is the keystream of section 9.3.
-        u32 h = (((seed << 15) ^ seed) << 8) ^ (seed >> 9) ^ seed;
-
-        state_ = (static_cast<u64>(seed) << 32) | h;
-    }
-
-    u32 next() {
-        state_ = state_ * 0x4c957f2d5851f42dULL + 0x7fULL;
-
-        const u32 hi = static_cast<u32>(state_ >> 32);
-        const u32 v = static_cast<u32>(state_ >> 27) ^ (hi >> 13);
-        const u32 n = hi >> 27;
-        return (v >> n) | (v << ((32 - n) & 31));
-    }
-
-private:
-    u64 state_;
-};
-
-void prng_keystream_xor(std::vector<u8>& data, u32 seed) {
-    PrngStream prng(seed);
-
-    const usize size = data.size();
-    for (usize i = 0; i < size; i += 4) {
-        const u32 value = prng.next();
-        data[i + 0] ^= static_cast<u8>(value & 0xFF);
-        if (i + 1 < size) data[i + 1] ^= static_cast<u8>((value >> 8) & 0xFF);
-        if (i + 2 < size) data[i + 2] ^= static_cast<u8>((value >> 16) & 0xFF);
-        if (i + 3 < size) data[i + 3] ^= static_cast<u8>((value >> 24) & 0xFF);
-    }
-}
+// Mode 0x02 chunk length mask. The top bit is the end-of-entry flag observed
+// on the final chunk; lengths above 0x7ff never occur in the retail archives
+// and are rejected rather than trusted.
+constexpr u32 kChunkLengthMask = 0x7FFFFFFFu;
+constexpr usize kMaxChunkLength = 0x7FF;
+constexpr usize kStoredChunkLength = 0x400;
 
 // ---------------------------------------------------------------------------
 // Bogocrypt1 (mode-0x00): XOR + conditional swaps + key schedule
@@ -243,6 +207,66 @@ void decode_lzw_codes(const u8* data, usize size, std::vector<u8>& out) {
 // ArchiveCodec public interface
 // ---------------------------------------------------------------------------
 
+bool ArchiveCodec::decode_chunked(const u8* data, usize span, usize expected,
+                                 std::vector<u8>& out) {
+    out.clear();
+    if (expected == 0) return true;
+    out.reserve(expected);
+
+    usize at = 0;
+    while (out.size() < expected) {
+        if (span < at + 4) return false;
+        const u32 raw = static_cast<u32>(data[at]) |
+                        static_cast<u32>(data[at + 1]) << 8 |
+                        static_cast<u32>(data[at + 2]) << 16 |
+                        static_cast<u32>(data[at + 3]) << 24;
+        at += 4;
+
+        const usize length = raw & kChunkLengthMask;
+        if (length > kMaxChunkLength) return false;
+        if (span - at < length) return false;
+
+        if (length == kStoredChunkLength) {
+            out.insert(out.end(), data + at, data + at + length);
+            at += length;
+            continue;
+        }
+
+        z_stream stream{};
+        if (inflateInit2(&stream, -15) != Z_OK) return false;
+        stream.next_in = const_cast<Bytef*>(data + at);
+        stream.avail_in = static_cast<uInt>(length);
+
+        u8 scratch[512];
+        while (out.size() < expected) {
+            stream.next_out = scratch;
+            stream.avail_out = sizeof scratch;
+            const int status = inflate(&stream, Z_NO_FLUSH);
+            const usize produced = sizeof scratch - stream.avail_out;
+            out.insert(out.end(), scratch, scratch + produced);
+            if (status == Z_STREAM_END) break;
+            if (status != Z_OK && status != Z_BUF_ERROR) {
+                inflateEnd(&stream);
+                return false;
+            }
+            // Native miniz is driven by the output buffer: a chunk that runs out
+            // of input is not an error by itself, and does not have to end with a
+            // deflate end marker. No progress with input left is a real failure.
+            if (produced == 0 && stream.avail_in == 0) break;
+            if (produced == 0) {
+                inflateEnd(&stream);
+                return false;
+            }
+        }
+        inflateEnd(&stream);
+
+        at += length;
+    }
+
+    out.resize(expected);
+    return true;
+}
+
 bool ArchiveCodec::decode(std::vector<u8>& data, u8 mode, u32 seed, usize cipher_span) {
     const usize span = cipher_span == 0 ? data.size() : cipher_span;
     if (span > data.size()) return false;
@@ -263,9 +287,9 @@ bool ArchiveCodec::decode(std::vector<u8>& data, u8 mode, u32 seed, usize cipher
             return true;
         }
         case 0x02: {
-            // PRNG keystream XOR, seeded with the entry's specialHash.
-            prng_keystream_xor(data, seed);
-            return true;
+            // Mode 0x02 is not a keystream and cannot be decoded without the
+            // entry's expected output length. Callers use decode_chunked().
+            return false;
         }
         default:
             return false;
@@ -276,7 +300,7 @@ const char* ArchiveCodec::codec_name(u8 mode) {
     switch (mode) {
         case 0x00: return "xor";
         case 0x01: return "lzw";
-        case 0x02: return "prng";
+        case 0x02: return "chunked";
         default: return "unknown";
     }
 }

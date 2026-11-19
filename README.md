@@ -274,7 +274,7 @@ established from the shipped DLL rather than assumed — see
 | Directory-backed data source | **done** |
 | Headless renderer (counts, draws nothing) | **done** |
 | **Playtesting box (white-box sandbox)** | **done** — controllable room, no game data: a square entity moved by arrows/WASD or the stick of XInput-shaped pad 0 (deadzone applied in the engine layer), 60 Hz fixed-step movement in `src/engine/sandbox.cpp` clamped to the room, unit-covered in `tests/test_sandbox.cpp`; `./build/isaec_window slice`, `frames=0` plays until Esc — supersedes #67's fixed marker; see [#67](https://github.com/caos-obliquo/tboi-recomp/issues/67), [#79](https://github.com/caos-obliquo/tboi-recomp/issues/79) |
-| **Controller input (XInput-shaped)** | **done** — engine layer: four pad slots, XInput `wButtons` bit layout, signed up-positive 16-bit thumbsticks, triggers 0–255, `dwPacketNumber` bumping on change, 7849 deadzone; **SDL2 backend** (`isaec::platform::SdlGamepadSource`) — device enumeration + hot-plug rescan + both-motor rumble; **100/100 tests green**; never run against a live game — see [#65](https://github.com/caos-obliquo/tboi-recomp/issues/65) |
+| **Controller input (XInput-shaped)** | **done** — engine layer: four pad slots, XInput `wButtons` bit layout, signed up-positive 16-bit thumbsticks, triggers 0–255, `dwPacketNumber` bumping on change, 7849 deadzone; **SDL2 backend** (`isaec::platform::SdlGamepadSource`) — device enumeration + hot-plug rescan + both-motor rumble; **145/145 tests green**; never run against a live game — see [#65](https://github.com/caos-obliquo/tboi-recomp/issues/65) |
 | **Closure bodies located** | **911 distinct bodies** of 1064 call sites — accounting complete |
 | **Closure bodies decompiled** | **911 / 911**, 0 failures, classified into 11 shapes |
 | **Property-accessor ABI** | **recovered** — [§14](docs/binding-surface-findings.md) |
@@ -288,8 +288,8 @@ established from the shipped DLL rather than assumed — see
 | **Field layout cross-check** | **105 recovered field offsets confirmed** against the Repentogon `.zhl` layouts — 11 under another name, 3 moved; **187 method names confirmed** ([§21](docs/binding-surface-findings.md)) |
 | Field layout | **21 classes with a complete layout**, 434 fields with an offset and a type (174 int, 104 float, 48 bool, 75 object) — **44 of the classes are implemented** as plain field objects, with 310 plain fields ([§24](docs/binding-surface-findings.md)) |
 | **Closure bodies implemented** | **0 / 911 translated** — the closures are glue; 42 native methods behind them are now translated from the binary (22 `Vector`, 6 `Color`, 5 `RNG`, 9 `BitSet128`) |
-| **Packed archive (`ARCH000`) container** | **container solved**, codec open |
-| → `ARCH000` payload codec | **not started** — see [#2](https://github.com/caos-obliquo/tboi-recomp/issues/2) |
+| **Packed archive (`ARCH000`) container** | **container solved**, mode 0x00/0x01/0x02 chunked arms decoded |
+| → `ARCH000` payload codec | **mode 0x02 mostly decoded** — stored records copy at `offset + 9` (378/378 PNGs valid), chunked entries inflate chunk-by-chunk with a `0x400` verbatim arm (1155 entries, 203/203 PNGs valid); 2647 entries remain an unresolved third arm and fail explicitly instead of returning noise; `tests/test_archive.cpp` runs a real-archive check when `ISAEC_TBOI_ARCHIVE` is set — see [#2](https://github.com/caos-obliquo/tboi-recomp/issues/2), [#110](https://github.com/caos-obliquo/tboi-recomp/issues/110) |
 | → `ARCH000` 64-bit name hash | **not started** — see [#1](https://github.com/caos-obliquo/tboi-recomp/issues/1) |
 | GPU rendering | **not started** — see [#5](https://github.com/caos-obliquo/tboi-recomp/issues/5) |
 | Graphics/performance epic | **scoped, not started** — see [#19](https://github.com/caos-obliquo/tboi-recomp/issues/19) |
@@ -428,7 +428,7 @@ tools/                     research + codegen scripts; see tools/README.md
   decompile_corpus.py      resumable batch decompiler for the 911 bodies
 docs/                      measured findings; see docs/binding-surface-findings.md
 bindings/                  recovered surface + generated spec
-tests/                     62 cases with PNG, 57 without, ctest
+tests/                     145 cases with PNG, ctest
 third_party/lua-5.3.6/    vendored, checksum in third_party/CMakeLists.txt
 ```
 
@@ -449,7 +449,7 @@ milestone `M1 Foundation` covers the current blockers.
 | # | What | State |
 |---|---|---|
 | [#1](https://github.com/caos-obliquo/tboi-recomp/issues/1) | Locate the runtime archive loader | **blocked** — enumeration ruled out; approach exhausted |
-| [#2](https://github.com/caos-obliquo/tboi-recomp/issues/2) | `ARCH000` payload codec | **partially advanced** — mode 0x02 is an LCG, constants not recovered |
+| [#2](https://github.com/caos-obliquo/tboi-recomp/issues/2) | `ARCH000` payload codec | **partially advanced** — mode 0x02 chunk framing recovered; 1533/4180 entries decode (581 PNGs, all valid); 2647-entry third arm open |
 | [#3](https://github.com/caos-obliquo/tboi-recomp/issues/3) | Recover bodies and signatures | **partially advanced** — 911/911 decompiled, the shape census done, 24 members implemented, **0 of 911 bodies translated** |
 | [#4](https://github.com/caos-obliquo/tboi-recomp/issues/4) | Per-class attribution | **largely resolved** — 64 classes + 3 namespaces, code-derived; hierarchy not recoverable |
 | [#5](https://github.com/caos-obliquo/tboi-recomp/issues/5) | Real GPU renderer | **blocked** — nothing to draw yet |

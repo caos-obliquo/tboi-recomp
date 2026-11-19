@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 """Decode an Isaac ARCH000 archive.
 
-The container layout and both codecs were recovered by measurement and then
-verified against the reference install: every entry of every archive decodes to
-a recognisable file type. Nothing here is transcribed from another
-implementation. The format facts and the algorithm descriptions are recorded in
-docs/arch000-format.md, and the reference that first documented the layout is
-credited there.
+The container layout and the codec arms were recovered by measurement. Mode
+0x00 and the mode 0x02 chunk framing are verified against the reference install;
+mode 0x01 LZW is implemented but known to diverge on real archives, and 2647
+mode 0x02 entries remain an unresolved third arm, so extraction fails those
+entries explicitly instead of returning noise. Nothing here is transcribed from
+another implementation. The format facts and the algorithm descriptions are
+recorded in docs/arch000-format.md, and the reference that first documented the
+layout is credited there.
 
-Mode 0x02 entries carry a nine-byte record header in front of the payload. When
-that header declares a stored entry the payload is plaintext and needs no cipher
-at all; this is how 965 PNGs in repentance.a and afterbirthp.a were recovered.
+Mode 0x02 has two payload shapes. A stored record carries a nine-byte header and
+its payload is plaintext at ``offset + 9``; those account for 378 PNGs in
+repentance.a. Every other entry is a chunked raw-DEFLATE stream with four-byte
+chunk headers and no entry-level header: ``0x400`` chunks are verbatim, the rest
+inflate, and output stops at the recorded size.
 
 Entry names are recovered by hashing the full lowercased resource path with
 djb2-add (seed 5381, multiplier 33). The hash was confirmed by 22186 matches
@@ -202,53 +206,41 @@ def read_archive(path: Path) -> tuple[int, list[tuple[int, int, int, int, int]]]
     return mode, entries
 
 
-class PrngStream:
-    """The 64-bit LCG keystream generator at VA 0xaa93e0.
+def decode_chunked(blob: bytes, offset: int, size: int, limit: int) -> bytes:
+    """Decode a mode 0x02 chunk stream.
 
-    Disassembled, not transcribed: the arm reached by mode 0x02 allocates two
-    buffers and calls this generator with the entry's specialHash as the seed,
-    then XORs the keystream over the payload. It is a plain linear congruential
-    generator and NOT ISAAC, despite an earlier revision of this file asserting
-    otherwise. Details in docs/arch000-format.md section 9.
+    Measured framing (docs/arch000-format.md section 9.6): a four-byte LE
+    header per chunk, ``len = raw & 0x7fffffff``, top bit set on the final
+    chunk only, ``len == 0x400`` copied verbatim, every other chunk an
+    independent raw-DEFLATE stream. Output stops at ``size`` bytes and never
+    sums chunk lengths, which would read the next entry's table as a header.
+    The PRNG whole-entry model was retracted; nothing here XORs.
     """
+    import zlib
 
-    MULT = 0x4C957F2D5851F42D
-    INC = 0x7F
-
-    def __init__(self, seed: int) -> None:
-        h = ((seed << 15) ^ seed) & U32
-        h ^= seed >> 9
-        h = ((h << 8) ^ seed) & U32
-        self.state = (((seed & U32) << 32) | h) & 0xFFFFFFFFFFFFFFFF
-
-    def next(self) -> int:
-        self.state = (self.state * self.MULT + self.INC) & 0xFFFFFFFFFFFFFFFF
-        hi = (self.state >> 32) & U32
-        v = ((self.state >> 27) & U32) ^ (hi >> 13)
-        n = hi >> 27
-        # The generator derives 32-n with neg/and, so n == 0 would ask for a
-        # shift by 32. That is undefined on a 32-bit register in the C++ port;
-        # masking keeps the two implementations byte-identical rather than
-        # relying on the trailing & U32 to happen to absorb it here.
-        return ((v >> n) | (v << ((32 - n) & 31))) & U32
-
-
-def decode_prng(
-    blob: bytes, offset: int, size: int, special_hash: int
-) -> bytes:
-    out = bytearray(blob[offset : offset + size])
-    prng = PrngStream(special_hash)
-    # The loop advances by whole words but consumes a word whenever any byte of
-    # it remains, so a payload whose length is not a multiple of four still has
-    # its tail XORed by the leading bytes of the next word. Rounding the range
-    # down to the last whole word would leave that tail in plaintext, which the
-    # differential fixture test rejects.
-    for i in range(0, len(out), 4):
-        word = prng.next()
-        for byte_index in range(4):
-            if i + byte_index < len(out):
-                out[i + byte_index] ^= (word >> (8 * byte_index)) & 0xFF
-    return bytes(out)
+    out = bytearray()
+    cursor = offset
+    while len(out) < size:
+        if cursor + 4 > limit:
+            raise Malformed("mode 0x02 chunk stream ends before the declared size")
+        raw = int.from_bytes(blob[cursor : cursor + 4], "little")
+        length = raw & 0x7FFFFFFF
+        if length > 0x7FF:
+            raise Malformed(f"mode 0x02 chunk length 0x{length:x} exceeds 0x7ff")
+        cursor += 4
+        if cursor + length > limit:
+            raise Malformed("mode 0x02 chunk overruns the next entry")
+        chunk = blob[cursor : cursor + length]
+        cursor += length
+        if length == 0x400:
+            out.extend(chunk)
+            continue
+        try:
+            # Buffer-driven, like miniz: no deflate end marker is required.
+            out.extend(zlib.decompressobj(wbits=-15).decompress(chunk))
+        except zlib.error as error:
+            raise Malformed(f"mode 0x02 chunk is not DEFLATE: {error}") from error
+    return bytes(out[:size])
 
 
 def asset_span(
@@ -339,7 +331,8 @@ def decode_entry(
             return blob[
                 offset + RECORD_HEADER_SIZE : offset + RECORD_HEADER_SIZE + size
             ]
-        return decode_prng(blob, offset, size, special_hash)
+        limit = len(blob) if span is None else min(len(blob), offset + span)
+        return decode_chunked(blob, offset, size, limit)
     if mode == MODE_ASSETS:
         return decode_assets(blob, offset, size, special_hash, span)
     raise Malformed(

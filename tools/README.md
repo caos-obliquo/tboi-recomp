@@ -17,6 +17,7 @@ a binary **you** already own, from a path **you** pass in.
 | `probe_iat.py` | Walks the PE import directory, maps every IAT slot to its imported name, and finds each `call dword ptr [slot]` site. | yes |
 | `probe_property_names.py` | Recovers the name and upvalue of every Lua closure registration, by scanning forward from each `lua_pushcclosure` call site. | yes |
 | `probe_body_signatures.py` | Counts the Lua entry points and patched-Lua pseudo-indices each closure body touches. | yes |
+| `probe_mode2_chunks.py` | Walks `ARCH000` mode 0x02 chunk headers on a packed archive, inflates DEFLATE chunks, copies `0x400` chunks verbatim, and prints the decoded / PNG-valid / unresolved split. | yes |
 | `probe_class_attribution.py` | Attributes every closure registration to the game class that owns it, classifies it (method / property / metamethod) and writes `bindings/code-derived-surface.json`. | yes |
 | `negctl-baseline.py` | Negative control for the test suite. Proves a green baseline can go red. | no |
 

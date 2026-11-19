@@ -3,7 +3,7 @@
 // Three modes exist:
 //   - 0x00: Bogocrypt1 (XOR + conditional swaps + key schedule)
 //   - 0x01: LZW decompression (carries no keystream)
-//   - 0x02: 64-bit LCG PRNG keystream XOR, seeded with the entry specialHash
+//   - 0x02: chunked DEFLATE, four-byte length headers between chunks
 //
 // The mode byte is at offset 7 of the archive header.
 
@@ -33,6 +33,24 @@ public:
     //
     // Returns false for an unknown mode or a span larger than the buffer.
     static bool decode(std::vector<u8>& data, u8 mode, u32 seed, usize cipher_span = 0);
+
+    // Decode one mode-0x02 chunk stream, appending to `out`.
+    //
+    // The stream is a sequence of chunks: a little-endian u32 header, then
+    // `header & 0x7fffffff` bytes. The top bit of the header is set on the
+    // final chunk of every entry inspected in the retail archives (1155 of
+    // 1155); it is not a stored flag and is ignored here.
+    //
+    // A chunk length of exactly 0x400 (1024) is a stored chunk and is copied
+    // verbatim. Every other chunk is an independent raw-DEFLATE stream.
+    // Lengths above 0x7ff are rejected. Decoding stops once `expected` bytes
+    // have been produced; a final chunk may overshoot and is truncated.
+    //
+    // `span` must be at least the total chunk sizes. Returns false on a
+    // truncated header, a truncated chunk, an invalid DEFLATE stream, or
+    // running out of input before `expected` bytes exist.
+    static bool decode_chunked(const u8* data, usize span, usize expected,
+                               std::vector<u8>& out);
 
     // Get the codec name for a mode.
     static const char* codec_name(u8 mode);

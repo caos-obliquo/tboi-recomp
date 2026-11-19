@@ -11,7 +11,13 @@
 // not merely with itself.
 
 #include "test_harness.hpp"
+#include "zip_fixture.hpp"
 
+#include "isaec/data/image.hpp"
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -380,10 +386,9 @@ ISAEC_TEST(archive_decode_returns_a_stored_payload_verbatim) {
     CHECK(second[3] == 0xEF);
 }
 
-ISAEC_TEST(archive_decode_refuses_the_modes_this_build_cannot_verify) {
-    // Mode 0x01 decodes real XML and then diverges in length; mode 0x02's PRNG
-    // keystream is indistinguishable from noise on real archives. Returning
-    // either would hand the renderer garbage, so the reader refuses.
+ISAEC_TEST(archive_decode_refuses_lzw_but_decodes_mode_0x02_chunks) {
+    // Mode 0x01 decodes real XML and then diverges in length, so the reader
+    // refuses. Mode 0x02 is a chunk stream and is decoded.
     std::vector<Slot> lzw(1);
     lzw[0].payload = std::vector<u8>(64, 0x7B);
     Archive lzw_archive;
@@ -392,13 +397,31 @@ ISAEC_TEST(archive_decode_refuses_the_modes_this_build_cannot_verify) {
     CHECK(!lzw_archive.decode(0, lzw_out));
     CHECK(lzw_archive.error().find("0x01") != std::string::npos);
 
-    std::vector<Slot> prng(1);
-    prng[0].payload = std::vector<u8>(64, 0x3C);
-    Archive prng_archive;
-    REQUIRE(prng_archive.open(scratch("prng.a", build(0x02, prng))));
-    std::vector<u8> prng_out;
-    CHECK(!prng_archive.decode(0, prng_out));
-    CHECK(prng_archive.error().find("0x02") != std::string::npos);
+    const std::vector<u8> text = {'<', '?', 'x', 'm', 'l', ' ', 'v', '=', '1'};
+    const std::vector<u8> compressed = ::isaec::test::raw_deflate(text);
+    std::vector<u8> stream;
+    put_u32le(stream, static_cast<u32>(compressed.size()) | 0x80000000u);
+    stream.insert(stream.end(), compressed.begin(), compressed.end());
+
+    std::vector<Slot> chunks(1);
+    chunks[0].payload = stream;
+    chunks[0].asset_size = text.size();
+    Archive chunk_archive;
+    REQUIRE(chunk_archive.open(scratch("chunked.a", build(0x02, chunks))));
+    std::vector<u8> decoded;
+    REQUIRE(chunk_archive.decode(0, decoded));
+    CHECK(decoded == text);
+}
+
+ISAEC_TEST(archive_decode_reports_a_bad_mode_0x02_chunk_stream) {
+    std::vector<Slot> slots(1);
+    slots[0].payload = {0x01, 0x08, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF};
+    slots[0].asset_size = 4;
+    Archive archive;
+    REQUIRE(archive.open(scratch("badchunk.a", build(0x02, slots))));
+    std::vector<u8> out;
+    CHECK(!archive.decode(0, out));
+    CHECK(archive.error().find("0x02") != std::string::npos);
 }
 
 ISAEC_TEST(archive_decode_rejects_an_index_outside_the_entry_table) {
@@ -576,3 +599,66 @@ ISAEC_TEST(archive_load_names_rejects_an_unreadable_source_and_clears_the_table)
     CHECK(archive.name(0).empty());
     CHECK(archive.named_count() == 0);
 }
+
+// Opt-in check against a real container. CI has no game install, so the test
+// is silent without ISAEC_TBOI_ARCHIVE. Run it with:
+//
+//   ISAEC_TBOI_ARCHIVE=.../resources/packed/repentance.a ./build/tests/isaec_tests
+//
+// Measured on repentance.a (4180 entries): 378 stored entries decode verbatim,
+// 1155 chunked entries decode, of which 203 are PNGs and every one of them
+// passes libpng. The remaining 2647 are the unresolved stored-chunk arm
+// recorded in docs/arch000-format.md 10.4; they are not asserted here, and the
+// lower bound below is deliberately under the measured count so an archive
+// from a different patch level does not fail the suite.
+#ifdef ISAEC_TEST_PNG
+ISAEC_TEST(archive_real_container_decodes_the_chunked_mode_0x02_arm) {
+    const char* path = std::getenv("ISAEC_TBOI_ARCHIVE");
+    if (path == nullptr || *path == '\0') return;
+
+    Archive archive;
+    if (!archive.open(path)) {
+        ::isaec::test::fail_now("ISAEC_TBOI_ARCHIVE: " + archive.error());
+    }
+    if (archive.mode() != isaec::data::kModePrng) {
+        ::isaec::test::fail_now("ISAEC_TBOI_ARCHIVE is not a mode 0x02 container");
+    }
+
+    usize decoded = 0;
+    usize png_entries = 0;
+    usize png_valid = 0;
+    usize stored_png = 0;
+    static const u8 kPngMagic[8] = {0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n'};
+
+    for (usize i = 0; i < archive.entries().size(); ++i) {
+        std::vector<u8> bytes;
+        if (!archive.decode(i, bytes)) continue;
+        ++decoded;
+        if (bytes.size() < 8 ||
+            std::memcmp(bytes.data(), kPngMagic, sizeof kPngMagic) != 0) {
+            continue;
+        }
+        ++png_entries;
+        if (isaec::data::decode_png(bytes.data(), bytes.size())) ++png_valid;
+        if (archive.is_stored(i)) ++stored_png;
+    }
+
+    std::printf("real archive: %zu entries, %zu decoded, %zu PNG, %zu PNG valid, "
+                "%zu stored PNG\n",
+                archive.entries().size(), decoded, png_entries, png_valid, stored_png);
+    if (decoded < 1500) {
+        ::isaec::test::fail_now("only " + std::to_string(decoded) +
+                                " entries decoded, expected at least 1500");
+    }
+    if (png_entries < 500 || png_valid != png_entries) {
+        ::isaec::test::fail_now(std::to_string(png_valid) + " of " +
+                                std::to_string(png_entries) +
+                                " PNG entries decoded, expected all and at least 500");
+    }
+    // Positive control: the stored arm alone accounts for 378 known PNGs.
+    if (stored_png < 300) {
+        ::isaec::test::fail_now("only " + std::to_string(stored_png) +
+                                " stored PNGs, expected at least 300");
+    }
+}
+#endif
