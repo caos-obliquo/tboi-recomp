@@ -1022,6 +1022,62 @@ Refs #90. Note: this PR deliberately does not start #64/#66/#52/#3/#4/#35 (not m
 - `docs/handoff.md`
 
 
+## [0.1.18] - 2026-11-19
+
+### Merged: [#113](https://github.com/caos-obliquo/tboi-recomp/pull/113) — fix(android): cross-build a static libpng for arm64-v8a [#16]
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-19  **Files:** 4 changed, +75/-31.
+
+<details>
+<summary>Pull request body</summary>
+
+Closes the configure/link half of #16. The NDK sysroot has zlib but no libpng; the old toolchain forced ISAEC_WITH_PNG=OFF and the pkg-config fallback silently linked host libpng, which failed at link time.
+
+- CMake fetches pinned libpng 1.6.44 (FetchContent, static, no tests/tools) for ANDROID; host discovery unchanged.
+- toolchain-android-arm64.cmake no longer forces PNG off.
+- CI drops host libpng-dev, asserts ISAEC_PNG_FOUND=ON, and verifies the first libpng archive member is EM_AARCH64.
+
+Verification in this PR is the CI android-arm64 job; there is no NDK on the authoring host. Host build unaffected: 138 cases, 0 failed on main.
+
+Still open on #16: the APK that consumes this library (SDL2 Activity + Gradle), and an on-device decode.
+
+</details>
+
+#### Closes
+
+- [` `] [#16](https://github.com/caos-obliquo/tboi-recomp/issues/16) Android builds link the host libpng; a cross-built one is required to ship (open)
+
+#### Commits
+
+- `374e5b65` fix(android): cross-build a static libpng for arm64-v8a [#16](https:/…
+  …/github.com/caos-obliquo/tboi-recomp/issues/16)
+  The Android toolchain forced ISAEC_WITH_PNG=OFF because the NDK sysroot
+  ships no libpng, and the pkg-config fallback resolved against host
+  packages: configure succeeded, then the link failed with 'unable to find
+  library -lpng16'. The consequence was that an Android build could not
+  decode a single image.
+  Fetch a pinned libpng at configure time and build it static for the
+  target ABI instead. zlib is the NDK's own, found before libpng configures
+  because libpng's CMake requires a ZLIB target.
+  The CI job drops the host libpng-dev install it used to need, asserts
+  ISAEC_PNG_FOUND=ON in the cache, and reads e_machine from the first
+  archive member to prove the fetched library is AArch64 rather than a
+  host archive.
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `.github/workflows/ci.yml` | 33 | 10 |
+| `CMakeLists.txt` | 33 | 3 |
+| `README.md` | 5 | 7 |
+| `cmake/toolchain-android-arm64.cmake` | 4 | 11 |
+
+#### Documentation
+
+- `README.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
