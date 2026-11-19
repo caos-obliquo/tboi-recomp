@@ -1022,6 +1022,135 @@ Refs #90. Note: this PR deliberately does not start #64/#66/#52/#3/#4/#35 (not m
 - `docs/handoff.md`
 
 
+## [0.1.18] - 2026-11-19
+
+### Merged: [#112](https://github.com/caos-obliquo/tboi-recomp/pull/112) — feat(codec): decode mode 0x02 chunked entries [#110]
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-19  **Files:** 15 changed, +896/-252.
+
+<details>
+<summary>Pull request body</summary>
+
+Implements the mode 0x02 chunked decoder measured on the installed `repentance.a`. Closes the implementation criteria in #110.
+
+## What changed
+
+- `ArchiveCodec::decode_chunked` (`src/data/codec.cpp`): four-byte LE chunk headers, `len = raw & 0x7fffffff`, `len == 0x400` copied verbatim, every other chunk inflated with `inflateInit2(-15)`, output stops at the declared entry size and is truncated on overshoot. Rejects `len > 0x7ff`, truncated chunks and chunks that overrun the next entry offset.
+- `Archive::decode` routes non-stored mode 0x02 entries through it; stored records still copy at `offset + 9`.
+- zlib becomes a core dependency (the NDK sysroot already ships libz).
+- Retracted PRNG class, its generator and `tests/prng_fixtures.inc` deleted. Chunk tests use real raw-DEFLATE streams from `tests/zip_fixture.hpp`.
+- Python reference (`tools/isaac-archive.py`) now decodes the same framing; `decode_prng` removed.
+- Docs: §6 scope correction, §9.0 measured correction, §9.4/§9.5 rewritten, new §9.6 framing, §10 opening/10.1 corrected. HANDOFF §30.1 records the outcome. README codec row and test counts updated.
+- New `tools/probe_mode2_chunks.py` reproduces the split.
+
+## Measurements (`repentance.a`, 4180 mode 0x02 entries)
+
+| arm | entries | result |
+|---|---|---|
+| stored record | 378 | 378 PNG, all valid |
+| chunked decoded | 1155 | 203 PNG (203/203 CRC+IDAT valid), 859 XML, 20 text, 17 RIFF, 56 binary |
+| unresolved | 2647 | full declared size but no known magic, not text; fails explicitly |
+
+Opt-in test output: `4180 entries, 1533 decoded, 581 PNG, 581 PNG valid, 378 stored PNG`. Probe `--all`: `decoded=1155 failed_short=2647`, `png=203`.
+
+Two doc claims are retracted with this data:
+1. every mode 0x02 entry carries a nine-byte header — only stored records do;
+2. `0x400` chunks are PRNG-XORed — the PNG CRCs prove they are verbatim.
+
+The 2647-entry third arm is documented as open, not asserted.
+
+## Verification
+
+- `cmake --build build -j8` clean
+- `./build/tests/isaec_tests`: 145 cases, 0 failed
+- `ISAEC_TBOI_ARCHIVE=.../repentance.a ./build/tests/isaec_tests`: same, with the real-archive case green
+- `python3 tools/probe_mode2_chunks.py <archive> --all` agrees with the C++ counts
+
+No game bytes are committed; the real-archive test is silent unless the env var is set.
+
+Note: this branch contains the docs retraction commit from #111, and rewrites parts of it, so #111 can be closed as superseded once this lands.
+
+</details>
+
+#### Closes
+
+- [` `] [#110](https://github.com/caos-obliquo/tboi-recomp/issues/110) Implement MiniZ stage for mode 0x02 and correct PRNG transcription (open)
+- [` `] [#111](https://github.com/caos-obliquo/tboi-recomp/pull/111) docs(codec): retract mode 0x02 PRNG claim, record MiniZ chain [#109] (open)
+
+#### Commits
+
+- `897d64d8` docs(codec): retract mode 0x02 PRNG claim, record MiniZ chain [#109]
+  REA/Ghidra analysis of the shipped isaac-ng.exe shows mode 0x02 is a MiniZ chunk stream whose stored blocks are XORed by the PRNG at 0xaa93e0; the compressed path calls 0xa85710 with no PRNG XOR. The previous docs described a whole-entry PRNG keystream and therefore misdiagnosed the 1406-entry noise result. Also correct the LCG multiplier word order and seed preparation transcription. Verification only: no production code changed; implementation follows in #110.
+- `e3ba4b72` fix(codec): correct mode-0x02 PRNG seed preparation in C++ [#52]
+  The seed prep for the 64-bit LCG at 0xaa93e0 was wrong: it applied the
+  (seed>>9) XOR before the (h<<8), the binary applies it after. Proven by
+  instruction-level evidence (Ghidra read_function_instructions,
+  ev_ea9666e3e700c4a5a0be1a326b339d94056ad29f255019bd2a0a56b1d4925ab5) and
+  by Kuna 1.906 standalone decompile of 0xaa93e0.
+  Correct: h = (((seed<<15)^seed)<<8) ^ (seed>>9) ^ seed
+  (state_lo = h, state_hi = seed)
+  tests/prng_fixtures.inc regenerated from new standalone reference
+  tools/gen_prng_fixtures.py (self-contained, no import of the user-owned
+  tools/isaac-archive.py, which still carries the old prep). isaec_tests
+  108/108, ctest green.
+  NOTE: fixtures remain self-referential (C++ vs Python reference), not
+  validated against game data. Stronger check on real mode-0x02 archives
+  produced ZERO known magics on all entries tried; the keystream is a
+  stored buffer consumed through vtable slot +0xc, not an inline XOR, and
+  the dispatcher seed is *(a0+12)+8, not obviously an entry field. Mode
+  0x02 remains UNVALIDATED against the game. See docs/rea-gap-analysis.md.
+- `ca53bac2` feat(codec): decode mode 0x02 chunked entries [#110](https://github.c…
+  …om/caos-obliquo/tboi-recomp/issues/110)
+  Mode 0x02 is not a whole-entry PRNG stream. Measured on the installed
+  repentance.a: each non-stored entry is a sequence of four-byte little-endian
+  chunk headers. Length is `raw & 0x7fffffff`; the top bit is set on the final
+  chunk and nowhere else (1155/1155 decoded entries, `other = 0`). A chunk whose
+  length is exactly 0x400 is stored verbatim; every other chunk is an independent
+  raw-DEFLATE stream. Output stops at the declared entry size, never at the sum of
+  chunk lengths, because that sum walks past the entry into the next one.
+  Measured split of 4180 mode 0x02 entries: 378 stored records (378 PNGs, all
+  valid), 1155 chunked entries decoded (203 PNG, 859 XML, 20 text, 17 RIFF, 56
+  other; 203/203 PNGs pass full CRC and IDAT) and 2647 unresolved entries. The
+  2647 assemble to the declared size but match no known magic and resist the PRNG
+  and bogocrypt1 candidates tried; they now fail explicitly rather than returning
+  noise. `ArchiveCodec::decode_chunked` uses zlib `inflateInit2(-15)` and makes
+  zlib a core dependency, which the NDK sysroot already ships.
+  This retracts the docs claim that every mode 0x02 entry has a nine-byte record
+  header (only stored records do) and the claim that 0x400 chunks are PRNG-XORed
+  (the PNG CRCs prove they are verbatim). The retracted PRNG class, its fixture
+  generator and `tests/prng_fixtures.inc` are deleted. Chunk tests build real
+  raw-DEFLATE streams via `tests/zip_fixture.hpp`; the opt-in real-archive test
+  runs when `ISAEC_TBOI_ARCHIVE` is set and reported 4180 entries, 1533 decoded,
+  581 PNGs, all valid. No game bytes are committed.
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `CMakeLists.txt` | 8 | 0 |
+| `README.md` | 5 | 5 |
+| `docs/HANDOFF.md` | 80 | 0 |
+| `docs/arch000-format.md` | 171 | 50 |
+| `include/isaec/data/codec.hpp` | 19 | 1 |
+| `src/data/archive.cpp` | 13 | 2 |
+| `src/data/codec.cpp` | 76 | 50 |
+| `tests/CMakeLists.txt` | 4 | 0 |
+| `tests/prng_fixtures.inc` | 0 | 26 |
+| `tests/test_archive.cpp` | 97 | 11 |
+| `tests/test_codec.cpp` | 109 | 52 |
+| `tests/zip_fixture.hpp` | 34 | 0 |
+| `tools/README.md` | 1 | 0 |
+| `tools/isaac-archive.py` | 48 | 55 |
+| `tools/probe_mode2_chunks.py` | 231 | 0 |
+
+#### Documentation
+
+- `README.md`
+- `docs/HANDOFF.md`
+- `docs/arch000-format.md`
+- `tools/README.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
