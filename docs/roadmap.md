@@ -107,9 +107,10 @@ surface they call, nothing else.
 
 ### Phase 6 — targets (#66)
 Linux x86_64 first-class first (clean-clone verify, pacing/vsync, reads on the
-user's own install), then Android arm64 via NDK + `ISAEC_WITH_PNG=OFF`, #16
-(libpng cross-build decision) as the known blocker; on-device verification;
-README sideload docs. **No Android-native Repentance+ port exists publicly.**
+user's own install), then Android arm64 via NDK. The libpng cross-build (#16)
+is solved by fetching a pinned static libpng; the slice is packaged as an
+arm64 debug APK and built in CI. On-device verification and README sideload
+docs remain. **No Android-native Repentance+ port exists publicly.**
 
 ### Phase 7 — mod system (future, design phase only)
 When bindings settle: resource-mod overlays using the Android-port guide's

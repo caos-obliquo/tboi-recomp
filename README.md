@@ -392,6 +392,15 @@ no libpng, so the configure step fetches a pinned libpng and builds it static
 for arm64-v8a; nothing host-side is linked into the target. CI asserts the
 resulting library and our own objects are AArch64.
 
+The windowed slice is also packaged as an arm64 debug APK. `android/` is a
+minimal Gradle project whose Activity is SDL2's `SDLActivity`; `libmain.so`
+calls the same `isaec_window_main` entry point as the desktop binary and opens
+the white-box slice at 1280×720. The `android-apk` CI job fetches pinned SDL2
+and Gradle, builds with the NDK, verifies `lib/arm64-v8a/libmain.so` and
+`libSDL2.so` are inside the APK, and uploads it as the `isaec-android-debug`
+artifact. There is no on-device run yet: no device is attached to the build
+host, so the first install is an owner step.
+
 ```sh
 cmake -S . -B build-android \
   -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-android-arm64.cmake \
@@ -399,8 +408,8 @@ cmake -S . -B build-android \
 ```
 
 CI builds on Linux (gcc and clang) and macOS, configures against the Android NDK,
-and additionally gates on `-Werror`, ASan+UBSan, spec freshness, and the binding
-extractor's self-check.
+packages the debug APK, and additionally gates on `-Werror`, ASan+UBSan, spec
+freshness, and the binding extractor's self-check.
 
 ---
 
@@ -454,7 +463,7 @@ milestone `M1 Foundation` covers the current blockers.
 | [#6](https://github.com/caos-obliquo/tboi-recomp/issues/6) | Repentance+ API surface | **partially advanced** |
 | [#7](https://github.com/caos-obliquo/tboi-recomp/issues/7) | Purge HUD/Isaac contamination | **resolved** — the code-derived surface replaces the contaminated one |
 | [#12](https://github.com/caos-obliquo/tboi-recomp/issues/12) | Name the patched-Lua anchored value | **open** — the last gap in the ABI |
-| [#16](https://github.com/caos-obliquo/tboi-recomp/issues/16) | Cross-built libpng for Android | **partially advanced** — static arm64 libpng fetched at configure; CI check pending |
+| [#16](https://github.com/caos-obliquo/tboi-recomp/issues/16) | Cross-built libpng for Android | **resolved** — static arm64 libpng fetched at configure; CI reads `e_machine` from the archive and requires `b700` |
 | [#17](https://github.com/caos-obliquo/tboi-recomp/issues/17) | Name the 372 anonymous bodies | **resolved** — all 911 bodies are named and class-attributed |
 | [#18](https://github.com/caos-obliquo/tboi-recomp/issues/18) | `macos-arm64` never dispatches | **resolved** — the required context was removed, the job is gone |
 | [#19](https://github.com/caos-obliquo/tboi-recomp/issues/19) | Graphics + performance epic | **scoped, not started** |

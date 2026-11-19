@@ -480,10 +480,10 @@ file is kept beside it as `isaac-ng-body-seeds-441.tsv`.
 ```
 approvals required   0     solo repo: the owner cannot approve their own PR,
                             so requiring 1 blocked every merge forever
-required checks      9     every real CI job context, verified 2026-11-17
+required checks      10    every real CI job context, verified 2026-11-19
                             against the branch-protection API (strict=true):
                             linux-gcc, linux-clang, linux-arm64, android-arm64,
-                            warnings-as-errors, asan-ubsan,
+                            android-apk, warnings-as-errors, asan-ubsan,
                             generated-spec-is-current,
                             binding-extractor-selfcheck,
                             release-notes-are-writable
@@ -1141,3 +1141,41 @@ Consequence for the PRNG section: `0xaa93e0`/`0xa89d70` remain an unexercised
 reading. The stored-block XOR condition in the native wrapper has not been
 identified in the data, so production does not XOR anything and no claim in
 the docs depends on the PRNG.
+
+## 31. Android packaging: an arm64 debug APK exists, on-device run does not
+
+State as of 2026-11-19. This section records what is actually built, because
+"Android works" is still false.
+
+**What exists.** `android/` is a minimal Gradle project (AGP 8.5.2, Gradle 8.7,
+compileSdk/targetSdk 34, minSdk 24, `abiFilters arm64-v8a`). Its only activity
+is `org.caos.isaec.MainActivity`, which extends SDL2's `SDLActivity` and loads
+`SDL2` then `main`. `libmain.so` is built from `src/platform/android_main.cpp`,
+which calls the same `isaec_window_main` as the desktop binary with
+`{"slice","1280","720"}` — the white-box room, not a game asset.
+
+**Dependencies.** Both are fetched at configure time, pinned by tag, and built
+from source: SDL2 `release-2.32.10` (Android only) and libpng `v1.6.44`
+(static, `CMAKE_POSITION_INDEPENDENT_CODE` forced because its objects end up
+in `libmain.so`). The NDK sysroot's `libz` is used directly. Nothing host-side
+is linked into the target.
+
+**Evidence.** The `android-apk` job builds `:app:assembleDebug`, unzips the
+APK, and fails unless `lib/arm64-v8a/libmain.so` and `lib/arm64-v8a/libSDL2.so`
+are present, then uploads `isaec-android-debug`. The artifact from run
+44482470989 measured 3,653,915 bytes with `libmain.so` 1,321,744,
+`libSDL2.so` 2,256,488, and no non-arm64 ABI directory. It is a debug-signed
+APK with three dex files; `classes.dex` alone is tiny, the SDL Java classes
+land in a later dex, so a size check on `classes.dex` must not be used as a
+"Java did not compile" signal (that mistake was made once).
+
+**What is not shown.** No device or emulator ever ran this APK from the build
+host (`adb devices` is empty). There is no tap/touch input mapping, no archive
+picker, no storage permission flow, and no read of the player's install on
+Android. The APK shows the slice and nothing else. Sideload instructions are
+in `README.md`; the first physical run is an owner step and stays open on #66.
+
+**CI lesson worth keeping.** The first `android-apk` run failed fetching
+`com.google.errorprone:error_prone_annotations:2.3.1` from Maven; a rerun of
+the same commit passed unchanged. That is an upstream-registry flake, not a
+build defect — check the failing URL before changing the build.
