@@ -469,7 +469,7 @@ milestone `M1 Foundation` covers the current blockers.
 | [#19](https://github.com/caos-obliquo/tboi-recomp/issues/19) | Graphics + performance epic | **scoped, not started** |
 | [#20](https://github.com/caos-obliquo/tboi-recomp/issues/20) | Cross-check the 372 anonymous bodies against REPENTOGON | **open** — highest-leverage item on the board |
 | [#52](https://github.com/caos-obliquo/tboi-recomp/issues/52) | Mode `0x01` LZW decoder | **resolved** — C++ ported from the natives; `config.a` 24/24 and `fonts.a` 10/10 at exact size, `rooms.a` 12/13 with one explicit short decode |
-| [#107](https://github.com/caos-obliquo/tboi-recomp/issues/107) | Game-side oracle for LZW parity | **partially advanced** — oracle tool compares C++ against the Python reference entry by entry; no game bytes committed |
+| [#107](https://github.com/caos-obliquo/tboi-recomp/issues/107) | Game-side oracle for LZW parity | **done** — `tools/check_lzw_oracle.py` compares every entry of a user-supplied archive against the Python reference; 24/24 on `config.a`, exit 0, and the reverted #52 defect makes it fail; no game bytes committed |
 
 ---
 

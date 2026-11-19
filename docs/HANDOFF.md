@@ -1191,7 +1191,7 @@ refuses mode 0x01.
 `tools/gen_lzw_fixtures.py` regenerates `tests/lzw_fixtures.inc` (6 synthetic
 cases, no game bytes committed) from `tools/isaac-archive.py`. The multi-chunk
 cases exercise dictionary persistence and the truncate-back step. The suite
-went from 145 to 152 cases, 0 failed. A negative control that reset the
+went from 145 to 148 cases, 0 failed. A negative control that reset the
 dictionary per chunk made three LZW tests fail, so the persistence assertions
 are not vacuous.
 
@@ -1202,19 +1202,20 @@ exactly their recorded size (first entry begins `<achievements gfxroot="resource
 explicit error in `Archive::decode` instead of a zero-padded payload. The cause
 is not identified.
 
-What this does **not** establish: the reimplementation has not been run against
-the game's own decoder as an oracle. Agreement is between the disassembly, the
-Python port and the C++ port.
+What this does **not** establish: at the time this section was written the
+reimplementation had not been run against the game's own decoder as an oracle.
+§31 closes that gap; agreement there is still between the disassembly, the
+Python port and the C++ port, since the game's decoder is not callable here.
 
 ---
 
-## 31. Game-side oracle for LZW is #107, on its own branch
+## 31. Game-side oracle for LZW: implemented, run, negative-controlled
 
-[#107](https://github.com/caos-obliquo/tboi-recomp/issues/107) tracks the missing
-oracle from §30. It is a separate issue and a separate branch
-(`feature/107-lzw-oracle`), deliberately not folded into #52's branch or PR
-#106: the user asked for separate branches and no PR merges until each piece is
-evidenced on its own.
+[#107](https://github.com/caos-obliquo/tboi-recomp/issues/107) tracked the
+missing oracle from §30. It landed on `feature/107-lzw-oracle` and PR #108,
+deliberately separate from #52's branch and PR #106 so each piece carried its
+own evidence.
+
 
 The probe is a C++ decode of every entry of a user-supplied real `config.a`
 through `Archive::decode`, compared byte-for-byte and by SHA256 with
