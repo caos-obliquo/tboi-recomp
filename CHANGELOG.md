@@ -1022,6 +1022,76 @@ Refs #90. Note: this PR deliberately does not start #64/#66/#52/#3/#4/#35 (not m
 - `docs/handoff.md`
 
 
+## [0.1.18] - 2026-11-19
+
+### Merged: [#108](https://github.com/caos-obliquo/tboi-recomp/pull/108) — feat(tools): add game-side LZW oracle [#107]
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-19  **Files:** 7 changed, +223/-3.
+
+<details>
+<summary>Pull request body</summary>
+
+Game-side oracle for the mode 0x01 LZW work tracked by #107, itself a follow-up to #52. **Do not merge yet** — this is for review only.
+
+### What lands
+
+- `src/tools/lzw_oracle.cpp`: reads an archive path at runtime, requires mode `0x01`, decodes every entry through `Archive::decode`, and writes a framed binary stream to stdout (u32 LE index, u32 LE decoded size, raw bytes). Ships no game data.
+- `tools/check_lzw_oracle.py`: loads `tools/isaac-archive.py`, runs the C++ oracle on a user-supplied archive, parses the framed stream, and compares every entry byte-for-byte with the Python reference. It also parses any XML entry and checks `items.xml` is exactly 51228 bytes and contains The Sad Onion (`id="1"`).
+- `CMakeLists.txt`: new `isaec_lzw_oracle` target, links only `isaec_core`, same `-Wall -Wextra` as the other executables.
+- `include/isaec/data/archive.hpp`: stale comment claiming mode `0x01` diverges/gets refused replaced — mode `0x01` now decodes via the compressed span and truncates to the recorded size; only non-stored mode `0x02` is refused.
+- Docs: `docs/HANDOFF.md` §31, `README.md` #107 row, `tools/README.md` checker row.
+
+### Evidence
+
+- `cmake --build build -j4` — green (only the pre-existing vendored-Lua `tmpnam` warning).
+- `ctest --test-dir build --output-on-failure` — 1/1 passed; `isaec_tests` 141 cases, 0 failed.
+- `python3 tools/check_lzw_oracle.py . "$HOME/.local/share/Steam/steamapps/common/The Binding of Isaac Rebirth/resources/packed/config.a"` — `entries: 24 (C++ records: 24)`, `result: 24/24 entries match`, exit 0. Entry 14 (`items.xml`) = 51228 bytes, sha256 prefix `4fbad99276`; entry 0 = 25894 bytes, prefix `e88c04f127`.
+- Negative control 1: per-chunk `state.reset()` in `decode_lzw` (`src/data/codec.cpp`) → checker `3/24 entries match`, exit 1 (21 BYTE mismatches). Restored; checker green again.
+- Negative control 2: `span = size` instead of `cipher_span(index)` in `Archive::decode` (`src/data/archive.cpp`) → oracle exits 1 (`entry 9 runs past the end of the file`). Restored; checker green again.
+- `git diff --check` clean. No game bytes committed.
+
+### REA / Ghidra references
+
+`isaac-ng.exe` SHA256 `3bdfc8bae0dc7e334b76009d0ad45dfbb16ee5f00c06ffbc3a0094e34d44616b`; mode dispatch `0xa68c50`; init `0xa850f0` (`ev_2ba7fae00f476b26809b438919f98d5f79ea9ab52bb30d9d99b40a3ff9939edd`); bit reader `0xa85090` (`ev_022dd8441b68bb8c05295291c706d5d4c3ce7141b14d471b0290afe8c337b690`); emit `0xa85020` (`ev_7e10cbc6d1e68acef69eb4da7e34bfa2845aa5793a7b77352d107fc3a0414a99`); chunk loop `0xa85320` (`ev_8f84fe3f86c05c3868f6e941f6039201a6865ca0993510ef59215363fb12152e`). These were cited in docs and in the #52/#107 issue comments.
+
+### Scope / stacking
+
+- This branch starts at `be382ba` on `fix/52-lzw-decoder`, so the diff against `main` currently also shows the two commits from #106 / PR #106. If #106 lands first this PR shrinks to just `6484eb4`. No merge performed here.
+- Mode `0x02` PRNG remains unverified and refused — explicitly out of scope.
+- Issues #52 and #107 were closed with Resolved evidence comments; this PR is the remaining review artifact.
+
+</details>
+
+#### Closes
+
+- [`x`] [#52](https://github.com/caos-obliquo/tboi-recomp/issues/52) LZW (mode 0x01): the decoder over-produces past the recorded size; chunks after the first produce garbage (closed)
+- [` `] [#106](https://github.com/caos-obliquo/tboi-recomp/pull/106) fix(tools): port the game's LZW chunk dictionary (merged)
+- [`x`] [#107](https://github.com/caos-obliquo/tboi-recomp/issues/107) Game-side oracle for mode 0x01 LZW parity (#52 follow-up) (closed)
+
+#### Commits
+
+- `f3eba4e1` feat(tools): add a game-side oracle for the LZW decoder [#107](https:…
+  …//github.com/caos-obliquo/tboi-recomp/issues/107)
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `CMakeLists.txt` | 9 | 0 |
+| `README.md` | 2 | 0 |
+| `docs/HANDOFF.md` | 27 | 0 |
+| `include/isaec/data/archive.hpp` | 4 | 3 |
+| `src/tools/lzw_oracle.cpp` | 59 | 0 |
+| `tools/README.md` | 1 | 0 |
+| `tools/check_lzw_oracle.py` | 121 | 0 |
+
+#### Documentation
+
+- `README.md`
+- `docs/HANDOFF.md`
+- `tools/README.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
