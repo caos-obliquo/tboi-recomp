@@ -152,6 +152,7 @@ add_library(isaec_core
   src/data/codec.cpp
   ${ISAEC_IMAGE_SRC}
   src/data/archive.cpp
+  src/data/anm2.cpp
 )
 
 target_include_directories(isaec_core PUBLIC

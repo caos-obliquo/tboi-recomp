@@ -61,9 +61,9 @@ closes on a promise.
 merge pending). What a real game additionally needs, before a single menu can
 draw:
 
-- **ANM2 animation loader** — sprites/animations carry Isaac's look; no
-  existing code, must be derived from the user's install + binary. Blocks
-  Phase 5.
+- ~~**ANM2 animation loader**~~ — parser landed ([anm2-format.md](anm2-format.md),
+  #124): 4104 of 4104 documents in three archives. Playback and texture binding
+  remain renderer work.
 - **GPU/SDL renderer proper (#5)** — replace white-box with real textures;
   vsync gate per #66.
 - **ARCH000 container & decode paths** — partially addressed (#52 open: the

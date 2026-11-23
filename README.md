@@ -272,9 +272,10 @@ established from the shipped DLL rather than assumed — see
 | Declarative `ApiSpec` → `Binding` codegen | **done** |
 | Recovered surface registers and resolves | **done** (as stubs) — 64 classes + 3 namespaces, 1003 methods + 461 properties, all behind `not_implemented_trampoline` except the 372 implemented members |
 | Directory-backed data source | **done** |
+| **ANM2 animation documents** | **loader done** — `isaec::data::parse_anm2` reads spritesheets, layers, nulls, events, root/layer/null timelines and triggers into typed data; 4104 of 4104 documents in three shipped archives parse, 345497 root+layer frames, synthetic fixtures only; nothing draws them yet — [anm2-format.md](docs/anm2-format.md), [#124](https://github.com/caos-obliquo/tboi-recomp/issues/124) |
 | Headless renderer (counts, draws nothing) | **done** |
 | **Playtesting box (white-box sandbox)** | **done** — controllable room, no game data: a square entity moved by arrows/WASD or the stick of XInput-shaped pad 0 (deadzone applied in the engine layer), 60 Hz fixed-step movement in `src/engine/sandbox.cpp` clamped to the room, unit-covered in `tests/test_sandbox.cpp`; `./build/isaec_window slice`, `frames=0` plays until Esc — supersedes #67's fixed marker; see [#67](https://github.com/caos-obliquo/tboi-recomp/issues/67), [#79](https://github.com/caos-obliquo/tboi-recomp/issues/79) |
-| **Controller input (XInput-shaped)** | **done** — engine layer: four pad slots, XInput `wButtons` bit layout, signed up-positive 16-bit thumbsticks, triggers 0–255, `dwPacketNumber` bumping on change, 7849 deadzone; **SDL2 backend** (`isaec::platform::SdlGamepadSource`) — device enumeration + hot-plug rescan + both-motor rumble; **148/148 tests green**; never run against a live game — see [#65](https://github.com/caos-obliquo/tboi-recomp/issues/65) |
+| **Controller input (XInput-shaped)** | **done** — engine layer: four pad slots, XInput `wButtons` bit layout, signed up-positive 16-bit thumbsticks, triggers 0–255, `dwPacketNumber` bumping on change, 7849 deadzone; **SDL2 backend** (`isaec::platform::SdlGamepadSource`) — device enumeration + hot-plug rescan + both-motor rumble; **159/159 tests green**; never run against a live game — see [#65](https://github.com/caos-obliquo/tboi-recomp/issues/65) |
 | **Closure bodies located** | **911 distinct bodies** of 1064 call sites — accounting complete |
 | **Closure bodies decompiled** | **911 / 911**, 0 failures, classified into 11 shapes |
 | **Property-accessor ABI** | **recovered** — [§14](docs/binding-surface-findings.md) |
@@ -435,7 +436,7 @@ tools/                     research + codegen scripts; see tools/README.md
   decompile_corpus.py      resumable batch decompiler for the 911 bodies
 docs/                      measured findings; see docs/binding-surface-findings.md
 bindings/                  recovered surface + generated spec
-tests/                     148 cases with PNG, ctest
+tests/                     159 cases with PNG, ctest
 third_party/lua-5.3.6/    vendored, checksum in third_party/CMakeLists.txt
 ```
 

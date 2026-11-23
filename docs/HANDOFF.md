@@ -1204,12 +1204,12 @@ is not identified.
 
 What this does **not** establish: at the time this section was written the
 reimplementation had not been run against the game's own decoder as an oracle.
-§31 closes that gap; agreement there is still between the disassembly, the
+§33 closes that gap; agreement there is still between the disassembly, the
 Python port and the C++ port, since the game's decoder is not callable here.
 
 ---
 
-## 31. Game-side oracle for LZW: implemented, run, negative-controlled
+## 33. Game-side oracle for LZW: implemented, run, negative-controlled
 
 [#107](https://github.com/caos-obliquo/tboi-recomp/issues/107) tracked the
 missing oracle from §30. It landed on `feature/107-lzw-oracle` and PR #108,
@@ -1233,3 +1233,39 @@ loop (the defect #52 removed) makes the oracle exit 1 with
 `entry 0: codec produced 1087 bytes for entry 0, expected 25894`. The control was
 then reverted and the positive run repeated. No game bytes are in the tree; the
 archive path is an argument.
+
+---
+
+## 34. ANM2 documents parse, and nothing draws them yet
+
+[#124](https://github.com/caos-obliquo/tboi-recomp/issues/124) opened the
+Phase 1 gate named in the roadmap: no ANM2 loader existed. `isaec::data::
+parse_anm2` now reads the dialect into typed data (spritesheets, layers, nulls,
+events, per-animation root/layer/null timelines, triggers). Schema, tolerances
+and limitations live in [anm2-format.md](anm2-format.md); this entry records the
+state and the evidence.
+
+Corpus, measured 2026-11-23 by running `./build/tests/isaec_tests` with
+`ISAEC_TBOI_ARCHIVE` set per archive:
+
+| Archive | entries | decoded | PNG (valid) | ANM2 parsed | root+layer frames |
+|---|---|---|---|---|---|
+| `repentance.a` | 4180 | 1533 | 581 (581) | 833 / 833 | 88147 |
+| `afterbirthp.a` | 10367 | 3472 | 971 (971) | 2249 / 2249 | 193801 |
+| `afterbirth.a` | 2647 | 1102 | 0 | 1022 / 1022 | 63549 |
+
+The repository suite went from 148 to 159 cases, 0 failed. The real-archive test
+now scales its decode floor with the entry count instead of asserting
+Repentance's totals, because `afterbirth.a` decodes 1102 of 2647 entries with no
+PNGs at all.
+
+Two tolerances are data-driven, not guesses: shipped documents contain
+`Name="" FrameNum="0"` placeholders and animations referencing layers the
+document does not define. The parser keeps both: blank animations are never
+resolved by name, and dangling ids are counted in `Anm2::dangling_references`.
+Structural damage is still fatal.
+
+What this does **not** establish: nothing consumes the data. There is no
+timeline advance, no texture binding, and no spritesheet lookup by path, so the
+screen still shows the white-box slice. The next gate is renderer work (#5),
+then playback.

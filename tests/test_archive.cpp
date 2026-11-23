@@ -673,19 +673,25 @@ ISAEC_TEST(archive_real_container_decodes_the_chunked_mode_0x02_arm) {
     std::printf("real archive: %zu entries, %zu decoded, %zu PNG, %zu PNG valid, "
                 "%zu stored PNG\n",
                 archive.entries().size(), decoded, png_entries, png_valid, stored_png);
-    if (decoded < 1500) {
-        ::isaec::test::fail_now("only " + std::to_string(decoded) +
-                                " entries decoded, expected at least 1500");
+    // Bounds are calibrated to the Repentance archive (4180 entries: 1533
+    // decoded, 581 PNG, 378 stored PNG). Other shipped archives are smaller and
+    // carry fewer assets, so the minimum scales with the entry count instead of
+    // asserting one patch level's totals.
+    const usize minimum = archive.entries().size() >= 4000 ? 1500 : archive.entries().size() / 3;
+    if (decoded < minimum) {
+        ::isaec::test::fail_now("only " + std::to_string(decoded) + " of " +
+                                std::to_string(archive.entries().size()) +
+                                " entries decoded, expected at least " +
+                                std::to_string(minimum));
     }
-    if (png_entries < 500 || png_valid != png_entries) {
+    if (png_valid != png_entries) {
         ::isaec::test::fail_now(std::to_string(png_valid) + " of " +
-                                std::to_string(png_entries) +
-                                " PNG entries decoded, expected all and at least 500");
+                                std::to_string(png_entries) + " PNG entries decoded, expected all");
     }
-    // Positive control: the stored arm alone accounts for 378 known PNGs.
-    if (stored_png < 300) {
-        ::isaec::test::fail_now("only " + std::to_string(stored_png) +
-                                " stored PNGs, expected at least 300");
+    if (archive.entries().size() >= 4000 && (png_entries < 500 || stored_png < 300)) {
+        ::isaec::test::fail_now(std::to_string(png_entries) + " PNG (" +
+                                std::to_string(stored_png) +
+                                " stored), expected at least 500 and 300 stored");
     }
 }
 #endif
