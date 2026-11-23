@@ -1022,6 +1022,42 @@ Refs #90. Note: this PR deliberately does not start #64/#66/#52/#3/#4/#35 (not m
 - `docs/handoff.md`
 
 
+## [0.1.18] - 2026-11-23
+
+### Merged: [#122](https://github.com/caos-obliquo/tboi-recomp/pull/122) — docs(handoff): record the LZW oracle as implemented [#107]
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-23  **Files:** 2 changed, +12/-11.
+
+<details>
+<summary>Pull request body</summary>
+
+Follow-up to #108. README row #107 now says done, HANDOFF §31 says implemented/run/negative-controlled, and §32's suite count is corrected from 152 to the measured 148.
+
+</details>
+
+#### Closes
+
+- [`x`] [#107](https://github.com/caos-obliquo/tboi-recomp/issues/107) Game-side oracle for mode 0x01 LZW parity (#52 follow-up) (closed)
+- [` `] [#108](https://github.com/caos-obliquo/tboi-recomp/pull/108) feat(tools): add game-side LZW oracle [#107] (merged)
+
+#### Commits
+
+- `8ad4e27e` docs(handoff): record the LZW oracle as implemented and correct the s…
+  …uite count [#107](https://github.com/caos-obliquo/tboi-recomp/issues/107)
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `README.md` | 1 | 1 |
+| `docs/HANDOFF.md` | 11 | 10 |
+
+#### Documentation
+
+- `README.md`
+- `docs/HANDOFF.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
