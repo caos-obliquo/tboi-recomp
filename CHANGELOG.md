@@ -1022,6 +1022,61 @@ Refs #90. Note: this PR deliberately does not start #64/#66/#52/#3/#4/#35 (not m
 - `docs/handoff.md`
 
 
+## [0.1.18] - 2026-11-23
+
+### Merged: [#127](https://github.com/caos-obliquo/tboi-recomp/pull/127) — feat(data): parse ANM2 animation documents [#124]
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-23  **Files:** 10 changed, +988/-17.
+
+<details>
+<summary>Pull request body</summary>
+
+Closes the Phase 1 loader gate in docs/roadmap.md.
+
+Adds `isaec::data::parse_anm2`: a hand-rolled reader for the ANM2 XML dialect (no XML dependency), producing spritesheets, layers, nulls, events and per-animation root/layer/null timelines with triggers. Frame fields are position, pivot, crop, size, delay, scale, rotation, RGBA tint and offsets, visible, interpolated.
+
+Evidence, run 2026-11-23 against user-owned installs with `ISAEC_TBOI_ARCHIVE`:
+| archive | entries | decoded | PNG valid | ANM2 parsed | root+layer frames |
+| repentance.a | 4180 | 1533 | 581 | 833/833 | 88147 |
+| afterbirthp.a | 10367 | 3472 | 971 | 2249/2249 | 193801 |
+| afterbirth.a | 2647 | 1102 | 0 | 1022/1022 | 63549 |
+
+Suite 148 -> 159 cases, 0 failed. Synthetic fixtures only; no game bytes.
+
+Two tolerances came from the data, not from guessing: `Name="" FrameNum="0"` placeholders exist in shipped documents, and some animations reference layers the document does not define. Both are kept (blank animations are never found by name; dangling ids are counted in `Anm2::dangling_references`), while structural damage is still fatal.
+
+Docs: new docs/anm2-format.md; HANDOFF §34 plus duplicate §31 renumbered to §33; roadmap Phase 1 loader ticked; README progress row. Note this exceeds the 250-line guideline (~700 lines of code+fixtures); splitting the parser from its tests would leave neither half reviewable.
+
+</details>
+
+#### Commits
+
+- `43beddb6` feat(data): parse ANM2 animation documents [#124](https://github.com/…
+  …caos-obliquo/tboi-recomp/issues/124)
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `CMakeLists.txt` | 1 | 0 |
+| `README.md` | 3 | 2 |
+| `docs/HANDOFF.md` | 38 | 2 |
+| `docs/anm2-format.md` | 102 | 0 |
+| `docs/roadmap.md` | 3 | 3 |
+| `include/isaec/data/anm2.hpp` | 129 | 0 |
+| `src/data/anm2.cpp` | 386 | 0 |
+| `tests/CMakeLists.txt` | 1 | 0 |
+| `tests/test_anm2.cpp` | 309 | 0 |
+| `tests/test_archive.cpp` | 16 | 10 |
+
+#### Documentation
+
+- `README.md`
+- `docs/HANDOFF.md`
+- `docs/anm2-format.md`
+- `docs/roadmap.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
