@@ -10,6 +10,7 @@ set(ISAEC_TEST_SRC
     test_field_class.cpp
     test_codec.cpp
     test_archive.cpp
+    test_anm2.cpp
     test_input.cpp
     test_sandbox.cpp
 )
