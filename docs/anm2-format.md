@@ -84,16 +84,67 @@ XML comments, `<?xml ...?>`, and `<!...>` declarations are skipped; the five
 standard entities (`&amp; &lt; &gt; &quot; &apos;`) are decoded in attribute
 values.
 
-## What is not implemented
+## Playback and drawing
 
-- No renderer consumption yet. The loader produces data; texture selection,
-  crop rectangles, pivots, interpolation and event dispatch are renderer and
-  engine work, tracked by the roadmap's Phase 1/5 and issue #5.
-- No `.png` lookup by spritesheet path. Entry names are hashes and the shipped
-  manifest does not cover this install's names (see arch000-format.md §11), so a
-  caller must supply the decoded sheet.
-- No timing evaluation. `Delay`, `Loop` and triggers are parsed, not advanced;
-  nothing here decides when the next frame is due.
+`isaec::engine::AnimationPlayer` advances a parsed document. It converts
+wall-clock seconds to frames with the document's `Info@Fps`, accumulates the
+fractional remainder, and crosses whole frames monotonically. A layer or null
+timeline is sampled by walking its keys and subtracting each `Delay` (minimum 1)
+until the current frame falls inside a key; past the last key the last key is
+held. Root and track transforms compose by addition for position and rotation,
+per-mille-style multiplication for the percent scales, per-channel
+multiplication for tint, and `visible` is the AND of root, track and the null's
+`Show`. A non-looping animation clamps at `FrameNum` and reports `finished()`; a
+looping one wraps at `FrameNum`.
+
+Triggers are stable-sorted by `AtFrame`, delivered once when playback crosses
+that frame, and drained with `take_triggers`. A looping animation re-arms its
+triggers on each wrap, including when a single update spans several whole loops.
+
+`DrawCall` carries rotation (degrees, clockwise), a pivot in source texels, and
+an RGB tint. `SdlRenderer` applies them through `SDL_RenderCopyExF` and
+`SDL_SetTextureColorMod`; the pivot is the destination of `x`/`y`.
+
+## Runner
+
+```sh
+isaec_window anm2 <archive.a> <anm2-entry> <png-entry> [animation|-] \
+  [frames] [width] [height] [sheet-archive.a]
+```
+
+`-` selects `DefaultAnimation`; `frames 0` runs until the window closes. The
+optional last argument reads the PNG from another archive when the document's
+sheet is not in the same container.
+
+Measured on a user-owned install (2026-11-24), 90 fixed-budget frames under
+`xvfb-run`:
+
+| field | value |
+|---|---|
+| document | `repentance.a` entry 20, `Idle`, fps 30, `FrameNum` 8, loop, 1 layer |
+| sheet | `afterbirthp.a` entry 7205, `resources/gfx/eraser_tears.png` |
+| frames / draws / presented | 90 / 90 / 90 |
+| animation frame | 4 |
+| triggers | 0 |
+
+## What this does not establish
+
+- **No interpolation.** Keys marked `Interpolated` are held, not blended.
+  Shipped documents contain interpolation weights; the player ignores them.
+- **FPS conversion is not runtime-verified.** The monotonic frame crossing and
+  per-key `Delay` sampling were compared against decompiled game code, but the
+  exact seconds-to-frames conversion, and therefore the wall-clock speed, is not
+  proven against the shipped executable.
+- **Sheet lookup is by basename only.** `repentance.a` resolves 0 of 4180 entry
+  names, so a path cannot be turned into an entry index there. The runner
+  matches the PNG's basename against `Spritesheet@Path` and needs a second
+  archive for this install: no document in `repentance.a` has a sheet entry that
+  the container can decode in place.
+- **Nothing composites to a framebuffer.** The runner draws layers in submission
+  order; blend rules, palettes and shaders are not modelled.
+- **Archive open is slow on large containers** (issue #130): a 633 MB archive
+  takes ~37 s to read, so a two-archive run spends about a minute before the
+  first frame.
 
 ## Provenance
 

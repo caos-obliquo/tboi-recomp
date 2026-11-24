@@ -25,14 +25,25 @@ struct Rect {
 };
 
 // A draw request in logical pixels. Coordinates are top-left origin.
+//
+// x/y name the destination of the pivot, matching ANM2's Position semantics: a
+// layer's pivot lands on x,y and the crop extends around it. With the default
+// zero pivot that is the top-left corner, which is what an image blit wants.
+// pivot_x/pivot_y are texels in `src`; rotation is degrees clockwise.
 struct DrawCall {
     i32 texture = 0;      // renderer-assigned texture handle
     Rect src;             // source rect in the texture
-    f32 x = 0.0f;         // destination, logical px
+    f32 x = 0.0f;         // destination of the pivot, logical px
     f32 y = 0.0f;
     f32 scale_x = 1.0f;
     f32 scale_y = 1.0f;
     f32 alpha = 1.0f;
+    f32 rotation = 0.0f;  // degrees clockwise around the pivot
+    f32 pivot_x = 0.0f;   // texels from the top-left of src
+    f32 pivot_y = 0.0f;
+    u8 red = 255;         // multiplicative tint; 255 leaves the texture unchanged
+    u8 green = 255;
+    u8 blue = 255;
 };
 
 class Renderer {

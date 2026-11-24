@@ -62,8 +62,10 @@ merge pending). What a real game additionally needs, before a single menu can
 draw:
 
 - ~~**ANM2 animation loader**~~ — parser landed ([anm2-format.md](anm2-format.md),
-  #124): 4104 of 4104 documents in three archives. Playback and texture binding
-  remain renderer work.
+  #124): 4104 of 4104 documents in three archives. Playback and a windowed
+  runner landed in #128: `AnimationPlayer` advances root/layer/null timelines,
+  composes poses, and `isaec_window anm2` draws real document layers. Remaining:
+  interpolation, and runtime proof of the FPS conversion.
 - **GPU/SDL renderer proper (#5)** — replace white-box with real textures;
   vsync gate per #66.
 - **ARCH000 container & decode paths** — partially addressed (#52 open: the
