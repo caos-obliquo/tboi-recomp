@@ -1236,7 +1236,7 @@ archive path is an argument.
 
 ---
 
-## 34. ANM2 documents parse, and nothing draws them yet
+## 34. ANM2 documents parse
 
 [#124](https://github.com/caos-obliquo/tboi-recomp/issues/124) opened the
 Phase 1 gate named in the roadmap: no ANM2 loader existed. `isaec::data::
@@ -1265,7 +1265,47 @@ document does not define. The parser keeps both: blank animations are never
 resolved by name, and dangling ids are counted in `Anm2::dangling_references`.
 Structural damage is still fatal.
 
-What this does **not** establish: nothing consumes the data. There is no
-timeline advance, no texture binding, and no spritesheet lookup by path, so the
-screen still shows the white-box slice. The next gate is renderer work (#5),
-then playback.
+What this did not establish at the time: nothing consumed the data. Playback and
+the windowed runner landed in §35.
+
+## 35. ANM2 playback and a real document drawn (#128)
+
+[#128](https://github.com/caos-obliquo/tboi-recomp/issues/128) asked for
+playback plus one visible path. `isaec::engine::AnimationPlayer` advances root,
+layer and null timelines from each key's `Delay` at `Info@Fps`, holds `Loop`
+animations at `FrameNum`, reports `finished()` for non-looping ones, composes
+root+track poses (additive position/rotation, multiplicative percent scales and
+tint) and delivers `AtFrame` triggers once each, in order, drainable, re-armed on
+every wrap. The timing model came from REA/Ghidra on the shipped executable:
+the cursor moves monotonically across crossed integer frames and layer/null
+cursors accumulate that timeline's `Delay`. That is static decompiler evidence,
+not a runtime replay.
+
+`DrawCall` gained rotation, pivot and RGB tint; `SdlRenderer` applies them with
+`SDL_RenderCopyExF` and `SDL_SetTextureColorMod`. `isaec_window anm2` opens the
+document archive, parses one entry, decodes one PNG (optionally from a second
+archive), and draws each layer's cropped pose at the window centre, 4x.
+
+Evidence, run 2026-11-24 under `xvfb-run -a -s "-screen 0 1280x720x24"` with a
+fixed 90-frame budget:
+
+```
+isaec_window anm2 repentance.a 20 7205 - 90 1280 720 afterbirthp.a
+document   entry 20 fps 30 layers 1 nulls 0 animations 1   (Idle, FrameNum 8, loop)
+sheet      afterbirthp.a entry 7205, resources/gfx/eraser_tears.png
+frames 90   draws 90   presented 90   animation frame 4   triggers 0
+```
+
+`repentance.a` resolves 0 of 4180 names, and none of its documents has a
+spritesheet that decodes inside the same container, so the sheet must come from
+another archive for this install; the lookup is basename-to-`Spritesheet@Path`
+only. The run spending 61.8 s wall and 56.6 s user CPU before its first frame is
+a container read defect, not playback: `Archive::open` copies per character and
+takes 37 s on the 633 MB archive. Recorded as
+[#130](https://github.com/caos-obliquo/tboi-recomp/issues/130).
+
+Not established: interpolation (keys marked `Interpolated` are held), the exact
+seconds-to-frames conversion against the shipped executable at runtime, and any
+framebuffer compositing beyond submission order. The suite went from 159 to 169
+cases, 0 failed, including a negative control that shows a one-tick key without
+`Delay` accumulation reaches the next key when the real timeline does not.

@@ -6,15 +6,22 @@
 // other than the null backend, which is the condition for every later milestone
 // to be visible at all.
 //
-// Three source modes, picked by the first argument:
+// Four source modes, picked by the first argument:
 //
 //   isaec_window <image.png> [frames] [width] [height]
 //   isaec_window <archive.a> <entry-index> [frames] [width] [height]
 //   isaec_window slice [width] [height] [frames]
+//   isaec_window anm2 <archive.a> <anm2-entry> <png-entry> [animation|-] [frames] [width] [height]
 //
 // The archive form runs the whole pipeline inside the engine: read the ARCH000
 // container, apply the entry's codec, hand the bytes to libpng, upload to the
 // GPU. Nothing shells out to tools/ and nothing is pre-extracted.
+//
+// The anm2 form parses a shipped animation document, plays one of its
+// animations, and draws every layer whose spritesheet matches the decoded PNG.
+// Positions are the document's pivot positions, scaled 4x around the window
+// centre; `-` selects the document's DefaultAnimation. A frames argument of 0
+// runs until the window closes.
 //
 // The slice form is the playable white-box (the issue #79 playtesting box):
 // an empty room (floor, four walls) with a controllable marker square — move
@@ -27,8 +34,10 @@
 // Argument handling mirrors null_main.cpp positionally rather than adding a
 // parser, so the two binaries stay diffable.
 
+#include "isaec/data/anm2.hpp"
 #include "isaec/data/archive.hpp"
 #include "isaec/data/image.hpp"
+#include "isaec/engine/animation.hpp"
 #include "isaec/engine/renderer.hpp"
 #include "isaec/engine/sandbox.hpp"
 #include "isaec/platform/sdl_input.hpp"
@@ -37,6 +46,7 @@
 
 #include <SDL_keyboard.h>
 #include <chrono>
+#include <cmath>
 #include <cstdio>
 #include <filesystem>
 #include <cstdlib>
@@ -49,6 +59,11 @@ namespace {
 std::string next_arg(int argc, char** argv, int& index, const char* fallback) {
     if (index >= argc) return fallback;
     return argv[index++];
+}
+
+std::string base_name(const std::string& path) {
+    const std::size_t slash = path.find_last_of("/\\");
+    return slash == std::string::npos ? path : path.substr(slash + 1);
 }
 
 bool ends_with(const std::string& text, const char* suffix) {
@@ -187,6 +202,193 @@ int run_slice(isaec::i32 width, isaec::i32 height, isaec::u64 frame_budget) {
     return 0;
 }
 
+int run_anm2(const std::string& archive_path, isaec::usize anm2_entry, isaec::usize png_entry,
+             const std::string& requested, isaec::u64 frame_budget, isaec::i32 width,
+             isaec::i32 height, const std::string& sheet_archive_path) {
+    isaec::data::Archive archive;
+    if (!archive.open(archive_path)) {
+        std::fprintf(stderr, "%s\n", archive.error().c_str());
+        return 1;
+    }
+
+    const std::filesystem::path manifest =
+        std::filesystem::path(archive_path).parent_path().parent_path().parent_path() /
+        "tools" / "ResourceExtractor" / "filelist.txt";
+    const bool named = archive.load_names(manifest);
+
+    std::vector<isaec::u8> document_bytes;
+    if (!archive.decode(anm2_entry, document_bytes)) {
+        std::fprintf(stderr, "%s: entry %zu: %s\n", archive_path.c_str(), anm2_entry,
+                     archive.error().c_str());
+        return 1;
+    }
+    isaec::data::Anm2 document;
+    std::string parse_error;
+    if (!isaec::data::parse_anm2(document_bytes.data(), document_bytes.size(), document,
+                                 parse_error)) {
+        std::fprintf(stderr, "entry %zu is not ANM2: %s\n", anm2_entry, parse_error.c_str());
+        return 1;
+    }
+
+    std::vector<isaec::u8> png_bytes;
+    isaec::data::Archive sheet_archive;
+    isaec::data::Archive* png_source = &archive;
+    if (!sheet_archive_path.empty()) {
+        if (!sheet_archive.open(sheet_archive_path)) {
+            std::fprintf(stderr, "%s\n", sheet_archive.error().c_str());
+            return 1;
+        }
+        sheet_archive.load_names(
+            std::filesystem::path(sheet_archive_path).parent_path().parent_path().parent_path() /
+            "tools" / "ResourceExtractor" / "filelist.txt");
+        png_source = &sheet_archive;
+    }
+    if (!png_source->decode(png_entry, png_bytes)) {
+        std::fprintf(stderr, "%s: entry %zu: %s\n", sheet_archive_path.empty()
+                     ? archive_path.c_str() : sheet_archive_path.c_str(), png_entry,
+                     png_source->error().c_str());
+        return 1;
+    }
+    const auto image = isaec::data::decode_png(png_bytes.data(), png_bytes.size());
+    if (!image) {
+        std::fprintf(stderr, "entry %zu is not a decodable PNG\n", png_entry);
+        return 1;
+    }
+
+    isaec::platform::SdlRenderer renderer("isaec-anm2", width, height);
+    if (!renderer.initialize(width, height)) {
+        std::fprintf(stderr, "renderer initialize failed\n");
+        return 1;
+    }
+    const isaec::i32 texture = renderer.create_texture(
+        image->width, image->height, image->rgba.data(), image->rgba.size());
+    if (texture < 0) {
+        std::fprintf(stderr, "texture upload failed\n");
+        renderer.shutdown();
+        return 1;
+    }
+
+    isaec::engine::AnimationPlayer player;
+    player.set_document(&document);
+    const bool played = requested.empty() ? player.play_default() : player.play(requested);
+    if (!played) {
+        std::fprintf(stderr, "no animation named \"%s\"; document has:",
+                     requested.c_str());
+        for (isaec::usize i = 0; i < document.animations.size() && i < 20; ++i) {
+            std::fprintf(stderr, " %s%s", document.animations[i].name.c_str(),
+                         document.animations[i].name.empty() ? "(blank)" : "");
+        }
+        std::fprintf(stderr, "\n");
+        renderer.destroy_texture(texture);
+        renderer.shutdown();
+        return 1;
+    }
+
+    const std::string png_name = png_source->name(png_entry);
+    if (png_source != &archive) {
+        std::printf("sheet src  %s, %zu/%zu named\n", sheet_archive_path.c_str(),
+                    png_source->named_count(), png_source->entries().size());
+    }
+    int sheet_id = -1;
+    if (!png_name.empty()) {
+        for (const isaec::data::Anm2Spritesheet& sheet : document.spritesheets) {
+            if (base_name(sheet.path) == base_name(png_name)) {
+                sheet_id = sheet.id;
+                break;
+            }
+        }
+    }
+
+    const isaec::data::Anm2Animation* animation = player.animation();
+    std::printf("backend    %.*s\n", static_cast<int>(renderer.backend_name().size()),
+                renderer.backend_name().data());
+    std::printf("document   entry %zu fps %d layers %zu nulls %zu animations %zu\n",
+                anm2_entry, document.fps, document.layers.size(), document.nulls.size(),
+                document.animations.size());
+    if (named) {
+        std::printf("named      %zu/%zu entries resolved\n", archive.named_count(),
+                    archive.entries().size());
+    }
+    std::printf("animation  %s (FrameNum %d, %s)\n", animation->name.c_str(),
+                animation->frame_num, animation->loop ? "loop" : "once");
+    if (sheet_id >= 0) {
+        std::printf("sheet      id %d matches %s\n", sheet_id, png_name.c_str());
+    } else {
+        std::printf("sheet      unresolved; drawing every layer against entry %zu\n", png_entry);
+    }
+    std::printf("viewport   %d x %d, pivot at centre, zoom 4x\n", width, height);
+    std::fflush(stdout);
+
+    constexpr isaec::f32 kZoom = 4.0f;
+    const isaec::f32 origin_x = static_cast<isaec::f32>(width) * 0.5f;
+    const isaec::f32 origin_y = static_cast<isaec::f32>(height) * 0.5f;
+    constexpr auto kFrameTime = std::chrono::microseconds(16666);
+
+    const auto started = std::chrono::steady_clock::now();
+    auto previous = started;
+    isaec::u64 frames = 0;
+    isaec::u64 triggers = 0;
+
+    while (frames < frame_budget && renderer.alive()) {
+        const auto frame_started = std::chrono::steady_clock::now();
+        isaec::f32 dt = std::chrono::duration<isaec::f32>(frame_started - previous).count();
+        previous = frame_started;
+        if (dt > 0.25f) dt = 0.25f;  // a paused debugger must not skip seconds of animation
+        player.update(dt);
+        std::vector<int> fired;
+        player.take_triggers(fired);
+        triggers += fired.size();
+
+        for (isaec::usize i = 0; i < document.layers.size(); ++i) {
+            isaec::engine::LayerPose pose;
+            if (!player.layer_pose(i, pose) || !pose.visible) continue;
+            if (pose.crop_w <= 0.0f || pose.crop_h <= 0.0f) continue;
+            if (sheet_id >= 0 && document.layers[i].spritesheet_id != sheet_id) continue;
+
+            isaec::engine::DrawCall call;
+            call.texture = texture;
+            call.src = {static_cast<isaec::i32>(std::lround(pose.crop_x)),
+                        static_cast<isaec::i32>(std::lround(pose.crop_y)),
+                        static_cast<isaec::i32>(std::lround(pose.crop_w)),
+                        static_cast<isaec::i32>(std::lround(pose.crop_h))};
+            call.x = origin_x + pose.x * kZoom;
+            call.y = origin_y + pose.y * kZoom;
+            call.scale_x = kZoom * pose.scale_x / 100.0f;
+            call.scale_y = kZoom * pose.scale_y / 100.0f;
+            call.alpha = static_cast<isaec::f32>(pose.alpha) / 255.0f;
+            call.rotation = pose.rotation;
+            call.pivot_x = pose.pivot_x;
+            call.pivot_y = pose.pivot_y;
+            call.red = pose.red;
+            call.green = pose.green;
+            call.blue = pose.blue;
+            renderer.submit(call);
+        }
+
+        renderer.present();
+        ++frames;
+
+        const auto spent = std::chrono::steady_clock::now() - frame_started;
+        if (spent < kFrameTime) std::this_thread::sleep_for(kFrameTime - spent);
+    }
+
+    const double elapsed =
+        std::chrono::duration<double>(std::chrono::steady_clock::now() - started).count();
+
+    renderer.destroy_texture(texture);
+    renderer.shutdown();
+
+    std::printf("frames     %lld\n", static_cast<long long>(frames));
+    std::printf("elapsed    %.3f s\n", elapsed);
+    std::printf("animation  frame %d%s\n", player.frame_index(),
+                player.finished() ? " (finished)" : "");
+    std::printf("triggers   %lld\n", static_cast<long long>(triggers));
+    std::printf("draws      %lld\n", static_cast<long long>(renderer.draw_calls()));
+    std::printf("presented  %lld\n", static_cast<long long>(renderer.presented()));
+    std::printf("textures   %lld live\n", static_cast<long long>(renderer.live_textures()));
+    return 0;
+}
+
 int isaec_window_main(int argc, char** argv) {
     int cursor = 1;
     const std::string source = next_arg(argc, argv, cursor, "");
@@ -194,8 +396,37 @@ int isaec_window_main(int argc, char** argv) {
         std::fprintf(stderr,
                      "usage: isaec_window <image.png|archive.a> [entry-index] "
                      "[frames] [width] [height]  |  isaec_window slice "
-                     "[width] [height] [frames]  (frames 0 = play until Esc)\n");
+                     "[width] [height] [frames]  |  isaec_window anm2 <archive.a> "
+                     "<anm2-entry> <png-entry> [animation|-] [frames] [width] [height]"
+                     "  (frames 0 = play until Esc)\n");
         return 2;
+    }
+
+    if (source == "anm2") {
+        const std::string archive_path = next_arg(argc, argv, cursor, "");
+        const std::string anm2_arg = next_arg(argc, argv, cursor, "");
+        const std::string png_arg = next_arg(argc, argv, cursor, "");
+        if (archive_path.empty() || anm2_arg.empty() || png_arg.empty()) {
+            std::fprintf(stderr,
+                         "usage: isaec_window anm2 <archive.a> <anm2-entry> <png-entry> "
+                         "[animation|-] [frames] [width] [height] [sheet-archive.a]\n");
+            return 2;
+        }
+        std::string animation_arg = next_arg(argc, argv, cursor, "-");
+        if (animation_arg == "-") animation_arg.clear();
+        isaec::u64 anm2_frames = static_cast<isaec::u64>(
+            std::strtoull(next_arg(argc, argv, cursor, "600").c_str(), nullptr, 10));
+        if (anm2_frames == 0) anm2_frames = ~isaec::u64{0};
+        const isaec::i32 anm2_width = static_cast<isaec::i32>(
+            std::strtol(next_arg(argc, argv, cursor, "1280").c_str(), nullptr, 10));
+        const isaec::i32 anm2_height = static_cast<isaec::i32>(
+            std::strtol(next_arg(argc, argv, cursor, "720").c_str(), nullptr, 10));
+        const std::string sheet_archive = next_arg(argc, argv, cursor, "");
+        return run_anm2(archive_path,
+                        static_cast<isaec::usize>(std::strtoull(anm2_arg.c_str(), nullptr, 10)),
+                        static_cast<isaec::usize>(std::strtoull(png_arg.c_str(), nullptr, 10)),
+                        animation_arg, anm2_frames, anm2_width, anm2_height,
+                        sheet_archive);
     }
 
     if (source == "slice") {

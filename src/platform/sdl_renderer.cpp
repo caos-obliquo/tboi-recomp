@@ -210,11 +210,29 @@ void SdlRenderer::submit(const engine::DrawCall& call) {
             ? nullptr
             : &source;
 
-    SDL_FRect dest{call.x, call.y, static_cast<f32>(call.src.w) * clamp_scale(call.scale_x),
-                   static_cast<f32>(call.src.h) * clamp_scale(call.scale_y)};
+    const f32 scale_x = clamp_scale(call.scale_x);
+    const f32 scale_y = clamp_scale(call.scale_y);
+    const f32 pivot_x = call.pivot_x * scale_x;
+    const f32 pivot_y = call.pivot_y * scale_y;
+
+    // x/y name the pivot's destination, so the unrotated rectangle starts one
+    // pivot offset back from it. A zero pivot degenerates to the usual blit.
+    SDL_FRect dest{call.x - pivot_x, call.y - pivot_y,
+                   static_cast<f32>(call.src.w) * scale_x,
+                   static_cast<f32>(call.src.h) * scale_y};
 
     SDL_SetTextureAlphaMod(texture, static_cast<Uint8>(clamp_alpha(call.alpha) * 255.0f));
-    if (SDL_RenderCopyF(device, texture, source_ptr, &dest) != 0) return;
+    SDL_SetTextureColorMod(texture, call.red, call.green, call.blue);
+
+    const int copied =
+        call.rotation == 0.0f
+            ? SDL_RenderCopyF(device, texture, source_ptr, &dest)
+            : [&] {
+                  const SDL_FPoint center{call.x, call.y};
+                  return SDL_RenderCopyExF(device, texture, source_ptr, &dest, call.rotation,
+                                           &center, SDL_FLIP_NONE);
+              }();
+    if (copied != 0) return;
 
     ++draw_calls_;
 }

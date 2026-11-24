@@ -11,6 +11,7 @@ set(ISAEC_TEST_SRC
     test_codec.cpp
     test_archive.cpp
     test_anm2.cpp
+    test_anm2_player.cpp
     test_input.cpp
     test_sandbox.cpp
 )
