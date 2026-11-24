@@ -1022,6 +1022,103 @@ Refs #90. Note: this PR deliberately does not start #64/#66/#52/#3/#4/#35 (not m
 - `docs/handoff.md`
 
 
+## [0.1.18] - 2026-11-24
+
+### Merged: [#131](https://github.com/caos-obliquo/tboi-recomp/pull/131) — feat(engine): play ANM2 animations and draw a real document [#128]
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-24  **Files:** 13 changed, +1086/-64.
+
+<details>
+<summary>Pull request body</summary>
+
+Closes #128.
+
+Adds the player the #124 loader was missing, plus one visible path.
+
+## What landed
+- `AnimationPlayer` (`include/isaec/engine/animation.hpp`, `src/engine/animation.cpp`): root/layer/null timelines advance from each key's `Delay` at `Info@Fps`; fractional frames accumulate; whole frames are crossed monotonically; `Loop` wraps at `FrameNum`; non-looping animations clamp and report `finished()`.
+- Pose composition: additive position/rotation, multiplicative percent scales, per-channel tint, `visible` = root AND track AND null `Show`.
+- Triggers: stable-sorted by `AtFrame`, fired once on crossing, drainable, re-armed on every wrap including multi-loop updates.
+- `DrawCall` gains rotation, pivot and RGB tint; `SdlRenderer` applies them with `SDL_RenderCopyExF` and `SDL_SetTextureColorMod`.
+- `isaec_window anm2 <archive> <anm2-entry> <png-entry> [animation|-] [frames] [width] [height] [sheet-archive]`.
+
+## Evidence
+- `./build/tests/isaec_tests` — **169 cases, 0 failed**, including the required negative control: a one-tick key reaches the next key where the real `Delay` timeline does not.
+- Xvfb run, 90 fixed frames: `repentance.a` entry 20 (`Idle`, fps 30, FrameNum 8, loop) with `afterbirthp.a` entry 7205 (`resources/gfx/eraser_tears.png`) — 90 draws, 90 presented, animation frame 4, exit 0.
+- `git diff --check` clean; no game bytes added.
+
+## Limitations (also in `docs/anm2-format.md`)
+- No interpolation: keys marked `Interpolated` are held.
+- `seconds * Fps` matches decompiled crossing logic but is not runtime-verified against the executable.
+- `repentance.a` resolves 0/4180 names and no document's sheet decodes in the same container, so the sheet lookup is basename-only and the run needs a second archive.
+- Archive open copies per character (37 s for 633 MB) — tracked as #130, not a playback defect.
+
+</details>
+
+#### Closes
+
+- [` `] [#124](https://github.com/caos-obliquo/tboi-recomp/issues/124) Load ANM2 animations (spritesheet, layers, nulls, frame timeline) (open)
+- [`x`] [#128](https://github.com/caos-obliquo/tboi-recomp/issues/128) Play ANM2 animations in the windowed build (closed)
+- [` `] [#130](https://github.com/caos-obliquo/tboi-recomp/issues/130) Archive open is quadratic-slow on large containers (37 s for a 633 MB archive) (open)
+
+#### Commits
+
+- `bdfd721b` feat(engine): play ANM2 animations and draw a real document [#128](ht…
+  …tps://github.com/caos-obliquo/tboi-recomp/issues/128)
+  The #124 loader produced data that nothing consumed. This adds the player
+  and one visible path.
+  AnimationPlayer advances root, layer and null timelines from each key's
+  Delay at Info@Fps, keeps the fractional remainder, crosses whole frames
+  monotonically, holds Loop animations at FrameNum and reports finished() for
+  non-looping ones. Poses compose additively for position and rotation,
+  multiplicatively for the percent scales and per-channel tint. Triggers are
+  stable-sorted by AtFrame, delivered once when crossed, drained by the
+  caller, and re-armed on every wrap, including when one update spans several
+  loops.
+  DrawCall gains rotation, pivot and RGB tint; the SDL backend applies them
+  through SDL_RenderCopyExF and SDL_SetTextureColorMod. isaec_window gains an
+  anm2 route that opens a document archive, parses one entry, decodes one
+  spritesheet PNG (optionally from a second archive) and draws each layer's
+  cropped pose.
+  Evidence: 169 synthetic cases pass, including a negative control showing a
+  one-tick key reaches the next key when the real Delay timeline does not. A
+  90-frame Xvfb run drew repentance.a entry 20 (Idle, fps 30, FrameNum 8)
+  with afterbirthp.a entry 7205 as its sheet: 90 draws, 90 presented,
+  animation frame 4. That sheet is cross-archive because repentance.a resolves
+  0 of 4180 names and has no decodable sheet for its own documents; the lookup
+  is basename-only.
+  Not established: interpolation (Interpolated keys are held), runtime parity
+  of the seconds-to-frames conversion, and framebuffer compositing beyond
+  submission order. The two-archive run spends 61.8 s before its first frame
+  because Archive::open copies per character; that is #130, not playback.
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `CMakeLists.txt` | 1 | 0 |
+| `HANDOFF.md` | 44 | 40 |
+| `README.md` | 1 | 1 |
+| `docs/HANDOFF.md` | 45 | 5 |
+| `docs/anm2-format.md` | 61 | 10 |
+| `docs/roadmap.md` | 4 | 2 |
+| `include/isaec/engine/animation.hpp` | 100 | 0 |
+| `include/isaec/engine/renderer.hpp` | 12 | 1 |
+| `src/engine/animation.cpp` | 235 | 0 |
+| `src/platform/sdl_main.cpp` | 233 | 2 |
+| `src/platform/sdl_renderer.cpp` | 21 | 3 |
+| `tests/CMakeLists.txt` | 1 | 0 |
+| `tests/test_anm2_player.cpp` | 328 | 0 |
+
+#### Documentation
+
+- `HANDOFF.md`
+- `README.md`
+- `docs/HANDOFF.md`
+- `docs/anm2-format.md`
+- `docs/roadmap.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
