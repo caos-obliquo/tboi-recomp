@@ -142,9 +142,10 @@ Measured on a user-owned install (2026-11-24), 90 fixed-budget frames under
   the container can decode in place.
 - **Nothing composites to a framebuffer.** The runner draws layers in submission
   order; blend rules, palettes and shaders are not modelled.
-- **Archive open is slow on large containers** (issue #130): a 633 MB archive
-  takes ~37 s to read, so a two-archive run spends about a minute before the
-  first frame.
+- **Archive open was slow on large containers.** A per-character copy took
+  ~37 s on the 633 MB container; it is now one sized read (155.8 ms for
+  `repentance.a`, 293.4 ms for `afterbirthp.a`), see issue #130 and
+  [HANDOFF.md §36](HANDOFF.md).
 
 ## Provenance
 

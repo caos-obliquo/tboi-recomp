@@ -4,7 +4,7 @@
 #include <cstdio>
 #include <fstream>
 #include <ios>
-#include <iterator>
+#include <limits>
 #include <utility>
 
 #include "isaec/data/codec.hpp"
@@ -42,11 +42,26 @@ bool Archive::open(const std::filesystem::path& path) {
     describe_.clear();
     mode_ = 0;
 
-    std::ifstream in(path, std::ios::binary);
+    std::ifstream in(path, std::ios::binary | std::ios::ate);
     if (!in) return fail("cannot open " + path.string());
 
-    blob_.assign(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());
-    if (in.bad()) return fail("read error on " + path.string());
+    // One sized read. The previous form copied through istreambuf_iterator,
+    // which advances one character per iterator increment: on a 633 MB
+    // container that measured 37.3 s of user CPU before the first byte was
+    // parsed (#130). Sizing first also means a truncated read is detected
+    // rather than silently producing a short blob.
+    const std::streamoff end = in.tellg();
+    if (end < 0) return fail("cannot size " + path.string());
+    if (static_cast<u64>(end) > std::numeric_limits<usize>::max()) {
+        return fail("file is too large to map into memory");
+    }
+    blob_.resize(static_cast<usize>(end));
+    in.seekg(0, std::ios::beg);
+    if (!blob_.empty()) {
+        in.read(reinterpret_cast<char*>(blob_.data()),
+                static_cast<std::streamsize>(blob_.size()));
+    }
+    if (!in) return fail("read error on " + path.string());
 
     if (blob_.size() < kArchiveHeaderSize) return fail("file is shorter than the header");
     if (!std::equal(std::begin(kMagic), std::end(kMagic), blob_.begin())) {

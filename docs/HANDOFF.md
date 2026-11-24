@@ -1299,13 +1299,38 @@ frames 90   draws 90   presented 90   animation frame 4   triggers 0
 `repentance.a` resolves 0 of 4180 names, and none of its documents has a
 spritesheet that decodes inside the same container, so the sheet must come from
 another archive for this install; the lookup is basename-to-`Spritesheet@Path`
-only. The run spending 61.8 s wall and 56.6 s user CPU before its first frame is
-a container read defect, not playback: `Archive::open` copies per character and
-takes 37 s on the 633 MB archive. Recorded as
-[#130](https://github.com/caos-obliquo/tboi-recomp/issues/130).
+only. The run first spent 61.8 s wall and 56.6 s user CPU before its first
+frame, which was a container read defect rather than playback: `Archive::open`
+copied per character and took 37 s on the 633 MB archive. Fixed under
+[#130](https://github.com/caos-obliquo/tboi-recomp/issues/130); see §36.
 
 Not established: interpolation (keys marked `Interpolated` are held), the exact
 seconds-to-frames conversion against the shipped executable at runtime, and any
 framebuffer compositing beyond submission order. The suite went from 159 to 169
 cases, 0 failed, including a negative control that shows a one-tick key without
 `Delay` accumulation reaches the next key when the real timeline does not.
+
+## 36. Archive open: one sized read (#130)
+
+`Archive::open` copied the whole container through `std::istreambuf_iterator`,
+one character per iterator increment. On this host that measured 37,316 ms for
+`afterbirthp.a` (633,600,463 bytes), which made every large-archive CLI run look
+like a hang before the first frame was drawn.
+
+The reader now seeks to the end, sizes the blob once, and issues a single
+`read()`. Measured with `ISAEC_TBOI_ARCHIVE=<archive> ./build/tests/isaec_tests`:
+
+| container | bytes | open |
+| --- | --- | --- |
+| `repentance.a` | 385,003,320 | 155.8 ms |
+| `afterbirthp.a` | 633,600,463 | 293.4 ms |
+
+Decode results are unchanged: the same corpus test reports 1533 decoded entries
+and 581 valid PNGs for `repentance.a`, 3472 and 971 for `afterbirthp.a`, and
+378/598 stored PNGs. The #128 runner now completes its 90-frame budget in
+5.2 s wall instead of 61.8 s.
+
+The new opt-in test `archive_real_container_opens_with_one_sized_read` prints
+the measured open time and fails above 2000 ms for containers of 64 MiB or
+more, so a regression to per-character copying is caught where the corpus is
+available. Suite: 170 cases, 0 failed.
