@@ -1022,6 +1022,68 @@ Refs #90. Note: this PR deliberately does not start #64/#66/#52/#3/#4/#35 (not m
 - `docs/handoff.md`
 
 
+## [0.1.18] - 2026-11-24
+
+### Merged: [#133](https://github.com/caos-obliquo/tboi-recomp/pull/133) — fix(data): read archive containers with one sized read [#130]
+
+**Author:** @caos-obliquo  **Merged:** 2026-11-24  **Files:** 5 changed, +109/-28.
+
+<details>
+<summary>Pull request body</summary>
+
+Closes #130.
+
+`Archive::open` copied the container through `std::istreambuf_iterator`, one character per iterator increment. On `afterbirthp.a` (633,600,463 bytes) that measured **37,316 ms** before the first byte was parsed; every large-archive CLI run looked like a hang.
+
+The reader now seeks to the end, sizes the blob once, and issues a single `read()`.
+
+Measured with `ISAEC_TBOI_ARCHIVE=<archive> ./build/tests/isaec_tests`:
+
+| container | bytes | open |
+| --- | --- | --- |
+| `repentance.a` | 385,003,320 | 155.8 ms |
+| `afterbirthp.a` | 633,600,463 | 293.4 ms |
+
+Decode results are unchanged: 1533 decoded / 581 valid PNG for `repentance.a`, 3472 / 971 for `afterbirthp.a`, stored PNG 378 / 598. The #128 runner now finishes its 90-frame budget in 5.2 s wall instead of 61.8 s.
+
+New opt-in test `archive_real_container_opens_with_one_sized_read` prints the open time and fails above 2000 ms for containers of 64 MiB or more, so a regression is caught where the corpus exists. Suite: 170 cases, 0 failed.
+
+Not claimed: any behavioural change beyond read speed. Offset validation, stored detection and decode results are unchanged.
+
+Note: the issue body said `repentance.a` was 18 MB; the installed file is 385,003,320 bytes. Corrected on the issue.
+
+</details>
+
+#### Closes
+
+- [`x`] [#128](https://github.com/caos-obliquo/tboi-recomp/issues/128) Play ANM2 animations in the windowed build (closed)
+- [`x`] [#130](https://github.com/caos-obliquo/tboi-recomp/issues/130) Archive open is quadratic-slow on large containers (37 s for a 633 MB archive) (closed)
+
+#### Commits
+
+- `f1a2af17` fix(data): read archive containers with one sized read [#130](https:/…
+  …/github.com/caos-obliquo/tboi-recomp/issues/130)
+  Archive::open copied through std::istreambuf_iterator, one character per iterator increment. On afterbirthp.a (633,600,463 bytes) that measured 37,316 ms before the first byte was parsed, which made every large-archive CLI run look like a hang.
+  Seek to the end, resize once, and issue a single read(). Measured on this host: repentance.a (385,003,320 bytes) opens in 155.8 ms, afterbirthp.a in 293.4 ms. Decode results are unchanged: 1533 decoded/581 PNG for repentance.a and 3472/971 for afterbirthp.a. The #128 runner drops from 61.8 s wall to 5.2 s.
+  The new opt-in test archive_real_container_opens_with_one_sized_read prints the open time and fails above 2000 ms for containers of 64 MiB or more.
+
+#### Files changed
+
+| file | + | - |
+|---|---:|---:|
+| `HANDOFF.md` | 19 | 17 |
+| `docs/HANDOFF.md` | 29 | 4 |
+| `docs/anm2-format.md` | 4 | 3 |
+| `src/data/archive.cpp` | 19 | 4 |
+| `tests/test_archive.cpp` | 38 | 0 |
+
+#### Documentation
+
+- `HANDOFF.md`
+- `docs/HANDOFF.md`
+- `docs/anm2-format.md`
+
+
 ## [Unreleased]
 
 ## [v0.1.3] - 2026-10-23
