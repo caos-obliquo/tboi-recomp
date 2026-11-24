@@ -15,8 +15,10 @@
 
 #include "isaec/data/image.hpp"
 
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
+#include <cstdint>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -625,6 +627,42 @@ ISAEC_TEST(archive_load_names_rejects_an_unreadable_source_and_clears_the_table)
     // A failed reload must not leave the previous table behind looking valid.
     CHECK(archive.name(0).empty());
     CHECK(archive.named_count() == 0);
+}
+
+// Opt-in startup-cost check. Opening a container is a single sized read, and
+// this measures it so a regression back to per-character copying is visible
+// instead of being felt as a hang (#130). Silent without ISAEC_TBOI_ARCHIVE.
+ISAEC_TEST(archive_real_container_opens_with_one_sized_read) {
+    const char* path = std::getenv("ISAEC_TBOI_ARCHIVE");
+    if (path == nullptr || *path == '\0') return;
+
+    std::error_code size_error;
+    const auto bytes = std::filesystem::file_size(path, size_error);
+    if (size_error) {
+        ::isaec::test::fail_now(std::string("file_size: ") + size_error.message());
+    }
+
+    const auto started = std::chrono::steady_clock::now();
+    Archive archive;
+    if (!archive.open(path)) {
+        ::isaec::test::fail_now("ISAEC_TBOI_ARCHIVE: " + archive.error());
+    }
+    const double elapsed_ms =
+        std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - started)
+            .count();
+
+    std::printf("real archive: %llu bytes opened in %.1f ms\n",
+                static_cast<unsigned long long>(bytes), elapsed_ms);
+
+    // Calibrated on this host against afterbirthp.a (633 MB): 0.4 s after the
+    // sized read, 37.3 s with istreambuf_iterator. The bound only says
+    // something for a large container, so it is skipped below 64 MiB.
+    constexpr std::uintmax_t kLargeContainer = 64ull * 1024ull * 1024ull;
+    if (bytes >= kLargeContainer && elapsed_ms > 2000.0) {
+        ::isaec::test::fail_now("opening " + std::to_string(bytes) + " bytes took " +
+                                std::to_string(elapsed_ms) +
+                                " ms, expected under 2000 ms");
+    }
 }
 
 // Opt-in check against a real container. CI has no game install, so the test
